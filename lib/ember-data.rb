@@ -1,0 +1,2 @@
+module EmberData
+end
