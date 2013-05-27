@@ -1,4 +1,5 @@
 //= require_self
+//= require ./string
 //= require_tree .
 
 Data = Ember.Namespace.create({

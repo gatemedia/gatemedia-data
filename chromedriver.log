@@ -1,0 +1,75 @@
+[0.000][INFO]:      ChromeDriver 26.0.1383.0 /usr/local/bin/chromedriver
+[0.233][FINE]:      Initializing session with capabilities {
+   "browserName": "chrome",
+   "chrome.detach": true,
+   "chromeOptions": {
+      "detach": true
+   },
+   "cssSelectorsEnabled": true,
+   "javascriptEnabled": true,
+   "nativeEvents": false,
+   "platform": "ANY",
+   "rotatable": false,
+   "takesScreenshot": false,
+   "version": ""
+}
+
+[0.234][INFO]:      Using named testing interface
+[0.575][INFO]:      Connected to Chrome successfully. Version: 27.0.1453.93
+[0.579][FINE]:      Command received (/session/dbc32b56f539c081b87092f5eaee7da2)
+[0.579][FINE]:      Command finished (/session/dbc32b56f539c081b87092f5eaee7da2) with response {
+   "sessionId": "dbc32b56f539c081b87092f5eaee7da2",
+   "status": 0,
+   "value": {
+      "acceptSslCerts": false,
+      "applicationCacheEnabled": false,
+      "browserConnectionEnabled": false,
+      "browserName": "chrome",
+      "chrome.chromedriverVersion": "26.0.1383.0",
+      "cssSelectorsEnabled": true,
+      "databaseEnabled": false,
+      "handlesAlerts": true,
+      "javascriptEnabled": true,
+      "locationContextEnabled": false,
+      "nativeEvents": true,
+      "platform": "mac",
+      "rotatable": false,
+      "takesScreenshot": true,
+      "version": "27.0.1453.93",
+      "webStorageEnabled": true
+   }
+}
+
+[0.580][FINE]:      Command received (/session/dbc32b56f539c081b87092f5eaee7da2/url) with params {
+   "url": "http://127.0.0.1:52398/test/unit"
+}
+
+[0.580][FINER]:     Waiting for all views to stop loading...
+[0.581][FINER]:     Done waiting for all views to stop loading
+[0.941][FINER]:     Waiting for all views to stop loading...
+[0.945][FINER]:     Done waiting for all views to stop loading
+[0.945][FINE]:      Command finished (/session/dbc32b56f539c081b87092f5eaee7da2/url) with response {
+   "sessionId": "dbc32b56f539c081b87092f5eaee7da2",
+   "status": 0,
+   "value": {
+
+   }
+}
+
+[0.978][FINE]:      Command received (/session/dbc32b56f539c081b87092f5eaee7da2/elements) with params {
+   "using": "xpath",
+   "value": ".//*[contains(concat(' ', normalize-space(@class), ' '), ' result ')]"
+}
+
+[0.978][FINER]:     Waiting for all views to stop loading...
+[0.979][FINER]:     Done waiting for all views to stop loading
+[1.075][FINER]:     Waiting for all views to stop loading...
+[1.075][FINER]:     Done waiting for all views to stop loading
+[1.075][FINE]:      Command finished (/session/dbc32b56f539c081b87092f5eaee7da2/elements) with response {
+   "sessionId": "dbc32b56f539c081b87092f5eaee7da2",
+   "status": 0,
+   "value": [ {
+      "ELEMENT": ":wdc:1369656788231"
+   } ]
+}
+
