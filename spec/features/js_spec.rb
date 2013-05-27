@@ -9,7 +9,6 @@ feature "UI tests" do
             page.should have_selector('.result')
         end
 
-STDIN.getc
         within '.result' do
             page.should have_selector('.failed', text: '0')
         end
