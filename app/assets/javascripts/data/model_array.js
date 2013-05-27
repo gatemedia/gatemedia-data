@@ -55,22 +55,23 @@ Data.ModelArray = Ember.ArrayProxy.extend({
         var
             content = this.get('content'),
             removed = this.get('_removed'),
-            promise = new Ember.RSVP.Promise(),
             saved = [];
 
-        for (i = 0; i < removed.get('length'); ++i) {
-            var removedItem = removed.popObject();
-            removedItem.save();
-        }
-        content.map(function (item) {
-            item.save().then(function (item) {
-                saved.pushObject(item);
-                if (saved.length === content.length) {
-                    promise.resolve(saved);
+        return new Ember.RSVP.Promise(function (resolve, reject) {
+            Ember.run(function () {
+                for (i = 0; i < removed.get('length'); ++i) {
+                    var removedItem = removed.popObject();
+                    removedItem.save();
                 }
+                content.map(function (item) {
+                    item.save().then(function (item) {
+                        saved.pushObject(item);
+                        if (saved.length === content.length) {
+                            resolve(saved);
+                        }
+                    });
+                });
             });
         });
-
-        return promise;
     }
 });

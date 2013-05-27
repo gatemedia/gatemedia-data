@@ -9,8 +9,15 @@ function fakeAPI (api, method, url, message) {
         if (Ember.typeOf(url) === 'regexp') {
             url = new RegExp('%@/%@'.fmt(Global.apiUrl, url.source))
         } else {
-            url = '%@/%@?user_credentials=%@'.fmt(Global.apiUrl, url, Auth.user.singleAccessToken);
-            // url = '%@/%@'.fmt(Global.apiUrl, url);
+            if (url.indexOf('?') >= 0) {
+                var
+                    parts = url.split('?'),
+                    action = parts[0],
+                    params = parts[1];
+                url = '%@/%@?user_credentials=%@&%@'.fmt(Global.apiUrl, action, Auth.user.singleAccessToken, params);
+            } else {
+                url = '%@/%@?user_credentials=%@'.fmt(Global.apiUrl, url, Auth.user.singleAccessToken);
+            }
         }
         data = null;
         break;

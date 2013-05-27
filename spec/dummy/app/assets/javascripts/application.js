@@ -8,7 +8,7 @@
 //= require data
 
 Global = {
-    apiUrl: '/'
+    apiUrl: 'http://0.0.0.0:8888'
 };
 
 Auth = {

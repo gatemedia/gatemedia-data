@@ -96,98 +96,112 @@ Data.adapter = Ember.Object.create({
         options = options || {};
 
         var
+            adapter = this,
             async = !options.sync,
-            noCache = options.noCache,
-            result = async ? new Ember.RSVP.Promise() : null;
+            noCache = options.noCache;
 
-        function ok (record) {
-            Ember.run(function () {
-                if (async) {
-                    result.resolve(record);
-                } else {
-                    result = record;
-                }
+        function run (async, noCache, resolve, reject) {
+            var result = null;
+
+            function ok (record) {
+                Ember.run(function () {
+                    if (async) {
+                        resolve(record);
+                    } else {
+                        result = record;
+                    }
+                });
+            }
+
+            function ko (error) {
+                Ember.run(function () {
+                    if (async) {
+                        reject(error);
+                    } else {
+                        result = null;
+                    }
+                });
+            }
+
+            if (noCache || !findInCache.call(adapter, ok)) {
+                find.call(adapter, async, ok, ko);
+            }
+            return result;
+        }
+
+        if (async) {
+            return new Ember.RSVP.Promise(function (resolve, reject) {
+                run(true, noCache, resolve, reject);
             });
+        } else {
+            return run(false, noCache);
         }
-
-        function ko (error) {
-            Ember.run(function () {
-                if (async) {
-                    result.reject(error);
-                } else {
-                    result = null;
-                }
-            });
-        }
-
-        if (noCache || !findInCache.call(this, ok)) {
-            find.call(this, async, ok, ko);
-        }
-        return result;
     },
 
     save: function (record) {
         var
-            url = [ this.get('baseUrl'), record.get('_url') ].join('/'),
+            adapter = this,
+            url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
             action,
             async = true,
             params = {},
-            resourceKey = record.constructor.resourceKey(),
-            promise = new Ember.RSVP.Promise();
+            resourceKey = record.constructor.resourceKey();
 
-        if (!(record.get('isDirty') || record.get('isNew'))) {
-            Ember.Logger.warn('Do not save clean record: ' + record.toString());
-            record.unload();
-            promise.resolve();
-            return promise;
-        }
+        return new Ember.RSVP.Promise(function (resolve, reject) {
+            Ember.run(function () {
+                if (!(record.get('isDirty') || record.get('isNew'))) {
+                    Ember.Logger.warn('Do not save clean record: ' + record.toString());
+                    record.unload();
+                    resolve();
+                    return;
+                }
 
-        if (record.get('isDeleted')) {
-            action = 'DELETE';
-        } else {
-            params[resourceKey] = record.toJSON();
+                if (record.get('isDeleted')) {
+                    action = 'DELETE';
+                } else {
+                    params[resourceKey] = record.toJSON();
 
-            if (record.get('isNew')) {
-                action = 'POST';
-            } else {
-                action = 'PUT';
-            }
-        }
-
-        Data.ajax({
-            url: url,
-            type: action,
-            async: async,
-            dataType: 'json',
-            data: this.buildParams(params),
-            success: function (data) {
-                Ember.run(function () {
-                    Ember.Logger.debug("DATA - Saved (" + action + ")", record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
-
-                    if (data[resourceKey]) {
-                        record._updateData(data[resourceKey]);
-                        record.constructor.sideLoad(data);
-                        promise.resolve(record);
+                    if (record.get('isNew')) {
+                        action = 'POST';
                     } else {
-                        if (action === 'DELETE') {
-                            record.unload();
-                            promise.resolve(record);
-                        } else {
-                            Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
-                            promise.reject();
-                        }
+                        action = 'PUT';
+                    }
+                }
+
+                Data.ajax({
+                    url: url,
+                    type: action,
+                    async: async,
+                    dataType: 'json',
+                    data: adapter.buildParams(params),
+                    success: function (data) {
+                        Ember.run(function () {
+                            Ember.Logger.debug("DATA - Saved (" + action + ")", record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
+
+                            if (data[resourceKey]) {
+                                record._updateData(data[resourceKey]);
+                                record.constructor.sideLoad(data);
+                                resolve(record);
+                            } else {
+                                if (action === 'DELETE') {
+                                    record.unload();
+                                    resolve(record);
+                                } else {
+                                    Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
+                                    reject();
+                                }
+                            }
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        Ember.run(function () {
+                            Ember.Logger.error(xhr, status, error);
+                            reject(error);
+                        });
                     }
                 });
-            },
-            error: function (xhr, status, error) {
-                Ember.run(function () {
-                    Ember.Logger.error(xhr, status, error);
-                    promise.reject(error);
-                });
-            }
+            });
         });
-
-        return promise;
     },
 
     buildUrl: function (type, id, parent) {

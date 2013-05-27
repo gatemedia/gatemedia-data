@@ -115,7 +115,7 @@ test("does not retrieve relation for empty set", function () {
 });
 
 test("retrieve relation once for non-empty set", function () {
-    fakeAPI(api, 'GET', new RegExp('leafs\?.*ids.*'), '{"leafs":[{"id":301001},{"id":301002}]}');
+    fakeAPI(api, 'GET', 'leafs?ids%5B%5D=301001&ids%5B%5D=301002', '{"leafs":[{"id":301001},{"id":301002}]}');
 
     var
         node = AttributesTest.Node.load({

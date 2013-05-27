@@ -90,7 +90,7 @@ test("record creation should auto-parent new records to owner", function () {
     ));
 });
 
-asyncTest("new records should be saved after owner", function (done) {
+asyncTest("new records should be saved after owner", 1, function () {
     var
         postId = 300,
         postTitle = 'My very first post',
@@ -103,12 +103,16 @@ asyncTest("new records should be saved after owner", function (done) {
             created_at: now
         });
 
-    // fakeAPI(api, 'PUT', 'posts/%@'.fmt(postId), '{ "post": { "id": %@, "title": "%@" } }'.fmt(postId, postTitle));
+    // Post not change, useless: fakeAPI(api, 'PUT', 'posts/%@'.fmt(postId), '{ "post": { "id": %@, "title": "%@" } }'.fmt(postId, postTitle));
     fakeAPI(api, 'POST', 'posts/%@/comments'.fmt(postId), '{ "comment": { "id": 300100, "post_id": %@ } }'.fmt(postId));
 
-    post.save().then(function () {
-        equal(api.requests.length, 1);
-        start();
+    Ember.run(function () {
+        post.save().then(function () {
+            equal(api.requests.length, 1);
+            start();
+        }, function (error) {
+            ok(false, 'Failed: %@'.fmt(error));
+        });
     });
 
     api.respond();

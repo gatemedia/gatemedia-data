@@ -184,48 +184,57 @@ Data.Model = Ember.Object.extend({
     },
 
     save: function () {
-        var promise = new Ember.RSVP.Promise();
+        var self = this;
 
-        function saveChildren (record, promise) {
-            var
-                relationCaches = record.get('_relationsCache'),
-                savingTracker = Ember.Object.create({
-                    relationsToSave: [],
+        return new Ember.RSVP.Promise(function (resolve, reject) {
 
-                    save: function (relation) {
-                        this.get('relationsToSave').pushObject(relation);
-                    },
-                    saved: function (relation) {
-                        var relationsToSave = this.get('relationsToSave');
-                        relationsToSave.removeObject(relation);
-                        if (Ember.isEmpty(relationsToSave)) {
-                            promise.resolve(record);
+            function saveChildren (record, resolve, reject) {
+                var
+                    relationCaches = record.get('_relationsCache'),
+                    savingTracker = Ember.Object.create({
+                        relationsToSave: [],
+
+                        save: function (relation) {
+                            this.get('relationsToSave').pushObject(relation);
+                        },
+                        saved: function (relation) {
+                            var relationsToSave = this.get('relationsToSave');
+                            // relationsToSave.removeObject(relation);
+                            relationsToSave.popObject();
+                            if (Ember.isEmpty(relationsToSave)) {
+                                resolve(record);
+                            }
+                        }
+                    });
+
+                record.constructor.eachRelation(function (relation, meta) {
+                    if (!meta.options.owner) {
+                        var relationCache = relationCaches[relation];
+                        if (relationCache) {
+                            savingTracker.save(relationCache);
+                            relationCache.save().then(function () {
+                                Ember.run(function () {
+                                    savingTracker.saved(relationCache)
+                                });
+                            });
                         }
                     }
                 });
+                savingTracker.saved(); // in case of no relation to save...
+            }
 
-            record.constructor.eachRelation(function (relation, meta) {
-                if (!meta.options.owner) {
-                    var relationCache = relationCaches[relation];
-                    if (relationCache) {
-                        savingTracker.save(relationCache);
-                        relationCache.save().then(function () {
-                            savingTracker.saved(relationCache)
+            // Ember.run(function () {
+                if (self.get('isNew') || self.get('hasChanges') || self.get('isDeleted')) {
+                    Data.adapter.save(self).then(function (record) {
+                        Ember.run(function () {
+                            saveChildren(record, resolve, reject);
                         });
-                    }
+                    });
+                } else {
+                    saveChildren(self, resolve, reject);
                 }
-            });
-            savingTracker.saved(); // in case of no relation to save...
-        }
-
-        if (this.get('isNew') || this.get('hasChanges') || this.get('isDeleted')) {
-            Data.adapter.save(this).then(function (record) {
-                saveChildren(record, promise);
-            });
-        } else {
-            saveChildren(this, promise);
-        }
-        return promise;
+            // });
+        });
     },
 
     cancelChanges: function () {
