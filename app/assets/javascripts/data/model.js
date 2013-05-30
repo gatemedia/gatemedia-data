@@ -189,9 +189,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     save: function () {
-        var self = this;
-
-        return new Ember.RSVP.Promise(function (resolve, reject) {
+        var self = this,
+            promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
             function saveChildren (record, resolve, reject) {
                 var
@@ -207,7 +206,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
                             // relationsToSave.removeObject(relation);
                             relationsToSave.popObject();
                             if (Ember.isEmpty(relationsToSave)) {
-                                self.trigger('record:saved', self);
                                 resolve(record);
                             }
                         }
@@ -241,6 +239,14 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
                 }
             // });
         });
+
+        promise.on('promise:resolved', function(event) {
+            self.trigger('record:saved', self);
+        });
+        promise.on('promise:failed', function(event) {
+            self.trigger('record:failed', self);
+        });
+        return promise;
     },
 
     cancelChanges: function () {
