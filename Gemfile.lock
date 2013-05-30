@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ember-data (0.0.1)
+    ember-data (0.0.2)
       rails (~> 3.2.13)
 
 GEM

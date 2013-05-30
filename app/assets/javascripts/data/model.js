@@ -207,7 +207,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
                             // relationsToSave.removeObject(relation);
                             relationsToSave.popObject();
                             if (Ember.isEmpty(relationsToSave)) {
-                                self.trigger('record:saved');
+                                self.trigger('record:saved', self);
                                 resolve(record);
                             }
                         }

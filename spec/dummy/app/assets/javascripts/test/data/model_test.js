@@ -137,8 +137,8 @@ module("Model saving: dirty model saving", withFakeAPI);
         var saved = [];
 
         Ember.run(function () {
-            post.on('record:saved', function () {
-                saved.pushObject(this);
+            post.on('record:saved', function (record) {
+                saved.pushObject(record);
             });
             post.save().then(function (savedPost) {
                 equal(post.get('isDirty'), false);
