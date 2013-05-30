@@ -3,7 +3,12 @@
 //= require ./adapter
 //= require ./reloader
 
-Data.Model = Ember.Object.extend({
+/**
+  Events:
+    - record:saved
+ */
+Data.Model = Ember.Object.extend(Ember.Evented, {
+
     id: Data.attr('number', { serialize: false }),
 
     isNew: true,
@@ -202,6 +207,7 @@ Data.Model = Ember.Object.extend({
                             // relationsToSave.removeObject(relation);
                             relationsToSave.popObject();
                             if (Ember.isEmpty(relationsToSave)) {
+                                self.trigger('record:saved');
                                 resolve(record);
                             }
                         }

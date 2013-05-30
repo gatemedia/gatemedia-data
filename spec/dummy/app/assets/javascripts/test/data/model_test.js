@@ -134,9 +134,16 @@ module("Model saving: dirty model saving", withFakeAPI);
     asyncTest("dirty record save calls API & restore cleanliness", function () {
         fakeAPI(api, 'PUT', 'posts/%@'.fmt(postId), '{ "post": { "id": %@, "title": "%@" } }'.fmt(postId, postTitle));
 
+        var saved = [];
+
         Ember.run(function () {
+            post.on('record:saved', function () {
+                saved.pushObject(this);
+            });
             post.save().then(function (savedPost) {
                 equal(post.get('isDirty'), false);
+                equal(saved.length, 1);
+                equal(saved[0], post);
                 start();
             });
         });
