@@ -21,6 +21,58 @@ ModelTest.Comment = Data.Model.extend({
 });
 
 
+module("Model retrieval", withFakeAPI);
+(function () {
+    asyncTest("API is called without any id to find all", function () {
+
+        fakeAPI(api, 'GET', 'posts', '{ "posts": [] }');
+
+        ModelTest.Post.find().then(function (post) {
+            equal(api.requests.length, 1);
+            equal(api.requests[0].method, 'GET');
+            equal(api.requests[0].url, 'http://0.0.0.0:8888/posts?user_credentials=xxx');
+
+            start();
+        });
+
+        api.respond();
+    });
+
+    asyncTest("API is called with id to find one", function () {
+        var postId = 68;
+
+        fakeAPI(api, 'GET', 'posts/%@'.fmt(postId), '{ "post": {} }');
+
+        ModelTest.Post.find(postId).then(function (post) {
+            equal(api.requests.length, 1);
+            equal(api.requests[0].method, 'GET');
+            equal(api.requests[0].url, 'http://0.0.0.0:8888/posts/%@?user_credentials=xxx'.fmt(postId));
+
+            start();
+        });
+
+        api.respond();
+    });
+
+    asyncTest("API is called with passed options", function () {
+        var
+            options = { page: 1, count: 5 };
+
+        fakeAPI(api, 'GET', 'posts?page=1&count=5', '{ "posts": [{}] }');
+
+        ModelTest.Post.find(options).then(function (post) {
+            equal(api.requests.length, 1);
+            equal(api.requests[0].method, 'GET');
+            equal(api.requests[0].url, 'http://0.0.0.0:8888/posts?user_credentials=xxx&page=1&count=5');
+
+            start();
+        });
+
+        api.respond();
+    });
+})();
+
+
 module("Data extension: models", withFakeAPI);
 (function () {
     test("model can be loaded from JSON", function () {
@@ -63,7 +115,7 @@ module("Data extension: models", withFakeAPI);
 })();
 
 
-module("seralization", withFakeAPI);
+module("Model seralization", withFakeAPI);
 (function () {
     var
         postId = 201, //TODO add store reset & call beforeEach

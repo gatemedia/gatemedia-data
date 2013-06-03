@@ -431,6 +431,8 @@ Data.Model.reopenClass({
             return Data.adapter.findOne(this, id, parent, options);
         case 'array':
             return Data.adapter.findMany(this, id, parent, options);
+        case 'object':
+            return Data.adapter.findMany(this, [], parent, { params: id });
         default:
             return Data.adapter.findMany(this, [], parent, options);
         }
