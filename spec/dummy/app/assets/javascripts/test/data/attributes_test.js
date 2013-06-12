@@ -7,7 +7,11 @@ AttributesTest.Node = Data.Model.extend({
 });
 
 AttributesTest.Leaf = Data.Model.extend({
-    node: Data.belongsTo('AttributesTest.Node')
+    node: Data.belongsTo('AttributesTest.Node'),
+    extra: Data.embedded('AttributesTest.ExtraAttributes')
+});
+
+AttributesTest.ExtraAttributes = Data.Model.extend(Data.dynamicAttributable, {
 });
 
 
@@ -30,6 +34,45 @@ test("default value is returned when null", function () {
         });
 
     equal(node.get('name'), 'My node');
+});
+
+module("Embedded attributes", withFakeAPI);
+
+test("can be directly accessible (no explicit declaration)", function () {
+    var leaf = AttributesTest.Leaf.load({
+        extra: {
+            tags: [ 'tic', 'tac', 'toe' ],
+            hint: "Unexpected, isn't it?"
+        }
+    });
+
+    equal(leaf.get('extra.tags.length'), 3);
+    [ 'tic', 'tac', 'toe' ].forEach(function (expectedItem, index) {
+        equal(leaf.get('extra.tags')[index], expectedItem);
+    });
+    equal(leaf.get('extra.hint'), "Unexpected, isn't it?");
+
+    leaf.get('extra.tags').popObject();
+    leaf.get('extra.tags').pushObject('toc');
+
+    leaf.get('extra').defineAttribute('dynamic', "Yeah! it's opened");
+    leaf.get('extra').defineAttributes({
+        composedName: "Well",
+        shouldBeCamelized: "it rocks"
+    });
+
+    leaf.set('extra.composedName', 'You know what?');
+
+    equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
+        node_id: undefined,
+        extra: {
+            tags: [ 'tic', 'tac', 'toc' ],
+            hint: "Unexpected, isn't it?",
+            dynamic: "Yeah! it's opened",
+            composedName: "You know what?",
+            shouldBeCamelized: "it rocks"
+        }
+    }));
 });
 
 module("Relations: belongsTo", withFakeAPI);

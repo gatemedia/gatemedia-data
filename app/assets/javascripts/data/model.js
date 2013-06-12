@@ -265,18 +265,26 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     toJSON: function () {
-        var json = {};
+        var
+            json = {},
+            processedKeys = [];
 
         this.constructor.eachAttribute(function (attribute, meta) {
             if (meta.options.serialize !== false) {
                 json[meta.codec.key(attribute)] = meta.codec.encode(this, attribute);
             }
+            processedKeys.pushObject(meta.codec.key(attribute));
         }, this);
 
         this.constructor.eachRelation(function (relation, meta) {
             if (meta.options.serialize !== false) {
                 json[meta.codec.key(relation)] = meta.codec.encode(this, relation);
             }
+            processedKeys.pushObject(meta.codec.key(relation));
+        }, this);
+
+        Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
+            json[dynamicKey] = this._data[dynamicKey];
         }, this);
 
         return json;

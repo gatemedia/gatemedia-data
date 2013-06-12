@@ -90,6 +90,36 @@ Data.embedded = function (type, options) {
 };
 
 
+Data.dynamicAttributable = Ember.Mixin.create({
+
+    defineAttribute: function (key, value) {
+        Ember.defineProperty(this, key, Ember.computed(function (key, newValue, oldValue) {
+            var result = newValue;
+            if (arguments.length > 1) {
+                Ember.set(this._data, key, result);
+            } else {
+                result = Ember.get(this._data, key);
+            }
+            return result;
+        }).property('_data.%@'.fmt(key)));
+
+        this._data[key] = value;
+    },
+
+    defineAttributes: function (object) {
+        Ember.keys(object).forEach(function (key) {
+            this.defineAttribute(key, object[key]);
+        }, this);
+    },
+
+    unknownProperty: function (propertyName) {
+        if (this._data.hasOwnProperty(propertyName)) {
+            return this._data[propertyName];
+        }
+    }
+});
+
+
 Data.belongsTo = function (type, options) {
     options = options || {};
 
