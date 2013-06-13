@@ -55,11 +55,11 @@ test("can be dynamically defined", function () {
     leaf.get('extra.tags').popObject();
     leaf.get('extra.tags').pushObject('toc');
 
-    leaf.get('extra').defineAttribute('dynamic', "Yeah! it's opened");
+    leaf.get('extra').defineAttribute('dynamic', { defaultValue: "Yeah! it's opened" });
     leaf.get('extra').defineAttributes({
-        composedName: "Well",
-        shouldBeCamelized: "it rocks",
-        canBeArray: [ 'head', 'tail' ]
+        composedName: { defaultValue: "Well" },
+        shouldBeCamelized: { defaultValue: "it rocks" },
+        canBeArray: { defaultValue: [ 'head', 'tail' ] }
     });
 
     leaf.set('extra.composedName', 'You know what?');
@@ -83,7 +83,7 @@ test("can be dynamically defined", function () {
         extra: {}
     }));
 
-    leaf.get('extra').defineAttribute('foo', "bar");
+    leaf.get('extra').defineAttribute('foo', { defaultValue: "bar" });
 
     equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
         node_id: undefined,
@@ -93,15 +93,38 @@ test("can be dynamically defined", function () {
     }));
 
     leaf.get('extra').resetAttributes({
-        onlyKey: 'K'
+        onlyKey: { defaultValue: [{ k: 'v' }] }
     });
 
     equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
         node_id: undefined,
         extra: {
-            onlyKey: 'K'
+            onlyKey: [{ k: 'v' }]
         }
     }));
+
+
+    var leaf2 = AttributesTest.Leaf.load({
+        extra: {
+            objectTags: {
+                0: { label: 'tic', color: 'blue' },
+                1: { label: 'tac', color: 'red' },
+                2: { label: 'toe', color: 'green' }
+            }
+        }
+    });
+
+    leaf2.get('extra').defineAttribute('objectTags', { decoder: 'array', defaultValue: [] });
+
+    equal(leaf2.get('extra.objectTags.length'), 3);
+    [
+        { label: 'tic', color: 'blue' },
+        { label: 'tac', color: 'red' },
+        { label: 'toe', color: 'green' }
+    ].forEach(function (expectedItem, index) {
+        equal(leaf2.get('extra.objectTags')[index].label, expectedItem.label);
+        equal(leaf2.get('extra.objectTags')[index].color, expectedItem.color);
+    });
 });
 
 module("Relations: belongsTo", withFakeAPI);

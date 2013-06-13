@@ -92,18 +92,33 @@ Data.embedded = function (type, options) {
 
 Data.dynamicAttributable = Ember.Mixin.create({
 
-    defineAttribute: function (key, value) {
+    defineAttribute: function (key, definition) {
         Ember.defineProperty(this, key, Ember.computed(function (key, newValue, oldValue) {
             var result = newValue;
             if (arguments.length > 1) {
                 Ember.set(this._data, key, result);
             } else {
+                var decoder = definition.decoder || 'raw';
                 result = Ember.get(this._data, key);
+                switch (decoder) {
+                case 'array':
+                    if (Ember.typeOf(result) === 'object') { // fix JQuery serialization or object arrays...
+                        var array = [];
+                        Ember.keys(result).forEach(function (index) {
+                            array[index] = result[index];
+                        });
+                        result = array;
+                    }
+                default:
+                    // nope
+                }
             }
             return result;
         }).property('_data.%@'.fmt(key)));
 
-        Ember.set(this._data, key, value);
+        if (Ember.isNone(Ember.get(this._data, key))) {
+            Ember.set(this._data, key, definition.defaultValue);
+        }
     },
 
     defineAttributes: function (object) {
