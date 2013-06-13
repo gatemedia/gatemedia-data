@@ -38,7 +38,7 @@ test("default value is returned when null", function () {
 
 module("Embedded attributes", withFakeAPI);
 
-test("can be directly accessible (no explicit declaration)", function () {
+test("can be dynamically defined", function () {
     var leaf = AttributesTest.Leaf.load({
         extra: {
             tags: [ 'tic', 'tac', 'toe' ],
@@ -58,7 +58,8 @@ test("can be directly accessible (no explicit declaration)", function () {
     leaf.get('extra').defineAttribute('dynamic', "Yeah! it's opened");
     leaf.get('extra').defineAttributes({
         composedName: "Well",
-        shouldBeCamelized: "it rocks"
+        shouldBeCamelized: "it rocks",
+        canBeArray: [ 'head', 'tail' ]
     });
 
     leaf.set('extra.composedName', 'You know what?');
@@ -70,7 +71,35 @@ test("can be directly accessible (no explicit declaration)", function () {
             hint: "Unexpected, isn't it?",
             dynamic: "Yeah! it's opened",
             composedName: "You know what?",
-            shouldBeCamelized: "it rocks"
+            shouldBeCamelized: "it rocks",
+            canBeArray: [ 'head', 'tail' ]
+        }
+    }));
+
+    leaf.get('extra').resetAttributes();
+
+    equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
+        node_id: undefined,
+        extra: {}
+    }));
+
+    leaf.get('extra').defineAttribute('foo', "bar");
+
+    equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
+        node_id: undefined,
+        extra: {
+            foo: 'bar'
+        }
+    }));
+
+    leaf.get('extra').resetAttributes({
+        onlyKey: 'K'
+    });
+
+    equal(JSON.stringify(leaf.toJSON()), JSON.stringify({
+        node_id: undefined,
+        extra: {
+            onlyKey: 'K'
         }
     }));
 });

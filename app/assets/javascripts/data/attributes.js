@@ -112,6 +112,13 @@ Data.dynamicAttributable = Ember.Mixin.create({
         }, this);
     },
 
+    resetAttributes: function (object) {
+        this.set('_data', {});
+        if (object) {
+            this.defineAttributes(object);
+        }
+    },
+
     unknownProperty: function (propertyName) {
         if (this._data.hasOwnProperty(propertyName)) {
             return this._data[propertyName];
