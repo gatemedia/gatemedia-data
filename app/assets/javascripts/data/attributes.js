@@ -103,7 +103,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
             return result;
         }).property('_data.%@'.fmt(key)));
 
-        this._data[key] = value;
+        Ember.set(this._data, key, value);
     },
 
     defineAttributes: function (object) {
