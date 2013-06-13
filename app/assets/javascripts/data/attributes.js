@@ -114,7 +114,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
                 }
             }
             return result;
-        }).property('_data.%@'.fmt(key)));
+        }).property('_data', '_data.%@'.fmt(key)).cacheable(false));
 
         if (Ember.isNone(Ember.get(this._data, key))) {
             Ember.set(this._data, key, definition.defaultValue);
