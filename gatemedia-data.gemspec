@@ -1,12 +1,12 @@
 $:.push File.expand_path("../lib", __FILE__)
 
 # Maintain your gem's version:
-require "ember-data/version"
+require "gatemedia-data/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "ember-data"
-  s.version     = EmberData::VERSION
+  s.name        = "gatemedia-data"
+  s.version     = GatemediaData::VERSION
   s.authors     = ["Mike Aski"]
   s.email       = ["mike.aski@gatemedia.ch"]
   s.homepage    = "http://www.gatemedia.ch"
