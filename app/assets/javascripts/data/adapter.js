@@ -138,7 +138,7 @@ Data.adapter = Ember.Object.create({
         }
     },
 
-    save: function (record) {
+    save: function (record, extraParams) {
         var
             adapter = this,
             url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
@@ -173,7 +173,7 @@ Data.adapter = Ember.Object.create({
                     type: action,
                     async: async,
                     dataType: 'json',
-                    data: adapter.buildParams(params),
+                    data: adapter.buildParams(params, extraParams),
                     success: function (data) {
                         Ember.run(function () {
                             Ember.Logger.debug("DATA - Saved (" + action + ")", record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);

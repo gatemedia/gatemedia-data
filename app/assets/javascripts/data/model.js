@@ -188,7 +188,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         }
     },
 
-    save: function () {
+    save: function (extraParams) {
         var self = this,
             promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
@@ -229,7 +229,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
             // Ember.run(function () {
                 if (self.get('isNew') || self.get('hasChanges') || self.get('isDeleted')) {
-                    Data.adapter.save(self).then(function (record) {
+                    Data.adapter.save(self, extraParams).then(function (record) {
                         Ember.run(function () {
                             saveChildren(record, resolve, reject);
                         });
