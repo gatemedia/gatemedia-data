@@ -331,6 +331,7 @@ Data.Model.reopenClass({
     },
 
     loadMany: function (data, extraData) {
+        data = data || [];
         return data.map(function (itemData) {
             return this.load(itemData, extraData);
         }, this);
