@@ -256,6 +256,7 @@ Data.hasMany = function (type, options) {
                 _type: meta.type,
                 _owner: this,
                 _field: key,
+                _affectOwner: meta.options.serialize || false,
                 content: content
             });
             content.forEach(function (record) {

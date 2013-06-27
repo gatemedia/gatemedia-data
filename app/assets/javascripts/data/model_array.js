@@ -4,6 +4,7 @@ Data.ModelArray = Ember.ArrayProxy.extend({
     _type: null,
     _owner: null,
     _field: null,
+    _affectOwner: false,
 
     _removed: null,
 
@@ -15,8 +16,7 @@ Data.ModelArray = Ember.ArrayProxy.extend({
 
     createRecord: function (data) {
         data = data || {};
-        var
-            type = Data.getType(this.get('_type')),
+        var type = Data.getType(this.get('_type')),
             ownerRelation = type.ownerRelation(Data.LAX_OWNER),
             dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
             dataOwnerId = data[dataOwnerKey],
@@ -46,10 +46,46 @@ Data.ModelArray = Ember.ArrayProxy.extend({
     cancelChanges: function () {
         var content = this.get('content');
 
-        content.map(function (item) {
+        content.forEach(function (item) {
             item.cancelChanges();
         });
     },
+
+    clear: function () {
+        this._super();
+
+        if (this.get('_affectOwner')) {
+            var owner = this.get('_owner'),
+                field = this.get('_field');
+
+            owner.get(field).forEach(function (related) {
+                owner._removeRelation(field, related);
+            });
+        }
+    },
+    pushObject: function (object) {
+        this._super(object);
+
+        if (this.get('_affectOwner')) {
+            var owner = this.get('_owner'),
+                field = this.get('_field');
+
+            owner._addRelation(field, object);
+        }
+    },
+    pushObjects: function (objects) {
+        this._super(objects);
+
+        if (this.get('_affectOwner')) {
+            var owner = this.get('_owner'),
+                field = this.get('_field');
+
+            objects.forEach(function (object) {
+                owner._addRelation(field, object);
+            });
+        }
+    },
+    //TODO wrap other MutableEnumerable methods...
 
     save: function () {
         var
