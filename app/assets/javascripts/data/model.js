@@ -10,6 +10,8 @@
 Data.Model = Ember.Object.extend(Ember.Evented, {
 
     id: Data.attr('number', { serialize: false }),
+    createdAt: Data.attr('datetime', { serialize: false }),
+    updatedAt: Data.attr('datetime', { serialize: false }),
 
     isNew: true,
     isDirty: false,
