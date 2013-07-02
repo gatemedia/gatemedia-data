@@ -164,6 +164,17 @@ module("Model seralization", withFakeAPI);
                 postTitle,
                 postTimestamp));
     });
+
+    test("JSON serializes altered hasMany", function () {
+        post.get('comments').pushObject(ModelTest.Comment.instanciate({
+            id: 4
+        }));
+
+        equal(JSON.stringify(post.toJSON()),
+            '{"title":"%@","created_at":"%@","comment_ids":[201001,201002,201003,4]}'.fmt(
+                postTitle,
+                postTimestamp));
+    });
 })();
 
 

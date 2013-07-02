@@ -201,10 +201,15 @@ Data.hasMany = function (type, options) {
         options: options,
         codec: {
             key: function (key) {
-                return key.decamelize().singularize() + '_ids';
+                return '%@_ids'.fmt(key.decamelize().singularize());
             },
 
             encode: function (instance, attribute) {
+                var cache = instance.get('_relationsCache.%@'.fmt(attribute));
+
+                if (cache) {
+                    return cache.getEach('id');
+                }
                 return instance.get('_data.' + this.key(attribute));
             }
         }
