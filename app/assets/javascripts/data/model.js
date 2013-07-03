@@ -170,7 +170,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         var container = this.get('_container');
 
         if (container) {
-            container.get('_removed').pushObject(this);
+            var removed = container.get('_removed');
+            removed && removed.pushObject(this);
             container.removeObject(this);
         }
 
