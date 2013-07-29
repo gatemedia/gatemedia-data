@@ -1,7 +1,13 @@
 
-Data.adapter = Ember.Object.create({
+// Data.adapter = Data.Adapter.create({
+//     baseUrl: Global.apiUrl
+// });
 
-    baseUrl: Global.apiUrl, //TODO extract from here...
+
+Data.Adapter = Ember.Object.extend({
+
+    baseUrl: Ember.required(),
+    authParams: null,
 
     findOne: function (type, id, parent, options) {
         options = options || {};
@@ -220,9 +226,7 @@ Data.adapter = Ember.Object.create({
     },
 
     buildParams: function (optionParams, extraParams) {
-        var params = {
-            user_credentials: Auth.user.singleAccessToken
-        };
+        var params = this.get('authParams') || {};
 
         function mergeParams(obj) {
             Ember.keys(obj).forEach(function (key) {

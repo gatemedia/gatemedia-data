@@ -232,7 +232,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
             // Ember.run(function () {
                 if (self.get('isNew') || self.get('hasChanges') || self.get('isDeleted')) {
-                    Data.adapter.save(self, extraParams).then(function (record) {
+                    self.getAdapter().save(self, extraParams).then(function (record) {
                         Ember.run(function () {
                             saveChildren(record, resolve, reject);
                         });
@@ -291,6 +291,10 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         }, this);
 
         return json;
+    },
+
+    getAdapter: function () {
+        return this.constructor.getAdapter();
     }
 });
 
@@ -437,16 +441,18 @@ Data.Model.reopenClass({
     },
 
     find: function (id, parent, options) {
+        var adapter = this.getAdapter();
+
         switch (Ember.typeOf(id)) {
         case 'string':
         case 'number':
-            return Data.adapter.findOne(this, id, parent, options);
+            return adapter.findOne(this, id, parent, options);
         case 'array':
-            return Data.adapter.findMany(this, id, parent, options);
+            return adapter.findMany(this, id, parent, options);
         case 'object':
-            return Data.adapter.findMany(this, [], parent, { params: id });
+            return adapter.findMany(this, [], parent, { params: id });
         default:
-            return Data.adapter.findMany(this, [], parent, options);
+            return adapter.findMany(this, [], parent, options);
         }
     },
 
@@ -482,5 +488,12 @@ Data.Model.reopenClass({
             }
         }, this);
         return ownerRelation;
+    },
+
+    getAdapter: function () {
+        var namespace = Ember.get(this.toString().split('.')[0]);
+
+        return namespace.adapter
+            || namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
     }
 });
