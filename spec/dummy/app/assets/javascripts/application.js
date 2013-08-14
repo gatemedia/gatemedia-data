@@ -5,7 +5,7 @@
 //= require lib/moment
 //
 //= require_self
-//= require data
+//= require gatemedia/data
 
 Global = {
     apiUrl: 'http://0.0.0.0:8888'
