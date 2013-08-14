@@ -1,5 +1,8 @@
 
-AttributesTest = Ember.Namespace.create();
+AttributesTest = Ember.Application.create({
+    apiUrl: Global.apiUrl,
+    rootElement: '#' + $('<div id="attributes-test">').appendTo('body').attr('id')
+});
 
 AttributesTest.Node = Data.Model.extend({
     name: Data.attr('string', { defaultValue: 'My node' }),

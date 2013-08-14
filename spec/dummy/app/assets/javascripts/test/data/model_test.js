@@ -1,5 +1,8 @@
 
-ModelTest = Ember.Namespace.create();
+ModelTest = Ember.Application.create({
+    apiUrl: Global.apiUrl,
+    rootElement: '#' + $('<div id="model-test">').appendTo('body').attr('id')
+});
 
 ModelTest.User = Data.Model.extend({
     name: Data.attr('string'),

@@ -1,5 +1,8 @@
 
-ModelArrayTest = Ember.Namespace.create();
+ModelArrayTest = Ember.Application.create({
+    apiUrl: Global.apiUrl,
+    rootElement: '#' + $('<div id="model-array-test">').appendTo('body').attr('id')
+});
 
 ModelArrayTest.Post = Data.Model.extend({
     title: Data.attr('string'),
