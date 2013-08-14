@@ -1,9 +1,4 @@
 
-// Data.adapter = Data.Adapter.create({
-//     baseUrl: Global.apiUrl
-// });
-
-
 Data.Adapter = Ember.Object.extend({
 
     baseUrl: Ember.required(),
