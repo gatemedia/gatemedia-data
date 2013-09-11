@@ -467,7 +467,7 @@ Data.Model.reopenClass({
     },
 
     resourceKey: function () {
-        var typeName = this.toString().split('.')[1];
+        var typeName = this._splittedSymbols()[2];
 
         return typeName.decamelize();
     },
@@ -491,10 +491,13 @@ Data.Model.reopenClass({
     },
 
     getAdapter: function () {
-        var symbol = /(.+)\.(\w+)/.exec(this.toString())[1],
-            namespace = Ember.get(symbol);
+        var namespace = Ember.get(this._splittedSymbols()[1]);
 
         return namespace.adapter
             || namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
+    },
+
+    _splittedSymbols: function () {
+        return /(.+)\.(\w+)/.exec(this.toString());
     }
 });
