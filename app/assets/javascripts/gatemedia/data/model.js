@@ -30,8 +30,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     _url: function () {
-        var
-            parent = this.get('_parent'),
+        var parent = this.get('_parent'),
             parts = [];
 
         if (parent) {
@@ -105,8 +104,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     _changeAttribute: function (attribute, oldValue, newValue) {
-        var
-            embeddedContainer = this.get('_embeddedContainer'),
+        var embeddedContainer = this.get('_embeddedContainer'),
             path = (embeddedContainer ? this.get('_embeddedAttribute') + '.' : '') + attribute,
             changeHolder = embeddedContainer || this,
             attributeChanges = changeHolder.get('_attributeChanges');
@@ -149,8 +147,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     _dirty: function () {
-        var
-            parent = this.get('_parent'),
+        var parent = this.get('_parent'),
             embeddedContainer = this.get('_embeddedContainer');
 
         this.set('isDirty', true);
@@ -196,8 +193,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
             promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
             function saveChildren (record, resolve, reject) {
-                var
-                    relationCaches = record.get('_relationsCache'),
+                var relationCaches = record.get('_relationsCache'),
                     savingTracker = Ember.Object.create({
                         relationsToSave: [],
 
@@ -268,8 +264,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     },
 
     toJSON: function () {
-        var
-            json = {},
+        var json = {},
             processedKeys = [];
 
         this.constructor.eachAttribute(function (attribute, meta) {
@@ -313,8 +308,7 @@ Data.Model.reopenClass({
     },
 
     load: function (data, extraData) {
-        var
-            useCache = extraData ? !extraData._embeddedContainer : true,
+        var useCache = extraData ? !extraData._embeddedContainer : true,
             cachedRecord = useCache ? this.cachedRecord(data.id) : null,
             record,
             reloader;
@@ -347,8 +341,7 @@ Data.Model.reopenClass({
     createRecord: function (data, extraData) {
         data = data || {};
         extraData = extraData || {};
-        var
-            useCache = !extraData._embeddedContainer,
+        var useCache = !extraData._embeddedContainer,
             record = this.create({
                 _data: data,
                 _createdAt: new Date(),
@@ -400,8 +393,7 @@ Data.Model.reopenClass({
     },
 
     sideLoad: function (data) {
-        var
-            orderedKeys = [],
+        var orderedKeys = [],
             types = {};
 
         orderedKeys.addKey = function (key, type) {
@@ -416,18 +408,15 @@ Data.Model.reopenClass({
             var dependsOn = meta.options.dependsOn || [];
 
             dependsOn.forEach(function (key) {
-                var
-                    typeName = key.singularize().camelize().classify(),
-                    namespace = this._splittedSymbols()[1];
+                var typeName = key.singularize().camelize().classify();
 
-                orderedKeys.addKey(key, '%@.%@'.fmt(namespace, typeName));
+                orderedKeys.addKey(key, '%@.%@'.fmt(this._classInfo().namespace, typeName));
             }, this);
             orderedKeys.addKey(relationName, meta.type);
         });
 
         orderedKeys.forEach(function (key) {
-            var
-                sideLoad = data[key],
+            var sideLoad = data[key],
                 type;
 
             if (sideLoad) {
@@ -467,9 +456,7 @@ Data.Model.reopenClass({
     },
 
     resourceKey: function () {
-        var typeName = this._splittedSymbols()[2];
-
-        return typeName.decamelize();
+        return this._classInfo().className.decamelize();
     },
 
     resourceUrl: function () {
@@ -491,13 +478,17 @@ Data.Model.reopenClass({
     },
 
     getAdapter: function () {
-        var namespace = Ember.get(this._splittedSymbols()[1]);
+        var namespace = Ember.get(this._classInfo().namespace);
 
         return namespace.adapter
             || namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
     },
 
-    _splittedSymbols: function () {
-        return /(.+)\.(\w+)/.exec(this.toString());
+    _classInfo: function () {
+        var info = /(.+)\.(\w+)/.exec(this.toString());
+        return {
+            namespace: info[1],
+            className: info[2]
+        };
     }
 });
