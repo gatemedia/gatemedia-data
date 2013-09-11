@@ -491,7 +491,8 @@ Data.Model.reopenClass({
     },
 
     getAdapter: function () {
-        var namespace = Ember.get(this.toString().split('.')[0]);
+        var symbol = /(.+)\.(\w+)/.exec(this.toString())[1],
+            namespace = Ember.get(symbol);
 
         return namespace.adapter
             || namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
