@@ -169,8 +169,7 @@ Data.belongsTo = function (type, options) {
                 this.expireCaches();
             });
         } else {
-            var
-                type = Data.getType(meta.type),
+            var type = Data.getType(meta.type),
                 id = this.get('_data.' + meta.codec.key(key)),
                 parent = meta.options.nested ? this : null,
                 relationsCache = this.get('_relationsCache'),
@@ -219,8 +218,7 @@ Data.hasMany = function (type, options) {
         if (arguments.length > 1) {
             Ember.assert('SHOULD NOT DO THAT, BRO', false);
         } else {
-            var
-                meta = this.constructor.metaForProperty(key),
+            var meta = this.constructor.metaForProperty(key),
                 type = Data.getType(meta.type),
                 ids = this.get('_data.' + meta.codec.key(key)),
                 parent = meta.options.nested ? this : null,
@@ -243,8 +241,7 @@ Data.hasMany = function (type, options) {
                     // Ember.Logger.debug('hasMany(%@.%@): empty set'.fmt(type, key));
                 } else {
                     if (meta.options.nestingParam) {
-                        var
-                            parts = meta.options.nestingParam.split(':'),
+                        var parts = meta.options.nestingParam.split(':'),
                             param = parts[1] || parts[0],
                             valuePath = parts[1] ? parts[0] : 'id';
 
