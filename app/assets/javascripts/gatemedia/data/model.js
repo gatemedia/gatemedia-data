@@ -418,7 +418,7 @@ Data.Model.reopenClass({
             dependsOn.forEach(function (key) {
                 var
                     typeName = key.singularize().camelize().classify(),
-                    namespace = this.toString().split('.')[0];
+                    namespace = this._splittedSymbols()[1];
 
                 orderedKeys.addKey(key, '%@.%@'.fmt(namespace, typeName));
             }, this);
