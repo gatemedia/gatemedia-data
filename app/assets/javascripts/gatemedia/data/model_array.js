@@ -24,9 +24,9 @@ Data.ModelArray = Ember.ArrayProxy.extend({
             ownerId = owner.get('id'),
             record;
 
-        Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(type), ownerRelation)
+        Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(type), ownerRelation);
         if (dataOwnerId) {
-            Ember.assert("Trying to add a %@ which owner mismatches ModelArray holder".fmt(type), ownerId === dataOwnerId)
+            Ember.assert("Trying to add a %@ which owner mismatches ModelArray holder".fmt(type), ownerId === dataOwnerId);
         } else {
             data[dataOwnerKey] = ownerId;
         }

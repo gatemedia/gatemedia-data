@@ -10,9 +10,8 @@ Data.ModelChanges = Ember.Object.extend({
     },
 
     addChange: function (attribute, change) {
-        var
-            attribute = attribute.replace('.', '/'),
-            key = '_changes.' + attribute,
+        attribute = attribute.replace('.', '/');
+        var key = '_changes.' + attribute,
             attributeChanges = this.get(key);
 
         if (!attributeChanges) {
@@ -24,7 +23,7 @@ Data.ModelChanges = Ember.Object.extend({
     },
 
     resetChanges: function (attribute) {
-        var attribute = attribute.replace('.', '/');
+        attribute = attribute.replace('.', '/');
 
         this.get('_changed').removeObject(attribute);
         delete this.get('_changes')[attribute];

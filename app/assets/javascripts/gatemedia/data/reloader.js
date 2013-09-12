@@ -51,7 +51,7 @@ Data.Reloader = Ember.Object.extend({
 
             for (var level = path.split('/').length; level > 0; level--) {
                 parent = parent.get('_parent') || parent.get('_owner');
-            };
+            }
             return parent;
         }
 

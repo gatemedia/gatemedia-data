@@ -168,7 +168,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
         if (container) {
             var removed = container.get('_removed');
-            removed && removed.pushObject(this);
+            if (removed) {
+                removed.pushObject(this);
+            }
             container.removeObject(this);
         }
 
@@ -217,7 +219,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
                             savingTracker.save(relationCache);
                             relationCache.save().then(function () {
                                 Ember.run(function () {
-                                    savingTracker.saved(relationCache)
+                                    savingTracker.saved(relationCache);
                                 });
                             });
                         }
@@ -298,7 +300,7 @@ Data.Model.reopenClass({
 
     instanciate: function (data, extraData) {
         extraData = extraData || {};
-        extraData['isNew'] = true;
+        extraData.isNew = true;
 
         var record = this.createRecord(data, extraData);
         Ember.run.next(record, function () {
@@ -318,7 +320,7 @@ Data.Model.reopenClass({
             record = cachedRecord;
         } else {
             extraData = extraData || {};
-            extraData['isNew'] = false;
+            extraData.isNew = false;
             record = this.createRecord(data, extraData);
         }
         record.resetCaches();
@@ -421,7 +423,7 @@ Data.Model.reopenClass({
 
             if (sideLoad) {
                 type = types[key];
-                Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances")
+                Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances");
                 sideLoad.forEach(function (sideItemData) {
                     Data.getType(type).load(sideItemData);
                 });
@@ -480,8 +482,8 @@ Data.Model.reopenClass({
     getAdapter: function () {
         var namespace = Ember.get(this._classInfo().namespace);
 
-        return namespace.adapter
-            || namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
+        return namespace.adapter ||
+               namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
     },
 
     _classInfo: function () {
