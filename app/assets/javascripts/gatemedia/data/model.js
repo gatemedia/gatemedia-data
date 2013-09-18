@@ -431,6 +431,83 @@ Data.Model.reopenClass({
     });
   },
 
+  /**
+    Find model's instance(s), according to passed parameters:
+      - id or ids or API parameters
+      - parent
+      - options
+
+    # Call samples
+
+    ## App.Stuff.find()
+      Requested API's URL:
+        "/stuffs"
+      API's controller action called:
+        StuffsController.index
+      API's action parameters:
+        {}
+
+    ## App.Stuff.find(42)
+      Requested API's URL:
+        "/stuffs/42"
+      API's controller action called:
+        StuffsController.show
+      API's action parameters:
+        { id:42 }
+
+    ## App.Stuff.find(42, <parent>) (with <parent>.id=36)
+      Requested API's URL:
+        "/<parent>s/<parent.id>/stuffs/42"
+      API's controller action called:
+        StuffsController.show
+      API's action parameters:
+        { id:42, <parent>_id:36 }
+
+    ## App.Stuff.find(42, null, {<options>})
+      Requested API's URL:
+        "/stuffs/42"
+      API's controller action called:
+        StuffsController.show
+      API's action parameters:
+        { id:42, <options.params> }
+
+    ## App.Stuff.find(42, <parent>, {<options>})
+      Requested API's URL:
+        "/<parent>s/<parent.id>/stuffs/42"
+      API's controller action called:
+        StuffsController.show
+      API's action parameters:
+        { id:42, <parent>_id:36, <options.params> }
+
+    ## App.Stuff.find([ 42, 51, 73 ], ...)
+      Requested API's URL:
+        "/<parent>s/<parent.id>/stuffs"
+      API's controller action called:
+        StuffsController.index
+      API's action parameters:
+        { ids:[42,51,73], ... }
+
+    ## App.Stuff.find({ criteria: 'value' })
+      Requested API's URL:
+        "/stuffs"
+      API's controller action called:
+        StuffsController.index
+      API's action parameters:
+        { criteria: "value" }
+
+    ## App.Stuff.find({ criteria: 'value' }, <parent>) (with <parent>.id=36)
+      Requested API's URL:
+        "/<parent>s/<parent.id>/stuffs"
+      API's controller action called:
+        StuffsController.index
+      API's action parameters:
+        {<parent>_id:36,criteria:"value"}
+
+    # Supported options:
+      - params: API call's extra parameters
+      - sync: boolean (defaults to `false`) If true, return synchronously, otherwise return a promise
+      - noCache: boolean (defaults to `false`) If true, ignore already loaded records (leads to cache update if incoming changes)
+   */
   find: function (id, parent, options) {
     var adapter = this.getAdapter();
 
