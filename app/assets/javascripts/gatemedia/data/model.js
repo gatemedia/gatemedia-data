@@ -396,7 +396,7 @@ Data.Model.reopenClass({
 
   sideLoad: function (data) {
     var orderedKeys = [],
-      types = {};
+        types = {};
 
     orderedKeys.addKey = function (key, type) {
       key = key.decamelize();
@@ -418,14 +418,12 @@ Data.Model.reopenClass({
     });
 
     orderedKeys.forEach(function (key) {
-      var sideLoad = data[key],
-        type;
-
+      var sideLoad = data[key] || data[key.pluralize()];
       if (sideLoad) {
-        type = types[key];
+        var type = Data.getType(types[key]);
         Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances");
         sideLoad.forEach(function (sideItemData) {
-          Data.getType(type).load(sideItemData);
+          type.load(sideItemData);
         });
       }
     });

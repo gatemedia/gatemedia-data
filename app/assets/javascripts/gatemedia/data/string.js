@@ -9,6 +9,7 @@ String.prototype.endsWith = function (suffix) {
 
 
 var inflector = new Ember.Inflector();
+inflector.plural(/s$/, '');
 inflector.plural(/$/, 's');
 inflector.plural(/y$/, 'ies');
 
