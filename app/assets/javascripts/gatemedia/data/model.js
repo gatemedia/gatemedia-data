@@ -396,7 +396,8 @@ Data.Model.reopenClass({
 
   sideLoad: function (data) {
     var orderedKeys = [],
-        types = {};
+        types = {},
+        namespace = this._classInfo().namespace;
 
     orderedKeys.addKey = function (key, type) {
       key = key.decamelize();
@@ -406,27 +407,37 @@ Data.Model.reopenClass({
       }
     };
 
-    this.eachRelation(function (relationName, meta) {
-      var dependsOn = meta.options.dependsOn || [];
-
-      dependsOn.forEach(function (key) {
+    function addAllKeys (keys) {
+      keys.forEach(function (key) {
         var typeName = key.singularize().camelize().classify();
+        orderedKeys.addKey(key, '%@.%@'.fmt(namespace, typeName));
+      });
+    }
 
-        orderedKeys.addKey(key, '%@.%@'.fmt(this._classInfo().namespace, typeName));
-      }, this);
+    this.eachRelation(function (relationName, meta) {
+      addAllKeys(meta.options.dependsOn || []);
       orderedKeys.addKey(relationName, meta.type);
+      addAllKeys(meta.options.sideLoads || []);
     });
 
     orderedKeys.forEach(function (key) {
-      var sideLoad = data[key] || data[key.pluralize()];
-      if (sideLoad) {
-        var type = Data.getType(types[key]);
+      var dataKey;
+      if (data.hasOwnProperty(key)) {
+        dataKey = key;
+      }
+      if (data.hasOwnProperty(key.pluralize())) {
+        dataKey = key.pluralize();
+      }
+      if (dataKey) {
+        var sideLoad = data[dataKey],
+            type = Data.getType(types[key]);
         Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances");
         sideLoad.forEach(function (sideItemData) {
           type.load(sideItemData);
         });
+        delete data[dataKey];
       }
-    });
+    }, this);
   },
 
   /**

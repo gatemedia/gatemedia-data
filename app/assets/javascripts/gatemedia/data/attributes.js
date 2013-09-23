@@ -142,7 +142,15 @@ Data.dynamicAttributable = Ember.Mixin.create({
   }
 });
 
+/**
+  Declares a "to one" relation.
+    - type: the "one" relation side's entity fully qualified class name
+    - options: an optional object defining some extra relation behaviour settings (cf. below)
 
+  Supported options:
+    - nested: defaults to false. if true, this entity's parent will be the related entity
+    - sideLoads: a list of extra side-loaded entities associated to this relation
+ */
 Data.belongsTo = function (type, options) {
   options = options || {};
 
@@ -192,6 +200,18 @@ Data.belongsTo = function (type, options) {
 };
 
 
+/**
+  Declares a "to many" relation.
+    - type: the "many" relation side's entity fully qualified class name
+    - options: an optional object defining some extra relation behaviour settings (cf. below)
+
+  Supported options:
+    - nested: defaults to false. if true, this entity's parent will be the related entity
+    - nestingParam: TODO
+    - serialize: defaults to true, if false, this relation will not be seralized to API, and dirtyness will not be
+      propagated to the parent
+    - sideLoads: a list of extra side-loaded entities associated to this relation
+ */
 Data.hasMany = function (type, options) {
   options = options || {};
 
