@@ -415,9 +415,18 @@ Data.Model.reopenClass({
     }
 
     this.eachRelation(function (relationName, meta) {
+      var sideLoads;
+      if (meta.options.sideLoad) {
+        sideLoads = [ meta.options.sideLoad ];
+      } else if (meta.options.sideLoads) {
+        sideLoads = meta.options.sideLoads;
+      } else {
+        sideLoads = [];
+      }
+
       addAllKeys(meta.options.dependsOn || []);
       orderedKeys.addKey(relationName, meta.type);
-      addAllKeys(meta.options.sideLoads || []);
+      addAllKeys(sideLoads);
     });
 
     orderedKeys.forEach(function (key) {

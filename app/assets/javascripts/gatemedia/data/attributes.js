@@ -149,6 +149,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
 
   Supported options:
     - nested: defaults to false. if true, this entity's parent will be the related entity
+    - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
  */
 Data.belongsTo = function (type, options) {
@@ -210,6 +211,7 @@ Data.belongsTo = function (type, options) {
     - nestingParam: TODO
     - serialize: defaults to true, if false, this relation will not be seralized to API, and dirtyness will not be
       propagated to the parent
+    - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
  */
 Data.hasMany = function (type, options) {
