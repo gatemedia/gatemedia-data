@@ -533,6 +533,16 @@ Data.Model.reopenClass({
     }
   },
 
+  /**
+    Return all loaded records (in cache), without issuing any request to the API.
+
+    Beware, the result is not bound to the cache so it will reflect the cache state at call time.
+   */
+  all: function () {
+    var cache = this._cache || {};
+    return Ember.keys(cache).map(function (id) { return cache[id]; });
+  },
+
   cacheRecord: function (id, value) {
     this._cache = this._cache || {};
     this._cache[id] = value;
