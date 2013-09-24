@@ -222,19 +222,14 @@ Data.Adapter = Ember.Object.extend({
   },
 
   buildParams: function (optionParams, extraParams) {
-    var params = this.get('authParams') || {};
-
-    function mergeParams(obj) {
-      Ember.keys(obj).forEach(function (key) {
-        params[key] = obj[key];
-      });
-    }
+    var params = {};
+    $.extend(params, this.get('authParams'));
 
     if (optionParams) {
-      mergeParams(optionParams);
+      $.extend(params, optionParams);
     }
     if (extraParams) {
-      mergeParams(extraParams);
+      $.extend(params, extraParams);
     }
     return params;
   },
