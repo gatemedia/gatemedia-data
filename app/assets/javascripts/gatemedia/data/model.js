@@ -440,7 +440,7 @@ Data.Model.reopenClass({
       if (dataKey) {
         var sideLoad = data[dataKey],
             type = Data.getType(types[key]);
-        Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances");
+        Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances", sideLoad);
         sideLoad.forEach(function (sideItemData) {
           type.load(sideItemData);
         });
