@@ -150,7 +150,7 @@ Data.Adapter = Ember.Object.extend({
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
       Ember.run(function () {
-        if (!(record.get('isDirty') || record.get('isNew'))) {
+        if (!(record.get('isDirty') || record.get('_isNew'))) {
           Ember.Logger.warn('Do not save clean record: ' + record.toString());
           record.unload();
           resolve();
@@ -162,7 +162,7 @@ Data.Adapter = Ember.Object.extend({
         } else {
           params[resourceKey] = record;
 
-          if (record.get('isNew')) {
+          if (record.get('_isNew')) {
             action = 'POST';
           } else {
             action = 'PUT';

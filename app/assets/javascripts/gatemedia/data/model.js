@@ -13,7 +13,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   createdAt: Data.attr('datetime', { serialize: false }),
   updatedAt: Data.attr('datetime', { serialize: false }),
 
-  isNew: true,
+  _isNew: true,
   isDirty: false,
   isDeleted: false,
 
@@ -37,7 +37,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       parts.pushObject(parent.get('_url'));
     }
     parts.pushObject(this.constructor.resourceUrl());
-    if (!this.get('isNew')) {
+    if (!this.get('_isNew')) {
       parts.pushObject(this.get('id'));
     }
     return parts.join('/');
@@ -60,7 +60,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _resetDirtyness: function () {
     this.setProperties({
-      isNew: false,
+      _isNew: false,
       isDirty: false
     });
     var parent = this.get('_parent');
@@ -175,7 +175,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     }
 
     this.set('isDeleted', true);
-    if (!this.get('isNew')) {
+    if (!this.get('_isNew')) {
       this._dirty();
     } else {
       this._resetDirtyness();
@@ -229,7 +229,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       }
 
       // Ember.run(function () {
-      if (self.get('isNew') || self.get('hasChanges') || self.get('isDeleted')) {
+      if (self.get('_isNew') || self.get('hasChanges') || self.get('isDeleted')) {
         self.getAdapter().save(self, extraParams).then(function (record) {
           Ember.run(function () {
             saveChildren(record, resolve, reject);
@@ -300,7 +300,7 @@ Data.Model.reopenClass({
 
   instanciate: function (data, extraData) {
     extraData = extraData || {};
-    extraData.isNew = true;
+    extraData._isNew = true;
 
     var record = this.createRecord(data, extraData);
     Ember.run.next(record, function () {
@@ -320,7 +320,7 @@ Data.Model.reopenClass({
       record = cachedRecord;
     } else {
       extraData = extraData || {};
-      extraData.isNew = false;
+      extraData._isNew = false;
       record = this.createRecord(data, extraData);
     }
     record.resetCaches();
