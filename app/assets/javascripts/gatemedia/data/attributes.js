@@ -255,7 +255,7 @@ Data.hasMany = function (type, options) {
         return relation;
       }
 
-      if (this.get('isNew')) {
+      if (this.get('_isNew')) {
         content = [];
         // Ember.Logger.debug('hasMany(%@.%@): empty set (new)'.fmt(type, key));
       } else {

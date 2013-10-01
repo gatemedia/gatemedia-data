@@ -150,7 +150,7 @@ Data.Adapter = Ember.Object.extend({
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
       Ember.run(function () {
-        if (!(record.get('isDirty') || record.get('isNew'))) {
+        if (!(record.get('isDirty') || record.get('_isNew'))) {
           Ember.Logger.warn('Do not save clean record: ' + record.toString());
           record.unload();
           resolve();
@@ -160,9 +160,9 @@ Data.Adapter = Ember.Object.extend({
         if (record.get('isDeleted')) {
           action = 'DELETE';
         } else {
-          params[resourceKey] = record.toJSON();
+          params[resourceKey] = record;
 
-          if (record.get('isNew')) {
+          if (record.get('_isNew')) {
             action = 'POST';
           } else {
             action = 'PUT';
@@ -174,7 +174,8 @@ Data.Adapter = Ember.Object.extend({
           type: action,
           async: async,
           dataType: 'json',
-          data: adapter.buildParams(params, extraParams),
+          contentType: 'application/json',
+          data: JSON.stringify(adapter.buildParams(params, extraParams)),
           success: function (data) {
             Ember.run(function () {
               Ember.Logger.debug("DATA - Saved (" + action + ")",
