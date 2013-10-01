@@ -13,9 +13,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   createdAt: Data.attr('datetime', { serialize: false }),
   updatedAt: Data.attr('datetime', { serialize: false }),
 
-  isNew: true,
-  isDirty: false,
-  isDeleted: false,
+  _isNew: true,
+  _isDirty: false,
+  _isDeleted: false,
 
   _container: null,
   _attributeChanges: null,
@@ -37,7 +37,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       parts.pushObject(parent.get('_url'));
     }
     parts.pushObject(this.constructor.resourceUrl());
-    if (!this.get('isNew')) {
+    if (!this.get('_isNew')) {
       parts.pushObject(this.get('id'));
     }
     return parts.join('/');
@@ -60,8 +60,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _resetDirtyness: function () {
     this.setProperties({
-      isNew: false,
-      isDirty: false
+      _isNew: false,
+      _isDirty: false
     });
     var parent = this.get('_parent');
     if (parent) {
@@ -75,12 +75,12 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this.constructor.eachRelation(function (name, meta) {
       if (!meta.options.owner) {
         var cachedRelation = this.get('_relationsCache')[name];
-        if (cachedRelation && cachedRelation.get('isDirty')) {
+        if (cachedRelation && cachedRelation.get('_isDirty')) {
           dirty = true;
         }
       }
     }, this);
-    this.set('isDirty', dirty);
+    this.set('_isDirty', dirty);
 
     var parent = this.get('_parent');
     if (parent) {
@@ -150,7 +150,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     var parent = this.get('_parent'),
       embeddedContainer = this.get('_embeddedContainer');
 
-    this.set('isDirty', true);
+    this.set('_isDirty', true);
     if (embeddedContainer) {
       embeddedContainer._dirty();
     }
@@ -174,8 +174,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       container.removeObject(this);
     }
 
-    this.set('isDeleted', true);
-    if (!this.get('isNew')) {
+    this.set('_isDeleted', true);
+    if (!this.get('_isNew')) {
       this._dirty();
     } else {
       this._resetDirtyness();
@@ -229,7 +229,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       }
 
       // Ember.run(function () {
-      if (self.get('isNew') || self.get('hasChanges') || self.get('isDeleted')) {
+      if (self.get('_isNew') || self.get('hasChanges') || self.get('_isDeleted')) {
         self.getAdapter().save(self, extraParams).then(function (record) {
           Ember.run(function () {
             saveChildren(record, resolve, reject);
@@ -300,7 +300,7 @@ Data.Model.reopenClass({
 
   instanciate: function (data, extraData) {
     extraData = extraData || {};
-    extraData.isNew = true;
+    extraData._isNew = true;
 
     var record = this.createRecord(data, extraData);
     Ember.run.next(record, function () {
@@ -320,7 +320,7 @@ Data.Model.reopenClass({
       record = cachedRecord;
     } else {
       extraData = extraData || {};
-      extraData.isNew = false;
+      extraData._isNew = false;
       record = this.createRecord(data, extraData);
     }
     record.resetCaches();
