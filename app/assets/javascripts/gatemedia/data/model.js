@@ -324,7 +324,7 @@ Data.Model.reopenClass({
       record = cachedRecord;
     } else {
       extraData = extraData || {};
-      extraData.isNew = false;
+      extraData.get('meta').set('isNew', false);
       record = this.createRecord(data, extraData);
     }
     record.resetCaches();
