@@ -301,12 +301,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 Data.Model.reopenClass({
 
   instanciate: function (data, extraData) {
-    extraData = extraData || {};
-    extraData.meta = Ember.Object.create({
-      isNew: true
-    });
-
     var record = this.createRecord(data, extraData);
+    record.set('meta.isNew', true);
     Ember.run.next(record, function () {
       this._dirty();
     });
@@ -323,11 +319,8 @@ Data.Model.reopenClass({
       cachedRecord._updateData(data);
       record = cachedRecord;
     } else {
-      extraData = extraData || {};
-      extraData.meta = Ember.Object.create({
-        isNew: false
-      });
       record = this.createRecord(data, extraData);
+      record.set('meta.isNew', false);
     }
     record.resetCaches();
 
@@ -355,7 +348,7 @@ Data.Model.reopenClass({
         _createdAt: new Date(),
       });
 
-    record.setProperties(extraData || {});
+    record.setProperties(extraData);
     if (this.hasReloading()) {
       record.set('_reloader', Data.Reloader.create({
         record: record
