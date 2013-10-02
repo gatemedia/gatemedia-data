@@ -160,7 +160,7 @@ Data.Adapter = Ember.Object.extend({
         if (record.get('isDeleted')) {
           action = 'DELETE';
         } else {
-          params[resourceKey] = record.toJSON();
+          params[resourceKey] = record;
 
           if (record.get('isNew')) {
             action = 'POST';
@@ -174,7 +174,8 @@ Data.Adapter = Ember.Object.extend({
           type: action,
           async: async,
           dataType: 'json',
-          data: adapter.buildParams(params, extraParams),
+          contentType: 'application/json',
+          data: JSON.stringify(adapter.buildParams(params, extraParams)),
           success: function (data) {
             Ember.run(function () {
               Ember.Logger.debug("DATA - Saved (" + action + ")",
