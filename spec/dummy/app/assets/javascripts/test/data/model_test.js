@@ -192,9 +192,9 @@ module("Model saving: dirty model saving", withFakeAPI);
         });
 
     test("attributes changes dirty record", function () {
-        equal(post.get('isDirty'), false);
+        equal(post.get('meta.isDirty'), false);
         post.set('title', 'My very very first post');
-        equal(post.get('isDirty'), true);
+        equal(post.get('meta.isDirty'), true);
     });
 
     asyncTest("dirty record save calls API & restore cleanliness", function () {
@@ -207,7 +207,7 @@ module("Model saving: dirty model saving", withFakeAPI);
                 saved.pushObject(record);
             });
             post.save().then(function (savedPost) {
-                equal(post.get('isDirty'), false);
+                equal(post.get('meta.isDirty'), false);
                 equal(saved.length, 1);
                 equal(saved[0], post);
                 start();
@@ -238,21 +238,21 @@ module("Model saving: dirty children dirty parent model", withFakeAPI);
 
     test("modifying without change do not dirty it", function () {
         post.set('comments.firstObject.text', commentText);
-        equal(post.get('comments.firstObject.isDirty'), false);
+        equal(post.get('comments.firstObject.meta.isDirty'), false);
     });
 
     test("modifying child dirty it and also parent", function () {
         post.set('comments.firstObject.text', 'Yeah! it rocks');
-        equal(post.get('comments.firstObject.isDirty'), true);
-        equal(post.get('isDirty'), true);
+        equal(post.get('comments.firstObject.meta.isDirty'), true);
+        equal(post.get('meta.isDirty'), true);
     });
 
     test("canceling dirty child changes also cleans dirty parent", function () {
         post.set('comments.firstObject.text', 'Yeah! it rocks');
-        equal(comment.get('isDirty'), true);
+        equal(comment.get('meta.isDirty'), true);
         comment.cancelChanges();
-        equal(comment.get('isDirty'), false);
-        equal(post.get('isDirty'), false);
+        equal(comment.get('meta.isDirty'), false);
+        equal(post.get('meta.isDirty'), false);
     });
 })();
 
@@ -273,15 +273,15 @@ module("Model saving: dirty record changes can be canceled", withFakeAPI);
         });
 
     test("attributes changes dirty record", function () {
-        equal(post.get('isDirty'), false);
+        equal(post.get('meta.isDirty'), false);
         post.set('title', 'My changed post');
-        equal(post.get('isDirty'), true);
+        equal(post.get('meta.isDirty'), true);
     });
 
     test("cancel changes cleans record", function () {
         post.cancelChanges();
         post.get('title', 'My changing post');
-        equal(post.get('isDirty'), false);
+        equal(post.get('meta.isDirty'), false);
     });
 })();
 
