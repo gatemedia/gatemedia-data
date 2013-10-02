@@ -13,12 +13,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   createdAt: Data.attr('datetime', { serialize: false }),
   updatedAt: Data.attr('datetime', { serialize: false }),
 
-  meta: Ember.Object.create({
-    isNew: true,
-    isDirty: false,
-    isDeleted: false
-  }),
-
   _container: null,
   _attributeChanges: null,
   _relationChanges: null,
@@ -29,6 +23,12 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._super();
     this._resetChanges();
     this.resetCaches();
+    this.set('meta', Ember.Object.create({
+        isNew: true,
+        isDirty: false,
+        isDeleted: false
+      })
+    );
   },
 
   _url: function () {
