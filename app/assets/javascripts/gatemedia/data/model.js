@@ -302,6 +302,9 @@ Data.Model.reopenClass({
 
   instanciate: function (data, extraData) {
     extraData = extraData || {};
+    extraData.meta = Ember.Object.create({
+      isNew: true
+    });
 
     var record = this.createRecord(data, extraData);
     Ember.run.next(record, function () {
