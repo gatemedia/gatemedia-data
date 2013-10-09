@@ -13,7 +13,10 @@ Data.Codec = Ember.Object.extend({
 Data.codec = {
   string: Data.Codec.create({
     encode: function (value/*, qualifier*/) {
-      return '%@'.fmt(value);
+      if (value) {
+        return '%@'.fmt(value);
+      }
+      return null;
     }
   }),
 
