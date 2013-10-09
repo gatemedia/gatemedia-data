@@ -207,7 +207,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   save: function (extraParams) {
-    this.willSave();
+    // this.willSave();
     var self = this,
         promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
@@ -259,7 +259,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     });
 
     promise.on('promise:resolved', function(/*event*/) {
-      self.didSave();
+      // self.didSave();
       self.trigger('record:saved', self);
     });
     promise.on('promise:failed', function(/*event*/) {
