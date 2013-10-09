@@ -173,7 +173,7 @@ Data.Adapter = Ember.Object.extend({
           url: url,
           type: action,
           async: async,
-          dataType: 'json',
+         // dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(adapter.buildParams(params, extraParams)),
           success: function (data) {
