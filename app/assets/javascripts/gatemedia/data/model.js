@@ -4,8 +4,9 @@
 //= require ./reloader
 
 /**
-  Events:
+  Events (intended for local model post-processing):
     - record:saved
+    - record:failed
  */
 Data.Model = Ember.Object.extend(Ember.Evented, {
 
@@ -18,6 +19,19 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   _relationChanges: null,
   /** Dereferenciated relations cache. Avoid processing time dereferencing (save, ...) */
   _relationsCache: null,
+
+  /**
+    Called before model saving.
+
+    Intended for global model pre-processing.
+   */
+  willSave: Ember.K(),
+  /**
+    Called after successful model saving.
+
+    Intended for global model post-processing.
+   */
+  didSave: Ember.K(),
 
   init: function () {
     this._super();
@@ -193,8 +207,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   save: function (extraParams) {
+    this.willSave();
     var self = this,
-      promise = new Ember.RSVP.Promise(function (resolve, reject) {
+        promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
       function saveChildren (record, resolve/*, reject*/) {
         var relationCaches = record.get('_relationsCache'),
@@ -244,6 +259,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     });
 
     promise.on('promise:resolved', function(/*event*/) {
+      self.didSave();
       self.trigger('record:saved', self);
     });
     promise.on('promise:failed', function(/*event*/) {
