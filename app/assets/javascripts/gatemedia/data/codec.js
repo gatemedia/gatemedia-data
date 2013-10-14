@@ -31,7 +31,7 @@ Data.codec = {
 
   boolean: Data.Codec.create({
     encode: function (value/*, qualifier*/) {
-      return value ? 't': 'f';
+      return value ? true: false;
     }
   }),
 
