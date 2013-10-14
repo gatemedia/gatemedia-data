@@ -172,7 +172,7 @@ Data.belongsTo = function (type, options) {
 
   return Ember.computed(function(key, value, oldValue) {
     if (arguments.length > 1) {
-      this.set('_data.' + meta.codec.key(key), value.get('id'));
+      this.set('_data.' + meta.codec.key(key), value ? value.get('id') : value);
       this.get('_relationsCache')[key] = value;
       Ember.run.next(this, function () {
         this._replaceRelation(key, oldValue, value);
