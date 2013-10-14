@@ -410,10 +410,17 @@ Data.Model.reopenClass({
     }, this);
   },
 
+  withRelation: function (name, callback, binding) {
+    this.eachRelation(function (relationName, meta) {
+      if (relationName === name) {
+        callback(meta);
+      }
+    }, binding);
+  },
+
   sideLoad: function (data) {
     var orderedKeys = [],
-        types = {},
-        namespace = this._classInfo().namespace;
+        types = {};
 
     orderedKeys.addKey = function (key, type) {
       key = key.decamelize();
@@ -423,15 +430,18 @@ Data.Model.reopenClass({
       }
     };
 
-    function addAllKeys (keys) {
+    function addAllKeys (keys, holderType) {
       keys.forEach(function (key) {
-        var typeName = key.singularize().camelize().classify();
-        orderedKeys.addKey(key, '%@.%@'.fmt(namespace, typeName));
+        holderType.withRelation(key, function (meta) {
+          orderedKeys.addKey(key, meta.type);
+        });
       });
     }
 
     this.eachRelation(function (relationName, meta) {
-      var sideLoads;
+      var dependencies = meta.options.dependsOn || [],
+          sideLoads;
+
       if (meta.options.sideLoad) {
         sideLoads = [ meta.options.sideLoad ];
       } else if (meta.options.sideLoads) {
@@ -440,9 +450,9 @@ Data.Model.reopenClass({
         sideLoads = [];
       }
 
-      addAllKeys(meta.options.dependsOn || []);
+      addAllKeys(dependencies, this);
       orderedKeys.addKey(relationName, meta.type);
-      addAllKeys(sideLoads);
+      addAllKeys(sideLoads, this);
     });
 
     orderedKeys.forEach(function (key) {
