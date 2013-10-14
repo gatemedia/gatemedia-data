@@ -63,7 +63,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     var ownerRelation = this.constructor.ownerRelation(Data.STRICT_OWNER);
 
     if (ownerRelation) {
-      return this.get('_relationsCache')[ownerRelation.name] || this.get(ownerRelation.name);
+      var relationsCache = this.get('_relationsCache') || {};
+      return relationsCache[ownerRelation.name] || this.get(ownerRelation.name);
     }
     return null;
   }.property().cacheable(false),

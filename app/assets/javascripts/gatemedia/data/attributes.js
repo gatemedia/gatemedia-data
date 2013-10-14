@@ -182,7 +182,7 @@ Data.belongsTo = function (type, options) {
       var type = Data.getType(meta.type),
         id = this.get('_data.' + meta.codec.key(key)),
         parent = meta.options.nested ? this : null,
-        relationsCache = this.get('_relationsCache'),
+        relationsCache = this.get('_relationsCache') || {},
         relation = relationsCache[key];
 
       if (relation) {
@@ -246,7 +246,7 @@ Data.hasMany = function (type, options) {
           ids = this.get('_data.' + meta.codec.key(key)),
           parent = meta.options.nested ? this : null,
           params,
-          relationsCache = this.get('_relationsCache'),
+          relationsCache = this.get('_relationsCache') || {},
           relation = relationsCache[key],
           content;
 
@@ -287,7 +287,7 @@ Data.hasMany = function (type, options) {
       content.forEach(function (record) {
         record.set('_container', relation);
       });
-      this.get('_relationsCache')[key] = relation;
+      relationsCache[key] = relation;
       return relation;
     }
   }).property('_data', '_relationsCache', '_cacheTimestamp').meta(meta);
