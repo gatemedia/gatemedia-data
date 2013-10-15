@@ -16,12 +16,12 @@ Data.ModelArray = Ember.ArrayProxy.extend({
   createRecord: function (data) {
     data = data || {};
     var type = Data.getType(this.get('_type')),
-      ownerRelation = type.ownerRelation(Data.LAX_OWNER),
-      dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
-      dataOwnerId = data[dataOwnerKey],
-      owner = this.get('_owner'),
-      ownerId = owner.get('id'),
-      record;
+        ownerRelation = type.ownerRelation(Data.LAX_OWNER),
+        dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
+        dataOwnerId = data[dataOwnerKey],
+        owner = this.get('_owner'),
+        ownerId = owner.get('id'),
+        record;
 
     Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(type), ownerRelation);
     if (dataOwnerId) {
@@ -87,10 +87,9 @@ Data.ModelArray = Ember.ArrayProxy.extend({
   //TODO wrap other MutableEnumerable methods...
 
   save: function () {
-    var
-      content = this.get('content'),
-      removed = this.get('_removed'),
-      saved = [];
+    var content = this.get('content'),
+        removed = this.get('_removed'),
+        saved = [];
 
     return new Ember.RSVP.Promise(function (resolve/*, reject*/) {
       Ember.run(function () {

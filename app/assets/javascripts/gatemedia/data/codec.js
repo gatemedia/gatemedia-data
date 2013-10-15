@@ -13,7 +13,7 @@ Data.Codec = Ember.Object.extend({
 Data.codec = {
   string: Data.Codec.create({
     encode: function (value/*, qualifier*/) {
-      if (value) {
+      if (!Ember.isNone(value)) {
         return '%@'.fmt(value);
       }
       return null;
