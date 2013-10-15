@@ -75,6 +75,14 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._resetDirtyness();
   },
 
+  reloadFrom: function (data) {
+    var type = this.constructor;
+
+    this._updateData(data[type.resourceKey()]);
+    type.sideLoad(data);
+    this.resetCaches();
+  },
+
   _resetDirtyness: function () {
     this.get('meta').setProperties({
       isNew: false,
