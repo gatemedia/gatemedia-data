@@ -183,7 +183,7 @@ Data.Adapter = Ember.Object.extend({
           async: async,
           type: action,
           url: url,
-          // dataType: 'json',
+          dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(adapter.buildParams(params, extraParams)),
           success: function (data) {
@@ -200,8 +200,8 @@ Data.Adapter = Ember.Object.extend({
                   record.unload();
                   resolve(record);
                 } else {
-                  Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
-                  reject();
+                  Ember.Logger.warn("API returned JSON with missing key '%@'".fmt(resourceKey), data);
+                  resolve(record);
                 }
               }
             });
