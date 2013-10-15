@@ -47,7 +47,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _url: function () {
     var parent = this.get('_parent'),
-      parts = [];
+        parts = [];
 
     if (parent) {
       parts.pushObject(parent.get('_url'));
@@ -130,9 +130,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _changeAttribute: function (attribute, oldValue, newValue) {
     var embeddedContainer = this.get('_embeddedContainer'),
-      path = (embeddedContainer ? this.get('_embeddedAttribute') + '.' : '') + attribute,
-      changeHolder = embeddedContainer || this,
-      attributeChanges = changeHolder.get('_attributeChanges');
+        path = (embeddedContainer ? this.get('_embeddedAttribute') + '.' : '') + attribute,
+        changeHolder = embeddedContainer || this,
+        attributeChanges = changeHolder.get('_attributeChanges');
 
     if (this.get('_original.' + path) === newValue) {
       attributeChanges.resetChanges(path);
@@ -173,7 +173,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _dirty: function () {
     var parent = this.get('_parent'),
-      embeddedContainer = this.get('_embeddedContainer');
+        embeddedContainer = this.get('_embeddedContainer');
 
     this.set('meta.isDirty', true);
     if (embeddedContainer) {
@@ -209,7 +209,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   unload: function () {
     var container = this.get('_container');
-
     if (container) {
       container.removeObject(this);
     }
@@ -294,7 +293,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   toJSON: function () {
     var json = {},
-      processedKeys = [];
+        processedKeys = [];
 
     this.constructor.eachAttribute(function (attribute, meta) {
       if (meta.options.serialize !== false) {
@@ -336,9 +335,9 @@ Data.Model.reopenClass({
 
   load: function (data, extraData) {
     var useCache = extraData ? !extraData._embeddedContainer : true,
-      cachedRecord = useCache ? this.cachedRecord(data.id) : null,
-      record,
-      reloader;
+        cachedRecord = useCache ? this.cachedRecord(data.id) : null,
+        record,
+        reloader;
 
     if (cachedRecord) {
       cachedRecord._updateData(data);
@@ -368,10 +367,10 @@ Data.Model.reopenClass({
     data = data || {};
     extraData = extraData || {};
     var useCache = !extraData._embeddedContainer,
-      record = this.create({
-        _data: data,
-        _createdAt: new Date(),
-      });
+        record = this.create({
+      _data: data,
+      _createdAt: new Date(),
+    });
 
     record.setProperties(extraData);
     if (this.hasReloading()) {
@@ -610,7 +609,6 @@ Data.Model.reopenClass({
 
   getAdapter: function () {
     var namespace = Ember.get(this._classInfo().namespace);
-
     return namespace.adapter ||
          namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
   },
