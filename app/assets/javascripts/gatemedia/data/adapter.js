@@ -4,6 +4,13 @@ Data.Adapter = Ember.Object.extend({
   baseUrl: Ember.required(),
   authParams: null,
 
+  /**
+    Intended to be overriden as needed.
+   */
+  ajax: function (settings) {
+    return Data.ajax(settings);
+  },
+
   findOne: function (type, id, parent, options) {
     options = options || {};
     return this.findWithCache(options,
@@ -16,10 +23,13 @@ Data.Adapter = Ember.Object.extend({
         return false;
       },
       function (async, ok, ko) {
-        Data.ajax({
-          url: this.buildUrl(type, id, parent),
-          type: 'GET',
+        var action = 'GET',
+            url = this.buildUrl(type, id, parent);
+
+        this.ajax({
           async: async,
+          type: action,
+          url: url,
           dataType: 'json',
           data: this.buildParams(options.params),
           success: function (data) {
@@ -37,7 +47,7 @@ Data.Adapter = Ember.Object.extend({
             }
           },
           error: function (xhr, status, error) {
-            Ember.Logger.error(xhr, status, error);
+            Ember.Logger.error(status + ':', action, url, error);
             ko(error);
           }
         });
@@ -60,19 +70,21 @@ Data.Adapter = Ember.Object.extend({
         return false;
       },
       function (async, ok, ko) {
-        Data.ajax({
-          url: this.buildUrl(type, null, parent),
-          type: 'GET',
+        var action = 'GET',
+            url = this.buildUrl(type, null, parent);
+
+        this.ajax({
           async: async,
+          type: action,
+          url: url,
           dataType: 'json',
           data: this.buildParams(options.params, {
             ids: ids, // Ember.isEmpty(ids) ? null : ids,
           }),
           success: function (data) {
             Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
-            var
-              resourceKey = type.resourceKey().pluralize(),
-              result = [];
+            var resourceKey = type.resourceKey().pluralize(),
+                result = [];
 
             if (data[resourceKey]) {
               result.addObjects(data[resourceKey].map(function (itemData) {
@@ -86,7 +98,7 @@ Data.Adapter = Ember.Object.extend({
             }
           },
           error: function (xhr, status, error) {
-            Ember.Logger.error(xhr, status, error);
+            Ember.Logger.error(status + ':', action, url, error);
             ko(error);
           }
         });
@@ -96,10 +108,9 @@ Data.Adapter = Ember.Object.extend({
   findWithCache: function (options, findInCache, find) {
     options = options || {};
 
-    var
-      adapter = this,
-      async = !options.sync,
-      noCache = options.noCache;
+    var adapter = this,
+        async = !options.sync,
+        noCache = options.noCache;
 
     function run (async, noCache, resolve, reject) {
       var result = null;
@@ -140,16 +151,15 @@ Data.Adapter = Ember.Object.extend({
   },
 
   save: function (record, extraParams) {
-    var
-      adapter = this,
-      url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
-      action,
-      async = true,
-      params = {},
-      resourceKey = record.constructor.resourceKey();
+    var adapter = this,
+        url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
+        action,
+        async = true,
+        params = {},
+        resourceKey = record.constructor.resourceKey();
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
-      Ember.run(function () {
+      Ember.run(adapter, function () {
         if (!(record.get('meta.isDirty') || record.get('meta.isNew'))) {
           Ember.Logger.warn('Do not save clean record: ' + record.toString());
           record.unload();
@@ -169,11 +179,11 @@ Data.Adapter = Ember.Object.extend({
           }
         }
 
-        Data.ajax({
-          url: url,
-          type: action,
+        this.ajax({
           async: async,
-         // dataType: 'json',
+          type: action,
+          url: url,
+          // dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(adapter.buildParams(params, extraParams)),
           success: function (data) {
@@ -198,7 +208,7 @@ Data.Adapter = Ember.Object.extend({
           },
           error: function (xhr, status, error) {
             Ember.run(function () {
-              Ember.Logger.error(xhr, status, error);
+              Ember.Logger.error(status + ':', action, url, error);
               reject(error);
             });
           }

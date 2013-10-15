@@ -1,58 +1,96 @@
 //= require lib/sinon-1.6.0
 //= require lib/sinon-server-1.6.0
 
-function fakeAPI (api, method, url, message) {
-    var url, data;
+/* global ok:false, withFakeAdapter:true */
 
-    switch (method) {
-    case 'GET':
-        if (Ember.typeOf(url) === 'regexp') {
-            url = new RegExp('%@/%@'.fmt(Global.apiUrl, url.source))
-        } else {
-            if (url.indexOf('?') >= 0) {
-                var
-                    parts = url.split('?'),
-                    action = parts[0],
-                    params = parts[1];
-                url = '%@/%@?user_credentials=%@&%@'.fmt(Global.apiUrl, action, Auth.user.singleAccessToken, params);
-            } else {
-                url = '%@/%@?user_credentials=%@'.fmt(Global.apiUrl, url, Auth.user.singleAccessToken);
-            }
-        }
-        data = null;
-        break;
-    case 'PUT':
-    case 'POST':
-        if (Ember.typeOf(url) === 'regexp') {
-            url = new RegExp('%@/%@'.fmt(Global.apiUrl, url.source))
-        } else {
-            url = '%@/%@'.fmt(Global.apiUrl, url);
-        }
-        data = {
-            user_credentials: Auth.user.single_access_token
-        };
-        break;
-    case 'DELETE':
-Ember.Logger.error('Not yet implemented!')
-        break;
+Data.FakeAdapter = Data.Adapter.extend({
+  XHR_FIXTURES: null,
+  XHR_REQUESTS: null,
+
+  reset: function () {
+    this.set('XHR_FIXTURES', []);
+    this.set('XHR_REQUESTS', []);
+  },
+
+  ajax: function (settings) {
+    if (Ember.isNone(this.get('XHR_REQUESTS'))) {
+      ok(false, 'FakeAdapter not setup. Did you specified "withFakeAdapter(...)"?');
     }
 
-    api.respondWith(method, url,
-        [
-            200,
-            { "Content-Type": "application/json" },
-            message
-        ]);
-}
+    var method = settings.type,
+        url = /https?:\/\/(.+?)(:\d+)?\/(.*)/.exec(settings.url).get('lastObject'),
+        params = settings.data;
+
+    if (method === 'GET') {
+      var extra = [];
+      Ember.keys(params).forEach(function (param) {
+        if (params.hasOwnProperty(param)) {
+          var value = params[param];
+          if (Ember.typeOf(value) === 'array') {
+            value.forEach(function (item) {
+              extra.pushObject('%@[]=%@'.fmt(param, item));
+            });
+          } else {
+            extra.pushObject('%@=%@'.fmt(param, value));
+          }
+        }
+      });
+      if (extra.length > 0) {
+        url += '?' + extra.map(function (p) { return encodeURI(p); }).join('&');
+      }
+    }
+
+    this.get('XHR_REQUESTS').pushObject({
+      method: method,
+      url: url,
+      params: params,
+      raw: settings
+    });
+    Ember.Logger.debug('AJAX ->', method, url, params);
+
+    var fixture = this.get('XHR_FIXTURES').find(function (fixture) {
+          return (fixture.method === method) && (fixture.url === url);
+        });
+
+    if (Ember.isNone(fixture)) {
+      ok(false, 'Unexpected XHR call: %@ %@'.fmt(method, url));
+    }
+
+    if (settings.hasOwnProperty('success')) {
+      settings.success(fixture.data);
+    }
+    return {
+      //TODO
+    };
+  },
+
+  fakeXHR: function (method, url, params, data) {
+    if (Ember.isNone(this.get('XHR_FIXTURES'))) {
+      ok(false, 'FakeAdapter not setup. Did you specified "withFakeAdapter(...)" at test module declaration?');
+    }
+
+    if (Ember.isNone(data)) {
+      data = params;
+      params = null;
+    }
+
+    Ember.Logger.debug('AJAX STUB:', method, url, params, data);
+    this.get('XHR_FIXTURES').pushObject({
+      method: method,
+      url: url,
+      params: params,
+      data: data
+    });
+  }
+});
 
 
-var api;
-
-withFakeAPI = {
+withFakeAdapter = function (adapter) {
+  return {
     setup: function () {
-        api = sinon.fakeServer.create();
+      adapter.reset();
     },
     teardown: function () {
-        api.restore();
     }
+  };
 };
