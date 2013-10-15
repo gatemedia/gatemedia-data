@@ -23,24 +23,22 @@ module("Adapter processing", withFakeAdapter(AdapterTest.adapter));
     AdapterTest.adapter.fakeXHR('PUT', 'entities/42', {});
 
     Ember.run(function () {
-      var newEntity = AdapterTest.Entity.instanciate(),
-          initialName = 'hop la yo';
+      var initialName = 'hop la yo',
+          newEntity = AdapterTest.Entity.instanciate({
+        name: initialName
+      });
 
-      newEntity.set('name', initialName);
       newEntity.save().then(function (/*ignoredEntity*/) {
-
-        AdapterTest.Entity.find(42).then(function (entity) {
-          equal(entity.get('name'), initialName);
-
-          entity.set('name', 'yopla');
-
-          entity.save().then(function (savedEntity) {
-            equal(savedEntity.get('name'), 'yopla');
-            start();
-          }, function (error) {
-            ok(false, error);
-          });
-        });
+        return AdapterTest.Entity.find(42);
+      }).then(function (entity) {
+        equal(entity.get('name'), initialName, 'Retrieved name is correct');
+        entity.set('name', 'yopla');
+        return entity.save();
+      }).then(function (savedEntity) {
+        equal(savedEntity.get('name'), 'yopla', 'Updated name is correct');
+        start();
+      }, function (error) {
+        ok(false, error);
       });
     });
   });
