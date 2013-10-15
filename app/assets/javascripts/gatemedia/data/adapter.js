@@ -191,7 +191,7 @@ Data.Adapter = Ember.Object.extend({
               Ember.Logger.debug("DATA - Saved (" + action + ")",
                 record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
 
-              if (data[resourceKey]) {
+              if (data && data[resourceKey]) {
                 record._updateData(data[resourceKey]);
                 record.constructor.sideLoad(data);
                 resolve(record);

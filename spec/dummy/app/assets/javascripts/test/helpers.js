@@ -49,11 +49,15 @@ Data.FakeAdapter = Data.Adapter.extend({
     Ember.Logger.debug('AJAX ->', method, url, params);
 
     var fixture = this.get('XHR_FIXTURES').find(function (fixture) {
-          return (fixture.method === method) && (fixture.url === url);
-        });
+      return (fixture.method === method) && (fixture.url === url);
+    });
 
     if (Ember.isNone(fixture)) {
-      ok(false, 'Unexpected XHR call: %@ %@'.fmt(method, url));
+      var message = 'Unexpected XHR call: %@ %@'.fmt(method, url);
+      Ember.Logger.error(message);
+      ok(false, message);
+
+      fixture = { data: null };
     }
 
     if (settings.hasOwnProperty('success')) {
