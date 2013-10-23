@@ -149,6 +149,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
 
   Supported options:
     - nested: defaults to false. if true, this entity's parent will be the related entity
+    - embedded: defaults to false. if true, the related entity's data is expected to be inlined inside holder's payload
     - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
  */
@@ -161,6 +162,9 @@ Data.belongsTo = function (type, options) {
     options: options,
     codec: {
       key: function (key) {
+        if (options.embedded) {
+          return key;
+        }
         return Data.belongsToKey(key);
       },
 
@@ -180,16 +184,20 @@ Data.belongsTo = function (type, options) {
       });
     } else {
       var type = Data.getType(meta.type),
-        id = this.get('_data.' + meta.codec.key(key)),
-        parent = meta.options.nested ? this : null,
-        relationsCache = this.get('_relationsCache') || {},
-        relation = relationsCache[key];
+          id = this.get('_data.' + meta.codec.key(key)),
+          parent = meta.options.nested ? this : null,
+          relationsCache = this.get('_relationsCache') || {},
+          relation = relationsCache[key];
 
       if (relation) {
         return relation;
       }
       if (id) {
-        relation = type.find(id, parent, { sync: true });
+        if (options.embedded) {
+          relation = type.load(id);
+        } else {
+          relation = type.find(id, parent, { sync: true });
+        }
         relation.set('_owner', this);
         relationsCache[key] = relation;
       } else {
@@ -237,6 +245,7 @@ Data.hasMany = function (type, options) {
     }
   };
 
+  /* jshint maxcomplexity:11 */
   return Ember.computed(function(key/*, value, oldValue*/) {
     if (arguments.length > 1) {
       Ember.assert('SHOULD NOT DO THAT, BRO', false);
