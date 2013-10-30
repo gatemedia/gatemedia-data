@@ -214,31 +214,37 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     }
   },
 
-  save: function (extraParams) {
+  saveProperties: function () {
+    return this.save(null, Array.prototype.slice.call(arguments, 0));
+  },
+
+  save: function (extraParams, includeProperties) {
     this.willSave();
     var self = this,
         promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
       function saveChildren (record, resolve/*, reject*/) {
         var relationCaches = record.get('_relationsCache'),
-          savingTracker = Ember.Object.create({
-            relationsToSave: [],
+            savingTracker;
 
-            save: function (relation) {
-              this.get('relationsToSave').pushObject(relation);
-            },
-            saved: function (/*relation*/) {
-              var relationsToSave = this.get('relationsToSave');
-              // relationsToSave.removeObject(relation);
-              relationsToSave.popObject();
-              if (Ember.isEmpty(relationsToSave)) {
-                resolve(record);
-              }
+        savingTracker = Ember.Object.create({
+          relationsToSave: [],
+
+          save: function (relation) {
+            this.get('relationsToSave').pushObject(relation);
+          },
+          saved: function (/*relation*/) {
+            var relationsToSave = this.get('relationsToSave');
+            // relationsToSave.removeObject(relation);
+            relationsToSave.popObject();
+            if (Ember.isEmpty(relationsToSave)) {
+              resolve(record);
             }
-          });
+          }
+        });
 
         record.constructor.eachRelation(function (relation, meta) {
-          if (!meta.options.owner) {
+          if ((Ember.isNone(includeProperties) || includeProperties.contains(relation)) && !meta.options.owner) {
             var relationCache = relationCaches[relation];
             if (relationCache) {
               savingTracker.save(relationCache);
@@ -255,7 +261,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
       // Ember.run(function () {
       if (self.get('meta.isNew') || self.get('hasChanges') || self.get('meta.isDeleted')) {
-        self.getAdapter().save(self, extraParams).then(function (record) {
+        self.getAdapter().save(self, extraParams, includeProperties).then(function (record) {
           Ember.run(function () {
             saveChildren(record, resolve, reject);
           });
@@ -291,26 +297,28 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._updateData(Ember.copy(this.get('_original'), true));
   },
 
-  toJSON: function () {
+  toJSON: function (includeProperties) {
     var json = {},
         processedKeys = [];
 
     this.constructor.eachAttribute(function (attribute, meta) {
-      if (meta.options.serialize !== false) {
+      if ((meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(attribute))) {
         json[meta.codec.key(attribute)] = meta.codec.encode(this, attribute);
       }
       processedKeys.pushObject(meta.codec.key(attribute));
     }, this);
 
     this.constructor.eachRelation(function (relation, meta) {
-      if (meta.options.serialize !== false) {
+      if ((meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(relation))) {
         json[meta.codec.key(relation)] = meta.codec.encode(this, relation);
       }
       processedKeys.pushObject(meta.codec.key(relation));
     }, this);
 
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
-      json[dynamicKey] = this._data[dynamicKey];
+      if (Ember.isNone(includeProperties) || includeProperties.contains(dynamicKey)) {
+        json[dynamicKey] = this._data[dynamicKey];
+      }
     }, this);
 
     return json;
