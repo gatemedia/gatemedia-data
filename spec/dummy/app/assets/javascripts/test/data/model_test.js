@@ -117,15 +117,15 @@ module("Data extension: models", withFakeAdapter(ModelTest.adapter));
 })();
 
 
-module("Model seralization");
+module("Model serialization");
 (function () {
   var postId = 201, //TODO add store reset & call beforeEach
-    postTitle = 'My very first post',
-    postTimestamp = '2013-04-15 11:53',
-    comment1 = 'Great! I like it',
-    comment2 = 'Sorry but I do not agree',
-    comment3 = 'Could be better...',
-    post;
+      postTitle = 'My very first post',
+      postTimestamp = '2013-04-15 11:53',
+      comment1 = 'Great! I like it',
+      comment2 = 'Sorry but I do not agree',
+      comment3 = 'Could be better...',
+      post;
   
   ModelTest.Comment.loadMany([{
     'id': 201001,
@@ -160,12 +160,19 @@ module("Model seralization");
     equal(comments.mapProperty('text').join(':'), [comment1, comment2, comment3].join(':'));
   });
 
-  test("JSON seralizes attributes & relations", function () {
+  test("JSON serializes attributes & relations", function () {
     equal(JSON.stringify(post.toJSON()),
       //TODO check skipped relations
       '{"title":"%@","created_at":"%@","comment_ids":[201001,201002,201003]}'.fmt(
         postTitle,
         postTimestamp));
+  });
+
+  test("JSON serializes specified properties & relations", function () {
+    equal(JSON.stringify(post.toJSON(['title'])),
+      '{"title":"%@"}'.fmt(postTitle));
+    equal(JSON.stringify(post.toJSON(['title', 'comments'])),
+      '{"title":"%@","comment_ids":[201001,201002,201003]}'.fmt(postTitle));
   });
 
   test("JSON serializes altered hasMany", function () {
@@ -177,6 +184,47 @@ module("Model seralization");
       '{"title":"%@","created_at":"%@","comment_ids":[201001,201002,201003,4]}'.fmt(
         postTitle,
         postTimestamp));
+  });
+})();
+
+
+module("Model saving: partial properties saving", withFakeAdapter(ModelTest.adapter));
+(function () {
+  var postId = 202, //TODO add store reset & call beforeEach
+      postTitle = 'My very first post',
+      postTimestamp = '2013-04-15 11:53',
+      comment = 'Yeah!...',
+      post;
+
+  ModelTest.Comment.loadMany([{
+    'id': 202001,
+    'post_id': postId,
+    'text': comment
+  }]);
+  post = ModelTest.Post.load({
+    'id': postId,
+    'title': postTitle,
+    'created_at': postTimestamp,
+    'comment_ids': [ 202001 ]
+  });
+
+  asyncTest("Record serializes specified properties", function () {
+    var newTitle = 'Hello world!';
+
+    ModelTest.adapter.fakeXHR('PUT', 'posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
+
+    Ember.run(function () {
+      post.set('title', newTitle);
+      post.saveProperties('title').then(function () {
+        equal(ModelTest.adapter.XHR_REQUESTS.length, 1);
+        equal(ModelTest.adapter.XHR_REQUESTS[0].method, 'PUT');
+        equal(ModelTest.adapter.XHR_REQUESTS[0].url, 'posts/%@'.fmt(postId));
+        equal(ModelTest.adapter.XHR_REQUESTS[0].params, '{"post":{"title":"%@"}}'.fmt(newTitle));
+        start();
+      }, function (error) {
+        ok(false, 'Failed: %@'.fmt(error));
+      });
+    });
   });
 })();
 

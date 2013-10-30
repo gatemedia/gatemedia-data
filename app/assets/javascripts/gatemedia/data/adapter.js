@@ -150,7 +150,7 @@ Data.Adapter = Ember.Object.extend({
     }
   },
 
-  save: function (record, extraParams) {
+  save: function (record, extraParams, includeProperties) {
     var adapter = this,
         url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
         action,
@@ -170,7 +170,7 @@ Data.Adapter = Ember.Object.extend({
         if (record.get('meta.isDeleted')) {
           action = 'DELETE';
         } else {
-          params[resourceKey] = record;
+          params[resourceKey] = record.toJSON(includeProperties);
 
           if (record.get('meta.isNew')) {
             action = 'POST';
