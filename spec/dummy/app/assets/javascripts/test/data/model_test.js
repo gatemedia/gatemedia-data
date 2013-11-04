@@ -333,7 +333,7 @@ module("Model saving: dirty record changes can be canceled");
 })();
 
 
-module("Model mapping");
+module("Model mapping", withFakeAdapter(ModelTest.adapter));
 (function () {
   var userId = 301,
     postId = 301001,
@@ -359,6 +359,24 @@ module("Model mapping");
 
   test("url should match standard REST format", function () {
     equal(user.get('_url'), 'users/%@'.fmt(userId));
+  });
+
+  asyncTest("url should change according to model's state", function () {
+    var user = ModelTest.User.instanciate(),
+        newId = 42;
+
+    ModelTest.adapter.fakeXHR('POST', 'users', { "user": { id: newId } });
+
+    Ember.run(function () {
+      equal(user.get('_url'), 'users');
+      user.save().then(function (user) {
+        equal(newId, user.get('id'));
+        equal(user.get('_url'), 'users/%@'.fmt(newId));
+        start();
+      }, function (error) {
+        ok(false, error);
+      });
+    });
   });
 
   test("url should contain nested resource's parents paths, according to [follow] option", function () {

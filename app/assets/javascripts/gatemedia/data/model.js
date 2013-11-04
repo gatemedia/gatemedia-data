@@ -57,7 +57,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       parts.pushObject(this.get('id'));
     }
     return parts.join('/');
-  }.property('id'),
+  }.property('meta.isNew', 'id'),
 
   _parent: function () {
     var ownerRelation = this.constructor.ownerRelation(Data.STRICT_OWNER);
@@ -315,6 +315,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       processedKeys.pushObject(meta.codec.key(relation));
     }, this);
 
+    Ember.assert("Model internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this), !Ember.isNone(this._data));
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
       if (Ember.isNone(includeProperties) || includeProperties.contains(dynamicKey)) {
         json[dynamicKey] = this._data[dynamicKey];
