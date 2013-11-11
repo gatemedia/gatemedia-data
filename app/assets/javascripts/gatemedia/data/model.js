@@ -265,6 +265,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
           Ember.run(function () {
             saveChildren(record, resolve, reject);
           });
+        }, function (error) {
+          reject(error);
         });
       } else {
         saveChildren(self, resolve, reject);

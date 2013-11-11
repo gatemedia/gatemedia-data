@@ -42,4 +42,20 @@ module("Adapter processing", withFakeAdapter(AdapterTest.adapter));
       });
     });
   });
+
+  asyncTest("HTTP errors should be handled by promise rejection", function () {
+    AdapterTest.adapter.fakeXHR('POST', 'entities', null, null, 500);
+
+    Ember.run(function () {
+      var newEntity = AdapterTest.Entity.instanciate();
+
+      newEntity.save().then(function (/*ignoredEntity*/) {
+        ok(false, 'Should have brake');
+        start();
+      }, function (error) {
+        ok(true, error);
+        start();
+      });
+    });
+  });
 })();

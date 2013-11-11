@@ -60,18 +60,26 @@ Data.FakeAdapter = Data.Adapter.extend({
       fixture = { data: null };
     }
 
-    if (settings.hasOwnProperty('success')) {
-      settings.success(fixture.data);
+    if (fixture.status === 200) {
+      if (settings.hasOwnProperty('success')) {
+        settings.success(fixture.data);
+      }
+    } else {
+      if (settings.hasOwnProperty('error')) {
+        settings.error({}, fixture.status, 'BAM');
+      }
     }
     return {
       //TODO
     };
   },
 
-  fakeXHR: function (method, url, params, data) {
+  fakeXHR: function (method, url, params, data, status) {
     if (Ember.isNone(this.get('XHR_FIXTURES'))) {
       ok(false, 'FakeAdapter not setup. Did you specified "withFakeAdapter(...)" at test module declaration?');
     }
+
+    status = status || 200;
 
     if (Ember.isNone(data)) {
       data = params;
@@ -83,7 +91,8 @@ Data.FakeAdapter = Data.Adapter.extend({
       method: method,
       url: url,
       params: params,
-      data: data
+      data: data,
+      status: status
     });
   }
 });
