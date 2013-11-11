@@ -209,7 +209,7 @@ Data.Adapter = Ember.Object.extend({
           error: function (xhr, status, error) {
             Ember.run(function () {
               Ember.Logger.error(status + ':', action, url, error);
-              reject(error);
+              reject(xhr);
             });
           }
         });
