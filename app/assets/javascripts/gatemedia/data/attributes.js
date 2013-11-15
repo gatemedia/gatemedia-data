@@ -1,13 +1,11 @@
 //= require ./utils
 //= require ./codec
 
-Data.attr = function (type, options) {
-  options = options || {};
-
-  var meta = {
+Data.attrMeta = function (type, options) {
+  return {
     type: type,
     isAttribute: true,
-    options: options,
+    options: options || {},
     codec: {
       key: function (key) {
         return key.decamelize();
@@ -15,24 +13,29 @@ Data.attr = function (type, options) {
 
       decode: function (value) {
         var
-          parts = meta.type.split(':'),
-          type = parts[0],
+          parts = type.split(':'),
+          basicType = parts[0],
           qualifier = parts[1];
 
-        return Data.codec[type].decode(value, qualifier);
+        return Data.codec[basicType].decode(value, qualifier);
       },
 
       encode: function (instance, attribute) {
         var
-          parts = meta.type.split(':'),
-          type = parts[0],
+          parts = type.split(':'),
+          basicType = parts[0],
           qualifier = parts[1],
           value = attribute ? instance.get(attribute) : instance;
 
-        return Data.codec[type].encode(value, qualifier);
+        return Data.codec[basicType].encode(value, qualifier);
       }
     }
   };
+};
+
+Data.attr = function (type, options) {
+  options = options || {};
+  var meta = Data.attrMeta(type, options);
 
   return Ember.computed(function(key, value, oldValue) {
     if (arguments.length > 1) {
