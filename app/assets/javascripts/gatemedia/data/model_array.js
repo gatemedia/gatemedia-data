@@ -55,7 +55,7 @@ Data.ModelArray = Ember.ArrayProxy.extend({
 
     if (this.get('_affectOwner')) {
       var owner = this.get('_owner'),
-        field = this.get('_field');
+          field = this.get('_field');
 
       owner.get(field).forEach(function (related) {
         owner._removeRelation(field, related);
@@ -67,7 +67,7 @@ Data.ModelArray = Ember.ArrayProxy.extend({
 
     if (this.get('_affectOwner')) {
       var owner = this.get('_owner'),
-        field = this.get('_field');
+          field = this.get('_field');
 
       owner._addRelation(field, object);
     }
@@ -77,10 +77,32 @@ Data.ModelArray = Ember.ArrayProxy.extend({
 
     if (this.get('_affectOwner')) {
       var owner = this.get('_owner'),
-        field = this.get('_field');
+          field = this.get('_field');
 
       objects.forEach(function (object) {
         owner._addRelation(field, object);
+      });
+    }
+  },
+  removeObject: function (object) {
+    this._super(object);
+
+    if (this.get('_affectOwner')) {
+      var owner = this.get('_owner'),
+          field = this.get('_field');
+
+      owner._removeRelation(field, object);
+    }
+  },
+  removeObjects: function (objects) {
+    this._super(objects);
+
+    if (this.get('_affectOwner')) {
+      var owner = this.get('_owner'),
+          field = this.get('_field');
+
+      objects.forEach(function (object) {
+        owner._removeRelation(field, object);
       });
     }
   },
