@@ -2,13 +2,35 @@
 Data.Adapter = Ember.Object.extend({
 
   baseUrl: Ember.required(),
+  /**
+    To be defined as needed by app.
+   */
   authParams: null,
 
-  /**
-    Intended to be overriden as needed.
-   */
-  ajax: function (settings) {
-    return Data.ajax(settings);
+  GET: function (url, data) {
+      return this._promisifiedAjax('GET', url, data);
+    },
+
+  POST: function (url, data) {
+    return this._promisifiedAjax('POST', url, data);
+  },
+
+  _promisifiedAjax: function (method, url, data) {
+    var settings = {
+      type: method,
+      url: '%@/%@'.fmt(this.get('baseUrl'), url),
+      data: this.buildParams(data)
+    };
+    return new Ember.RSVP.Promise(function (resolve, reject) {
+      Data.ajax(settings).
+      done(function (data) {
+        resolve(data);
+      }).
+      fail(function (xhr, status, error) {
+        Ember.Logger.error(status + ':', method, url, error);
+        reject(error);
+      });
+    });
   },
 
   findOne: function (type, id, parent, options) {
@@ -26,7 +48,7 @@ Data.Adapter = Ember.Object.extend({
         var action = 'GET',
             url = this.buildUrl(type, id, parent);
 
-        this.ajax({
+        Data.ajax({
           async: async,
           type: action,
           url: url,
@@ -73,7 +95,7 @@ Data.Adapter = Ember.Object.extend({
         var action = 'GET',
             url = this.buildUrl(type, null, parent);
 
-        this.ajax({
+        Data.ajax({
           async: async,
           type: action,
           url: url,
@@ -179,7 +201,7 @@ Data.Adapter = Ember.Object.extend({
           }
         }
 
-        this.ajax({
+        Data.ajax({
           async: async,
           type: action,
           url: url,
