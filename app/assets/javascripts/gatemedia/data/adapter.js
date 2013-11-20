@@ -8,26 +8,43 @@ Data.Adapter = Ember.Object.extend({
   authParams: null,
 
   GET: function (url, data) {
-      return this._promisifiedAjax('GET', url, data);
-    },
-
-  POST: function (url, data) {
-    return this._promisifiedAjax('POST', url, data);
-  },
-
-  _promisifiedAjax: function (method, url, data) {
     var settings = {
-      type: method,
+      type: 'GET',
       url: '%@/%@'.fmt(this.get('baseUrl'), url),
       data: this.buildParams(data)
     };
+    return this._promisifiedAjax(settings);
+  },
+
+  POST: function (url, data) {
+    return this._jsonBasedAjax('POST', url, data);
+  },
+  PUT: function (url, data) {
+    return this._jsonBasedAjax('PUT', url, data);
+  },
+  DELETE: function (url, data) {
+    return this._jsonBasedAjax('DELETE', url, data);
+  },
+
+  _jsonBasedAjax: function (action, url, data) {
+    var settings = {
+      type: action,
+      url: '%@/%@'.fmt(this.get('baseUrl'), url),
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify(this.buildParams(data))
+    };
+    return this._promisifiedAjax(settings);
+  },
+
+  _promisifiedAjax: function (settings) {
     return new Ember.RSVP.Promise(function (resolve, reject) {
       Data.ajax(settings).
       done(function (data) {
         resolve(data);
       }).
       fail(function (xhr, status, error) {
-        Ember.Logger.error(status + ':', method, url, error);
+        Ember.Logger.error(status + ':', settings.method, settings.url, error);
         reject(error);
       });
     });
