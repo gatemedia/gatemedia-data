@@ -119,7 +119,7 @@ Data.ModelArray = Ember.ArrayProxy.extend({
           var removedItem = removed.popObject();
           removedItem.save();
         }
-        content.map(function (item) {
+        content.forEach(function (item) {
           item.save().then(function (item) {
             saved.pushObject(item);
             if (saved.length === content.length) {
