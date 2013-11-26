@@ -244,7 +244,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         });
 
         record.constructor.eachRelation(function (relation, meta) {
-          if ((Ember.isNone(includeProperties) || includeProperties.contains(relation)) && !meta.options.owner) {
+          if ((Ember.isNone(includeProperties) || includeProperties.contains(relation)) &&
+              !meta.options.owner &&
+              meta.options.cascadeSaving) {
             var relationCache = relationCaches[relation];
             if (relationCache) {
               savingTracker.save(relationCache);
@@ -317,7 +319,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       processedKeys.pushObject(meta.codec.key(relation));
     }, this);
 
-    Ember.assert("Model internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this), !Ember.isNone(this._data));
+    Ember.assert("Model internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
+      !Ember.isNone(this._data));
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
       if (Ember.isNone(includeProperties) || includeProperties.contains(dynamicKey)) {
         json[dynamicKey] = this._data[dynamicKey];

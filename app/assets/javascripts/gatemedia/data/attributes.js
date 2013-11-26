@@ -155,9 +155,11 @@ Data.dynamicAttributable = Ember.Mixin.create({
     - embedded: defaults to false. if true, the related entity's data is expected to be inlined inside holder's payload
     - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
+    - cascadeSaving: defaults to true. if true, the relation is also saved if needed when the holder is saved
  */
 Data.belongsTo = function (type, options) {
   options = options || {};
+  options.cascadeSaving = !!options.cascadeSaving;
 
   var meta = {
     type: type,
@@ -224,9 +226,11 @@ Data.belongsTo = function (type, options) {
       propagated to the parent
     - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
+    - cascadeSaving: defaults to true. if true, the relation is also saved if needed when the holder is saved
  */
 Data.hasMany = function (type, options) {
   options = options || {};
+  options.cascadeSaving = !!options.cascadeSaving;
 
   var meta = {
     type: type,
