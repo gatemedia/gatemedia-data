@@ -70,25 +70,25 @@ Data.Adapter = Ember.Object.extend({
           type: action,
           url: url,
           dataType: 'json',
-          data: this.buildParams(options.params),
-          success: function (data) {
-            Ember.Logger.debug("DATA - Found one", type, "(" + id + "):", data);
-            var resourceKey = type.resourceKey();
+          data: this.buildParams(options.params)
+        }).
+        done(function (data) {
+          Ember.Logger.debug("DATA - Found one", type, "(" + id + "):", data);
+          var resourceKey = type.resourceKey();
 
-            if (data[resourceKey]) {
-              var record = type.load(data[resourceKey]);
-              type.sideLoad(data);
-              ok(record);
-            } else {
-              var message = "API returned JSON with missing key '" + resourceKey + "'";
-              Ember.Logger.error(message, data);
-              ko(message);
-            }
-          },
-          error: function (xhr, status, error) {
-            Ember.Logger.error(status + ':', action, url, error);
-            ko(error);
+          if (data[resourceKey]) {
+            var record = type.load(data[resourceKey]);
+            type.sideLoad(data);
+            ok(record);
+          } else {
+            var message = "API returned JSON with missing key '" + resourceKey + "'";
+            Ember.Logger.error(message, data);
+            ko(message);
           }
+        }).
+        fail(function (xhr, status, error) {
+          Ember.Logger.error(status + ':', action, url, error);
+          ko(error);
         });
       }
     );
@@ -119,27 +119,27 @@ Data.Adapter = Ember.Object.extend({
           dataType: 'json',
           data: this.buildParams(options.params, {
             ids: ids, // Ember.isEmpty(ids) ? null : ids,
-          }),
-          success: function (data) {
-            Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
-            var resourceKey = type.resourceKey().pluralize(),
-                result = [];
+          })
+        }).
+        done(function (data) {
+          Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
+          var resourceKey = type.resourceKey().pluralize(),
+              result = [];
 
-            if (data[resourceKey]) {
-              result.addObjects(data[resourceKey].map(function (itemData) {
-                return type.load(itemData);
-              }));
-              type.sideLoad(data);
-              ok(result);
-            } else {
-              Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
-              ko();
-            }
-          },
-          error: function (xhr, status, error) {
-            Ember.Logger.error(status + ':', action, url, error);
-            ko(error);
+          if (data[resourceKey]) {
+            result.addObjects(data[resourceKey].map(function (itemData) {
+              return type.load(itemData);
+            }));
+            type.sideLoad(data);
+            ok(result);
+          } else {
+            Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
+            ko();
           }
+        }).
+        fail(function (xhr, status, error) {
+          Ember.Logger.error(status + ':', action, url, error);
+          ko(error);
         });
       });
   },
@@ -224,33 +224,33 @@ Data.Adapter = Ember.Object.extend({
           url: url,
           // dataType: 'json', // avoid dataType, as it breaks when body is empty.
           contentType: 'application/json',
-          data: JSON.stringify(adapter.buildParams(params, extraParams)),
-          success: function (data) {
-            Ember.run(function () {
-              Ember.Logger.debug("DATA - Saved (" + action + ")",
-                record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
+          data: JSON.stringify(adapter.buildParams(params, extraParams))
+        }).
+        done(function (data) {
+          Ember.run(function () {
+            Ember.Logger.debug("DATA - Saved (" + action + ")",
+              record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
 
-              if (data && data[resourceKey]) {
-                record._updateData(data[resourceKey]);
-                record.constructor.sideLoad(data);
+            if (data && data[resourceKey]) {
+              record._updateData(data[resourceKey]);
+              record.constructor.sideLoad(data);
+              resolve(record);
+            } else {
+              if (action === 'DELETE') {
+                record.unload();
                 resolve(record);
               } else {
-                if (action === 'DELETE') {
-                  record.unload();
-                  resolve(record);
-                } else {
-                  Ember.Logger.warn("API returned JSON with missing key '%@'".fmt(resourceKey), data);
-                  resolve(record);
-                }
+                Ember.Logger.warn("API returned JSON with missing key '%@'".fmt(resourceKey), data);
+                resolve(record);
               }
-            });
-          },
-          error: function (xhr, status, error) {
-            Ember.run(function () {
-              Ember.Logger.error(status + ':', action, url, error);
-              reject(xhr);
-            });
-          }
+            }
+          });
+        }).
+        fail(function (xhr, status, error) {
+          Ember.run(function () {
+            Ember.Logger.error(status + ':', action, url, error);
+            reject(xhr);
+          });
         });
       });
     });
