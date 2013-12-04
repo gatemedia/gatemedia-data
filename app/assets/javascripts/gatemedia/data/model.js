@@ -171,6 +171,20 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._dirty();
   },
 
+  _destroyRelation: function (relation, removedMember) {
+    var data = this.get('_data'),
+        attr = '%@_id'.fmt(relation.singularize());
+
+    if (data.hasOwnProperty(attr)) {
+      delete data[attr];
+    } else {
+      attr = attr.pluralize();
+      data[attr].removeObject(removedMember.get('id'));
+    }
+    delete this.get('_relationsCache')[relation];
+    this.expireCaches();
+  },
+
   _dirty: function () {
     var parent = this.get('_parent'),
         embeddedContainer = this.get('_embeddedContainer');
