@@ -124,6 +124,11 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this.expireCaches();
   },
 
+  resetCache: function (relation) {
+    this.set('_relationsCache.%@'.fmt(relation), null);
+    this.expireCaches();
+  },
+
   expireCaches: function () {
     this.set('_cacheTimestamp', new Date().getTime());
   },
