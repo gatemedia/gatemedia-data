@@ -204,7 +204,7 @@ Data.Adapter = Ember.Object.extend({
         if (!(record.get('meta.isDirty') || record.get('meta.isNew'))) {
           Ember.Logger.warn('Do not save clean record: ' + record.toString());
           record.unload();
-          resolve();
+          resolve(record);
           return;
         }
 

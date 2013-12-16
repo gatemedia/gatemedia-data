@@ -280,11 +280,10 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         savingTracker.saved(); // in case of no relation to save...
       }
 
-      // Ember.run(function () {
       if (self.get('meta.isNew') || self.get('hasChanges') || self.get('meta.isDeleted')) {
         self.getAdapter().save(self, extraParams, includeProperties).then(function (record) {
-          Ember.run(function () {
-            saveChildren(record, resolve, reject);
+          Ember.run(record, function () {
+            saveChildren(this, resolve, reject);
           });
         }, function (error) {
           reject(error);
@@ -292,7 +291,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       } else {
         saveChildren(self, resolve, reject);
       }
-      // });
     });
 
     promise.on('promise:resolved', function(/*event*/) {
