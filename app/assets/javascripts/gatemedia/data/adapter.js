@@ -44,8 +44,10 @@ Data.Adapter = Ember.Object.extend({
         resolve(data);
       }).
       fail(function (xhr, status, error) {
-        Ember.Logger.error(status + ':', settings.method, settings.url, error);
-        reject(error);
+        Ember.run(function () {
+          Ember.Logger.error(status + ':', settings.method, settings.url, error);
+          reject(error);
+        });
       });
     });
   },
