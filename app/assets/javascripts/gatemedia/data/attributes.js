@@ -203,8 +203,14 @@ Data.belongsTo = function (type, options) {
         } else {
           relation = type.find(id, parent, { sync: true });
         }
-        relation.set('_owner', this);
-        relationsCache[key] = relation;
+        if (relation) {
+          relation.set('_owner', this);
+          relationsCache[key] = relation;
+        } else {
+          Ember.Logger.warn('An error occured at relation fetching... %@[%@].%@[%@] is not populated'.fmt(
+            this.constructor, this.get('id'), key, id
+          ));
+        }
       } else {
         relation = null;
       }
