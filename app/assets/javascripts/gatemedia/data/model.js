@@ -293,11 +293,10 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       }
     });
 
-    promise.on('promise:resolved', function(/*event*/) {
+    promise.then(function() {
       self.didSave();
       self.trigger('record:saved', self);
-    });
-    promise.on('promise:failed', function(/*event*/) {
+    }, function() {
       self.trigger('record:failed', self);
     });
     return promise;
