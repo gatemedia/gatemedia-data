@@ -12,6 +12,21 @@ Data.Codec = Ember.Object.extend({
 
 Data.codec = {
   string: Data.Codec.create({
+    decode: function (value) {
+      if (Ember.isNone(value)) {
+        return value;
+      }
+      switch (Ember.typeOf(value)) {
+      case 'string':
+        return value;
+      case 'object':
+        return JSON.stringify(value);
+      default:
+        Ember.Logger.warn('string codec returning raw %@ value:'.fmt(Ember.typeOf(value)), value);
+        return value;
+      }
+    },
+
     encode: function (value/*, qualifier*/) {
       if (!Ember.isNone(value)) {
         return '%@'.fmt(value);
