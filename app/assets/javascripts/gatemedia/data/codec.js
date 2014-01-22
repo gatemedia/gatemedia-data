@@ -100,12 +100,12 @@ Data.codec = {
 
   datetime: Data.Codec.create({
     decode: function (value/*, qualifier*/) {
-      return moment(value, 'YYYY-MM-DD HH:mm');
+      return moment(value, 'YYYY-MM-DDTHH:mm:ssZ');
     },
 
     encode: function (value/*, qualifier*/) {
       if (value) {
-        return value.format('YYYY-MM-DD HH:mm');
+        return value.format('YYYY-MM-DDTHH:mm:ssZ');
       }
       return null;
     }
