@@ -75,12 +75,26 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._resetDirtyness();
   },
 
+  /**
+    Reload this instance's properties from passed raw data.
+   */
   reloadFrom: function (data) {
     var type = this.constructor;
 
     this._updateData(data[type.resourceKey()]);
     type.sideLoad(data);
     this.resetCaches();
+  },
+
+  /**
+    Reload this instance from API.
+
+    returns the promise of API call.
+   */
+  reload: function () {
+    return this.constructor.find(this.get('id'), this.get('_parent'), {
+      noCache: true
+    });
   },
 
   _resetDirtyness: function () {
