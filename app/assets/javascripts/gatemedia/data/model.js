@@ -593,19 +593,19 @@ Data.Model.reopenClass({
       - sync: boolean (defaults to `false`) If true, return synchronously, otherwise return a promise
       - noCache: boolean (defaults to `false`) If true, ignore already loaded records (leads to cache update if incoming changes)
    */
-  find: function (id, parent, options) {
+  find: function (id, parent, options, hooks) {
     var adapter = this.getAdapter();
 
     switch (Ember.typeOf(id)) {
     case 'string':
     case 'number':
-      return adapter.findOne(this, id, parent, options);
+      return adapter.findOne(this, id, parent, options, hooks);
     case 'array':
-      return adapter.findMany(this, id, parent, options);
+      return adapter.findMany(this, id, parent, options, hooks);
     case 'object':
-      return adapter.findMany(this, [], parent, { params: id });
+      return adapter.findMany(this, [], parent, { params: id }, hooks);
     default:
-      return adapter.findMany(this, [], parent, options);
+      return adapter.findMany(this, [], parent, options, hooks);
     }
   },
 

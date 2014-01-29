@@ -52,7 +52,7 @@ Data.Adapter = Ember.Object.extend({
     });
   },
 
-  findOne: function (type, id, parent, options) {
+  findOne: function (type, id, parent, options, hooks) {
     options = options || {};
     return this.findWithCache(options,
       function (ok) {
@@ -67,6 +67,7 @@ Data.Adapter = Ember.Object.extend({
         var action = 'GET',
             url = this.buildUrl(type, id, parent);
 
+        Ember.tryInvoke(hooks, 'willXHR', [url]);
         Data.ajax({
           async: async,
           type: action,
@@ -79,8 +80,10 @@ Data.Adapter = Ember.Object.extend({
           var resourceKey = type.resourceKey();
 
           if (data[resourceKey]) {
+            Ember.tryInvoke(hooks, 'willLoad', [data]);
             var record = type.load(data[resourceKey]);
             type.sideLoad(data);
+            Ember.tryInvoke(hooks, 'didLoad', [data]);
             ok(record);
           } else {
             var message = "API returned JSON with missing key '" + resourceKey + "'";
@@ -96,7 +99,7 @@ Data.Adapter = Ember.Object.extend({
     );
   },
 
-  findMany: function (type, ids, parent, options) {
+  findMany: function (type, ids, parent, options, hooks) {
     options = options || {};
     return this.findWithCache(options,
       function (ok) {
@@ -114,6 +117,7 @@ Data.Adapter = Ember.Object.extend({
         var action = 'GET',
             url = this.buildUrl(type, null, parent);
 
+        Ember.tryInvoke(hooks, 'willXHR', [url]);
         Data.ajax({
           async: async,
           type: action,
@@ -129,10 +133,12 @@ Data.Adapter = Ember.Object.extend({
               result = [];
 
           if (data[resourceKey]) {
+            Ember.tryInvoke(hooks, 'willLoad', [data]);
             result.addObjects(data[resourceKey].map(function (itemData) {
               return type.load(itemData);
             }));
             type.sideLoad(data);
+            Ember.tryInvoke(hooks, 'didLoad', [data]);
             ok(result);
           } else {
             Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
