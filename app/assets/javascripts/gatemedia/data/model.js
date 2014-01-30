@@ -282,6 +282,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
               meta.options.cascadeSaving) {
             var relationCache = relationCaches[relation];
             if (relationCache) {
+              if (!relationCache.get('_affectOwner')) return;
               savingTracker.save(relationCache);
               relationCache.save().then(function () {
                 Ember.run(function () {
