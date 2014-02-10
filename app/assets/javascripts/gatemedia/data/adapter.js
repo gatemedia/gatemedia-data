@@ -38,18 +38,37 @@ Data.Adapter = Ember.Object.extend({
   },
 
   _promisifiedAjax: function (settings) {
+    var self = this;
     return new Ember.RSVP.Promise(function (resolve, reject) {
-      Data.ajax(settings).
-      done(function (data) {
-        resolve(data);
-      }).
-      fail(function (xhr, status, error) {
-        Ember.run(function () {
-          Ember.Logger.error(status + ':', settings.method, settings.url, error);
-          reject(error);
+      self._xhr(
+        settings,
+        function success (data) {
+          resolve(data);
+        },
+        function error (xhr, status, err) {
+          Ember.run(function () {
+            Ember.Logger.error(status + ':', settings.method, settings.url, err);
+            reject(err);
+          });
         });
-      });
     });
+  },
+
+  _xhr: function (settings, success, error) {
+    if (!settings.async) {
+      settings = Ember.merge(settings, {
+        success: success,
+        error: error
+      });
+    }
+
+    var call = Data.ajax(settings);
+
+    if (settings.async) {
+      call
+        .done(success)
+        .fail(error);
+    }
   },
 
   findOne: function (type, id, parent, options, hooks) {
@@ -68,14 +87,14 @@ Data.Adapter = Ember.Object.extend({
             url = this.buildUrl(type, id, parent);
 
         Ember.tryInvoke(hooks, 'willXHR', [url]);
-        Data.ajax({
+        this._xhr({
           async: async,
           type: action,
           url: url,
           dataType: 'json',
           data: this.buildParams(options.params)
-        }).
-        done(function (data) {
+        },
+        function (data) {
           Ember.Logger.debug("DATA - Found one", type, "(" + id + "):", data);
           var resourceKey = type.resourceKey();
 
@@ -90,8 +109,8 @@ Data.Adapter = Ember.Object.extend({
             Ember.Logger.error(message, data);
             ko(message);
           }
-        }).
-        fail(function (xhr, status, error) {
+        },
+        function (xhr, status, error) {
           Ember.Logger.error(status + ':', action, url, error);
           ko(error);
         });
@@ -118,7 +137,7 @@ Data.Adapter = Ember.Object.extend({
             url = this.buildUrl(type, null, parent);
 
         Ember.tryInvoke(hooks, 'willXHR', [url]);
-        Data.ajax({
+        this._xhr({
           async: async,
           type: action,
           url: url,
@@ -126,8 +145,8 @@ Data.Adapter = Ember.Object.extend({
           data: this.buildParams(options.params, {
             ids: ids, // Ember.isEmpty(ids) ? null : ids,
           })
-        }).
-        done(function (data) {
+        },
+        function (data) {
           Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
           var resourceKey = type.resourceKey().pluralize(),
               result = [];
@@ -144,8 +163,8 @@ Data.Adapter = Ember.Object.extend({
             Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
             ko();
           }
-        }).
-        fail(function (xhr, status, error) {
+        },
+        function (xhr, status, error) {
           Ember.Logger.error(status + ':', action, url, error);
           ko(error);
         });
