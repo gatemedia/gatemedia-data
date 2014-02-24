@@ -1,5 +1,6 @@
 //= require ./utils
 //= require ./codec
+//= require ./tooling
 
 Data.attrMeta = function (type, options) {
   return {
@@ -45,6 +46,7 @@ Data.attr = function (type, options) {
     } else {
       value = this.get('_data.' + meta.codec.key(key));
 
+      Data.tooling.readAttribute(this, key, value);
       if (Ember.isNone(value)) {
         value = options.defaultValue;
       }
@@ -80,6 +82,7 @@ Data.embedded = function (type, options) {
     } else {
       value = this.get('_data.' + meta.codec.key(key));
 
+      Data.tooling.readEmbedded(this, key, value);
       if (value === undefined) {
         value = options.defaultValue;
       }
@@ -117,6 +120,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
           // nope
         }
       }
+      Data.tooling.readDynamicAttribute(this, key, result);
       return result;
     }).property('_data', '_data.%@'.fmt(key)).cacheable(false));
 
@@ -194,6 +198,7 @@ Data.belongsTo = function (type, options) {
           relationsCache = this.get('_relationsCache') || {},
           relation = relationsCache[key];
 
+      Data.tooling.readBelongsTo(parent, this, key, id, relation);
       if (relation) {
         return relation;
       }
@@ -272,6 +277,7 @@ Data.hasMany = function (type, options) {
           relation = relationsCache[key],
           content;
 
+      Data.tooling.readHasMany(parent, this, key, ids, relation);
       if (relation) {
         // Ember.Logger.debug('hasMany(%@.%@): use cache'.fmt(type, key));
         return relation;
