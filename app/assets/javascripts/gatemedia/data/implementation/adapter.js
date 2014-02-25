@@ -84,7 +84,8 @@ Data.Adapter = Ember.Object.extend({
       },
       function (async, ok, ko) {
         var action = 'GET',
-            url = this.buildUrl(type, id, parent);
+            useContext = Ember.isNone(options.useContext) ? true : options.useContext,
+            url = this.buildUrl(type, id, parent, useContext);
 
         Ember.tryInvoke(hooks, 'willXHR', [url]);
         this._xhr({
@@ -134,7 +135,8 @@ Data.Adapter = Ember.Object.extend({
       },
       function (async, ok, ko) {
         var action = 'GET',
-            url = this.buildUrl(type, null, parent);
+            useContext = Ember.isNone(options.useContext) ? true : options.useContext,
+            url = this.buildUrl(type, null, parent, useContext);
 
         Ember.tryInvoke(hooks, 'willXHR', [url]);
         this._xhr({
@@ -282,11 +284,15 @@ Data.Adapter = Ember.Object.extend({
     });
   },
 
-  buildUrl: function (type, id, parent) {
-    var urlParts = [
+  buildUrl: function (type, id, parent, useContext) {
+    var context = Data.get('context'),
+        urlParts = [
       this.get('baseUrl')
     ];
 
+    if (context && useContext) {
+      urlParts.pushObject(context);
+    }
     if (parent) {
       urlParts.pushObject(parent.get('_url'));
     }
