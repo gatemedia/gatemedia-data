@@ -18,8 +18,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", ">= 3.2.14"
 
-  s.add_development_dependency "sqlite3"
-  s.add_development_dependency "colored"
-  s.add_development_dependency "rspec-rails", "~> 2.0"
-  s.add_development_dependency "capybara"
+  s.add_development_dependency "haml-rails"
+  s.add_development_dependency "sass-rails"
+  s.add_development_dependency "guard"
+  s.add_development_dependency "guard-livereload"
+  s.add_development_dependency "rack-livereload"
 end

@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+TESTS_PORT=2001
+
+guard start -i &
+GUARD_PID=$!
+
+sleep 3 && open http://localhost:$TESTS_PORT &
+
+pushd tests
+script/rails s -p $TESTS_PORT
+popd
+
+kill $GUARD_PID
