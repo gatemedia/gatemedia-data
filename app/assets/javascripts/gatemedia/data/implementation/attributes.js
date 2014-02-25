@@ -48,7 +48,7 @@ Data.attr = function (type, options) {
 
       Data.tooling.readAttribute(this, key, value);
       if (Ember.isNone(value)) {
-        if (options.defaultValue) {
+        if (this.get('_data').hasOwnProperty(key)) {
           value = options.defaultValue;
         } else {
           var id = this.get('_data.id');

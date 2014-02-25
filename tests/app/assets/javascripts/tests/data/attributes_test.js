@@ -37,7 +37,7 @@ module("Data extension: attributes");
 (function () {
 
   test("default value is returned when undefined", function () {
-    var node = AttributesTest.Node.load({ id: 1 });
+    var node = AttributesTest.Node.load({ id: 1, name: null });
     equal(node.get('name'), 'My node');
   });
 
