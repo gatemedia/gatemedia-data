@@ -78,11 +78,12 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   /**
     Reload this instance's properties from passed raw data.
    */
-  reloadFrom: function (data) {
+  reloadFrom: function (data, key) {
     var type = this.constructor;
+    key = key || type.resourceKey();
 
-    this._updateData(data[type.resourceKey()]);
-    type.sideLoad(data);
+    this._updateData(data[key]);
+    type.sideLoad(data, key);
     this.resetCaches();
   },
 
@@ -461,14 +462,22 @@ Data.Model.reopenClass({
     }, this);
   },
 
-  sideLoad: function (data) {
+  sideLoad: function (data, alreadyLoaded) {
+    alreadyLoaded = alreadyLoaded || [];
+
+    Ember.assert('You must call %@.sideLoad() with the initial key'.fmt(this.constructor), !Ember.isNone(alreadyLoaded));
+    if (!Ember.isArray(alreadyLoaded)) {
+      delete data[alreadyLoaded];
+      alreadyLoaded = [alreadyLoaded];
+    }
+
     var orderedKeys = [],
         types = {},
         namespace = this._classInfo().namespace;
 
     orderedKeys.addKey = function (key, type) {
       key = key.decamelize();
-      if (!this.contains(key)) {
+      if (!this.contains(key) && !alreadyLoaded.contains(key)) {
         types[key] = type;
         this.pushObject(key);
       }
@@ -514,6 +523,15 @@ Data.Model.reopenClass({
         delete data[dataKey];
       }
     }, this);
+
+    if (Ember.keys(data).length) {
+      orderedKeys.forEach(function (key) {
+        var type = Data.getType(types[key]);
+        if (type && Ember.keys(data).length) {
+          type.sideLoad(data, alreadyLoaded.pushObjects(orderedKeys));
+        }
+      }, this);
+    }
   },
 
   /**
@@ -654,7 +672,7 @@ Data.Model.reopenClass({
   getAdapter: function () {
     var namespace = Ember.get(this._classInfo().namespace);
     return namespace.adapter ||
-         namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
+           namespace.__container__.lookup('adapter:default'); //TODO improve injection management...
   },
 
   _classInfo: function () {

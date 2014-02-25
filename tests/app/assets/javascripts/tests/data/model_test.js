@@ -28,7 +28,13 @@ ModelTest.Comment = Data.Model.extend({
   post: Data.belongsTo('ModelTest.Post', { owner: true }),
   text: Data.attr('string'),
   author: Data.attr('string'),
-  createdAt: Data.attr('datetime')
+  createdAt: Data.attr('datetime'),
+  votes: Data.hasMany('ModelTest.Vote')
+});
+
+ModelTest.Vote = Data.Model.extend({
+  note: Data.attr('number'),
+  author: Data.attr('string')
 });
 
 
@@ -68,16 +74,70 @@ module("Model retrieval", {
   });
 
   asyncTest("API is called with passed options", function () {
-    var
-      options = { page: 1, count: 5 };
+    var options = { page: 1, count: 5 };
 
-    Data.API.stub().GET('posts', {page:1, count:5}, { "posts": [{}] });
+    Data.API.stub().GET('posts', options, { "posts": [{}] });
 
     Ember.run(function () {
       ModelTest.Post.find(options).then(function (/*post*/) {
         equal(Data.API.XHR_REQUESTS.length, 1);
         equal(Data.API.XHR_REQUESTS[0].method, 'GET');
         equal(Data.API.XHR_REQUESTS[0].url, 'posts');
+        start();
+      });
+    });
+  });
+
+  asyncTest("Payload should be processed for deep-sideload", function () {
+    var postId = 24632;
+
+    Data.API.stub().GET('posts/%@'.fmt(postId), {
+      'post': {
+        'id': postId,
+        'title': 'Discussion',
+        'comment_ids': [ 100100, 100101 ]
+      },
+      'comments': [{
+        'id': 100100,
+        'text': 'Let us talk',
+        'vote_ids': [ 100100100, 100100101, 100100102 ]
+      }, {
+        'id': 100101,
+        'text': 'Why not',
+        'vote_ids': [ 100101100, 100101101 ]
+      }],
+      'votes': [{
+        'id': 100100100,
+        'author': 'John',
+        'note': 4
+      },{
+        'id': 100100101,
+        'note': 2
+      },{
+        'id': 100100102,
+        'note': 5
+      },{
+        'id': 100101100,
+        'note': 4
+      },{
+        'id': 100101101,
+        'note': 5
+      }]
+    });
+
+    Ember.run(function () {
+      ModelTest.Post.find(postId).then(function (post) {
+        equal(Data.API.XHR_REQUESTS.length, 1, 'A single request has been issued');
+        equal(Data.API.XHR_REQUESTS[0].method, 'GET');
+        equal(Data.API.XHR_REQUESTS[0].url, 'posts/%@'.fmt(postId));
+
+        equal(post.get('comments.length'), 2, 'Two comments have been sideloaded');
+        equal(post.get('comments.firstObject.id'), 100100, 'First comment has been sideloaded (id)');
+        equal(post.get('comments.firstObject.text'), 'Let us talk', 'First comment has been sideloaded (text)');
+        equal(post.get('comments.firstObject.votes.length'), 3, 'First comment has 3 votes');
+        equal(post.get('comments.firstObject.votes.firstObject.author'), 'John', 'First comment has first vote by John');
+        equal(post.get('comments.firstObject.votes.firstObject.note'), 4, 'First comment has first vote with note 4');
+
         start();
       });
     });

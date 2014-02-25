@@ -75,7 +75,7 @@
       Ember.Logger.info('--> AJAX CALL', settings);
 
       function reply () {
-        var result = this.get('result');
+        var result = Ember.copy(this.get('result'), true);
 
         if (Ember.typeOf(result) === 'number') {
           this.callFail(result);

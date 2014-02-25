@@ -101,7 +101,7 @@ Data.Adapter = Ember.Object.extend({
           if (data[resourceKey]) {
             Ember.tryInvoke(hooks, 'willLoad', [data]);
             var record = type.load(data[resourceKey]);
-            type.sideLoad(data);
+            type.sideLoad(data, resourceKey);
             Ember.tryInvoke(hooks, 'didLoad', [data]);
             ok(record);
           } else {
@@ -156,7 +156,7 @@ Data.Adapter = Ember.Object.extend({
             result.addObjects(data[resourceKey].map(function (itemData) {
               return type.load(itemData);
             }));
-            type.sideLoad(data);
+            type.sideLoad(data, resourceKey);
             Ember.tryInvoke(hooks, 'didLoad', [data]);
             ok(result);
           } else {
@@ -259,8 +259,7 @@ Data.Adapter = Ember.Object.extend({
               record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
 
             if (data && data[resourceKey]) {
-              record._updateData(data[resourceKey]);
-              record.constructor.sideLoad(data);
+              record.reloadFrom(data, resourceKey);
               resolve(record);
             } else {
               if (action === 'DELETE') {
