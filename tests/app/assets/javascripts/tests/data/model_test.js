@@ -296,15 +296,19 @@ module("Model saving: partial properties saving");
 })();
 
 
-module("Model saving: dirty model saving");
+module("Model saving: dirty model saving", {
+  setup: function () {
+    Data.API.reset();
+  }
+});
 (function () {
-  var
-    postId = 100,
-    postTitle = 'My very first post',
-    post = ModelTest.Post.load({
-      id: postId,
-      title: postTitle
-    });
+  var postId = 100,
+      postTitle = 'My very first post',
+      post = ModelTest.Post.load({
+    'id': postId,
+    'title': postTitle,
+    'created_at': '2014-02-25T17:54+01:00'
+  });
 
   test("attributes changes dirty record", function () {
     equal(post.get('meta.isDirty'), false);
@@ -313,7 +317,12 @@ module("Model saving: dirty model saving");
   });
 
   asyncTest("dirty record save calls API & restore cleanliness", function () {
-    Data.API.stub().PUT('posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
+    Data.API.stub().PUT('posts/%@'.fmt(postId), {
+      'post': {
+        'id': postId,
+        'title': postTitle
+      }
+    });
 
     var saved = [];
 
@@ -321,7 +330,7 @@ module("Model saving: dirty model saving");
       post.on('record:saved', function (record) {
         saved.pushObject(record);
       });
-      post.save().then(function (savedPost) {
+      post.save().then(function (/*savedPost*/) {
         equal(post.get('meta.isDirty'), false);
         equal(saved.length, 1);
         equal(saved[0], post);

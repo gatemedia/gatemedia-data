@@ -92,10 +92,11 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
     returns the promise of API call.
    */
-  reload: function () {
-    return this.constructor.find(this.get('id'), this.get('_parent'), {
+  reload: function (options) {
+    options = options || {};
+    return this.constructor.find(this.get('id'), this.get('_parent'), Ember.merge(options, {
       noCache: true
-    });
+    }));
   },
 
   _resetDirtyness: function () {

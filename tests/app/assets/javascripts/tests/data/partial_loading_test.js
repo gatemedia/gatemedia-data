@@ -24,7 +24,11 @@ PartialLoading.Part = Data.Model.extend({
 });
 
 
-module("Partial loading");
+module("Partial loading", {
+  setup: function () {
+    Data.API.reset();
+  }
+});
 (function () {
 
   asyncTest('API context is passed when defined', function () {
@@ -66,13 +70,34 @@ module("Partial loading");
   });
 
 
-    // var stuffId = 42;
-    // Data.API.stub('forever').GET('stuffs/%@'.fmt(stuffId), {
-    //   'stuff': {
-    //     'id': stuffId,
-    //     'name': "My stuff"
-    //   }
-    // });
+  asyncTest('Missing attribute access causes full resource retrieval', function () {
+    var context = 'dummy',
+        stuffId = 42;
 
+    Data.setContext(context);
+    Data.API.stub().GET('%@/stuffs/%@'.fmt(context, stuffId), {
+      'stuff': {
+        'id': stuffId,
+        'name': "My stuff"
+      }
+    });
+    Data.API.stub().GET('stuffs/%@'.fmt(stuffId), {
+      'stuff': {
+        'id': stuffId,
+        'name': "My stuff",
+        'description': "What a nice stuff!"
+      }
+    });
+
+    PartialLoading.Stuff.find(stuffId).then(function (stuff) {
+      equal(stuff.get('name'), 'My stuff', 'Name attribute is defined');
+      equal(Data.API.XHR_REQUESTS.length, 1, 'Stuff has been retieved once');
+      equal(stuff.get('description'), 'What a nice stuff!', 'Description attribute is defined');
+      equal(Data.API.XHR_REQUESTS.length, 2, 'Stuff has been retieved once');
+
+
+      start();
+    });
+  });
 
 })();

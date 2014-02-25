@@ -117,7 +117,7 @@ asyncTest("new records should be saved after owner", 1, function () {
   });
 
   // Post not changed, useless: fakeXHR('PUT', 'posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
-  Data.API.stub().POST('posts/%@/comments'.fmt(postId), { "comment": { "id": 300100, "post_id": postId } });
+  Data.API.stub().POST('posts/%@/comments'.fmt(postId), { 'comments': [{ 'id': 300100, 'post_id': postId }] });
 
   Ember.run(function () {
     post.save().then(function () {

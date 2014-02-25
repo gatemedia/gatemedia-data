@@ -48,7 +48,24 @@ Data.attr = function (type, options) {
 
       Data.tooling.readAttribute(this, key, value);
       if (Ember.isNone(value)) {
-        value = options.defaultValue;
+        if (options.defaultValue) {
+          value = options.defaultValue;
+        } else {
+          var id = this.get('_data.id');
+          Ember.Logger.warn('Accessing undefined attribute %@[%@].%@ - Fetch full resource'.fmt(
+            this.constructor,
+            id,
+            key));
+          if (id) {
+            this.reload({ useContext: false, sync: true });
+            value = this.get('_data.' + meta.codec.key(key));
+          } else {
+            Ember.Logger.error('Missing %@[%@].id - Cannot fetch full resource, trying to use default'.fmt(
+              this.constructor,
+              id));
+            value = options.defaultValue;
+          }
+        }
       }
       value = meta.codec.decode(value);
     }
