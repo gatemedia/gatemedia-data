@@ -10,7 +10,7 @@ Data.Adapter = Ember.Object.extend({
   GET: function (url, data) {
     var settings = {
       type: 'GET',
-      url: '%@/%@'.fmt(this.get('baseUrl'), url),
+      url: this._contextifiedUrl(url),
       data: this.buildParams(data)
     };
     return this._promisifiedAjax(settings);
@@ -29,12 +29,24 @@ Data.Adapter = Ember.Object.extend({
   _jsonBasedAjax: function (action, url, data) {
     var settings = {
       type: action,
-      url: '%@/%@'.fmt(this.get('baseUrl'), url),
+      url: this._contextifiedUrl(url),
       contentType: 'application/json',
       dataType: 'json',
       data: JSON.stringify(this.buildParams(data))
     };
     return this._promisifiedAjax(settings);
+  },
+
+  _contextifiedUrl: function (url) {
+    var parts = [],
+        context = Data.get('context');
+
+    parts.pushObject(this.get('baseUrl'));
+    if (!Ember.isNone(context)) {
+      parts.pushObject(context);
+    }
+    parts.pushObject(url);
+    return parts.join('/');
   },
 
   _promisifiedAjax: function (settings) {
