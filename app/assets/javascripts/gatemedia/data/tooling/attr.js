@@ -60,9 +60,15 @@ Data.LogTooling = Ember.Object.create({
     });
     if (this.get('log')) {
       if (parent) {
-        Ember.Logger.debug('=>>', m.format('HH:mm:ss:sss'), kind,
-          instance.parent.toString(), '#%@'.fmt(parent.get('_data.id')),
-          '%@[%@].%@'.fmt(instance.constructor.toString(), instance.get('_data.id'), key), '%@'.fmt(ids), value);
+        if (instance.parent) {
+          Ember.Logger.debug('=>>', m.format('HH:mm:ss:sss'), kind,
+            instance.parent.toString(), '#%@'.fmt(parent.get('_data.id')),
+            '%@[%@].%@'.fmt(instance.constructor.toString(), instance.get('_data.id'), key), '%@'.fmt(ids), value);
+        } else {
+          Ember.Logger.debug('=>>', m.format('HH:mm:ss:sss'), kind,
+            '[no parent wired]', '#%@'.fmt(parent.get('_data.id')),
+            '%@[%@].%@'.fmt(instance.constructor.toString(), instance.get('_data.id'), key), '%@'.fmt(ids), value);
+        }
       } else {
         Ember.Logger.debug('==>', m.format('HH:mm:ss:sss'), kind,
           '%@[%@].%@'.fmt(instance.constructor.toString(), instance.get('_data.id'), key), '%@'.fmt(ids), value);
