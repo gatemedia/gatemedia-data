@@ -109,5 +109,18 @@ Data.codec = {
       }
       return null;
     }
+  }),
+
+  json: Data.Codec.create({
+    decode: function (value/*, qualifier*/) {
+      return JSON.stringify(value);
+    },
+
+    encode: function (value/*, qualifier*/) {
+      if (value === undefined) {
+        return undefined;
+      }
+      return JSON.parse(value);
+    }
   })
 };
