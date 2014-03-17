@@ -2,10 +2,26 @@
 Data.Adapter = Ember.Object.extend({
 
   baseUrl: Ember.required(),
+  namespace: null,
+  context: null,
   /**
     To be defined as needed by app.
    */
   authParams: null,
+
+  setNamespace: function (namespace) {
+    this.set('namespace', namespace);
+  },
+  resetNamespace: function () {
+    this.setNamespace(null);
+  },
+
+  setContext: function (context) {
+    this.set('context', context);
+  },
+  resetContext: function () {
+    this.setContext(null);
+  },
 
   GET: function (url, data) {
     var settings = {
@@ -39,9 +55,13 @@ Data.Adapter = Ember.Object.extend({
 
   _contextifiedUrl: function (url) {
     var parts = [],
-        context = Data.get('context');
+        namespace = this.get('namespace'),
+        context = this.get('context');
 
     parts.pushObject(this.get('baseUrl'));
+    if (namespace) {
+      parts.pushObject(namespace);
+    }
     if (!Ember.isNone(context)) {
       parts.pushObject(context);
     }
@@ -232,11 +252,16 @@ Data.Adapter = Ember.Object.extend({
 
   save: function (record, extraParams, includeProperties) {
     var adapter = this,
-        url = [ adapter.get('baseUrl'), record.get('_url') ].join('/'),
         action,
         async = true,
         params = {},
-        resourceKey = record.constructor.resourceKey();
+        resourceKey = record.constructor.resourceKey(),
+        url = [
+      this.get('baseUrl'),
+      this.get('namespace'),
+      this.get('context'),
+      record.get('_url')
+    ].compact().join('/');
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
       Ember.run(adapter, function () {
@@ -297,11 +322,15 @@ Data.Adapter = Ember.Object.extend({
   },
 
   buildUrl: function (type, id, parent, useContext) {
-    var context = Data.get('context'),
+    var namespace = this.get('namespace'),
+        context = this.get('context'),
         urlParts = [
       this.get('baseUrl')
     ];
 
+    if (namespace) {
+      urlParts.pushObject(namespace);
+    }
     if (context && useContext) {
       urlParts.pushObject(context);
     }

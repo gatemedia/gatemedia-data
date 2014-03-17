@@ -45,7 +45,7 @@ module("Partial loading", {
       equal(Data.API.XHR_REQUESTS.length, 1, 'Stuffs index has been request once');
       equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been without context as not set');
 
-      Data.setContext(context);
+      PartialLoading.adapter.setContext(context);
 
       PartialLoading.Stuff.find().then(function (/*stuffs*/) {
         equal(Data.API.XHR_REQUESTS.length, 2, 'Stuffs index has been request once');
@@ -55,7 +55,7 @@ module("Partial loading", {
           equal(Data.API.XHR_REQUESTS.length, 3, 'Stuffs index has been request once');
           equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been without context as specified');
 
-          Data.resetContext();
+          PartialLoading.adapter.resetContext();
 
           PartialLoading.Stuff.find().then(function (/*stuffs*/) {
             equal(Data.API.XHR_REQUESTS.length, 4, 'Stuffs index has been request once');
@@ -74,7 +74,7 @@ module("Partial loading", {
     var context = 'dummy',
         stuffId = 42;
 
-    Data.setContext(context);
+    PartialLoading.adapter.setContext(context);
     Data.API.stub().GET('%@/stuffs/%@'.fmt(context, stuffId), {
       'stuff': {
         'id': stuffId,

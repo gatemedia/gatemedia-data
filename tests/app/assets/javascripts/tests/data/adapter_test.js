@@ -41,6 +41,7 @@ module("Adapter processing");
         start();
       }, function (error) {
         ok(false, error);
+        start();
       });
     });
   });
@@ -56,6 +57,26 @@ module("Adapter processing");
         start();
       }, function (error) {
         ok(true, error);
+        start();
+      });
+    });
+  });
+
+  asyncTest("Namespace should be prepended on direct AJAX call to API", function () {
+    Data.API.stub().GET('resources/42', {});
+
+    Ember.run(function () {
+      AdapterTest.adapter.GET('resources/42').then(function () {
+        ok(true, 'GET call done');
+
+        AdapterTest.adapter.setNamespace('api/v2');
+
+        Data.API.stub().GET('api/v2/resources/36', {});
+        AdapterTest.adapter.GET('resources/36').then(function () {
+          start();
+        });
+      }, function (error) {
+        ok(false, error);
         start();
       });
     });

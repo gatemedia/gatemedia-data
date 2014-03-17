@@ -145,9 +145,17 @@
           result = params;
           params = null;
         }
+        var fullPath = path,
+            namespace = api.get('namespace');
+        if (namespace) {
+          fullPath = [
+            namespace,
+            path
+          ].join('/');
+        }
         api.get('handlers').pushObject(RequestHandler.create({
           verb: verb,
-          path: path,
+          path: fullPath,
           params: params,
           result: result,
           handleCount: handleCount,
@@ -187,7 +195,10 @@
       });
     },
 
-    reset: function () {
+    reset: function (properties) {
+      if (properties) {
+        this.setProperties(properties);
+      }
       this.set('handlers', []);
       this.set('fallbackHandler', RequestHandler.extend({
         handleRequest: function (settings) {
