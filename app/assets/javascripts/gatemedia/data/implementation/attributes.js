@@ -49,7 +49,7 @@ Data.attr = function (type, options) {
       Data.tooling.readAttribute(this, key, value);
       if (Ember.isNone(value)) {
         var data = this.get('_data');
-        if (data && data.hasOwnProperty(meta.codec.key(key))) {
+        if ((data && data.hasOwnProperty(meta.codec.key(key))) || options.defaultUndefined) {
           value = options.defaultValue;
         } else {
           var id = this.get('_data.id');
