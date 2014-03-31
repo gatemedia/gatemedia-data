@@ -26,7 +26,7 @@ PartialLoading.Part = Data.Model.extend({
 
 PartialLoading.User = Data.Model.extend({
   login: Data.attr('string'),
-  password: Data.attr('string', { defaultUndefined: true, defaultValue: 'zefljns42' })
+  password: Data.attr('string', { defaultUndefined: true, defaultValue: null })
 });
 
 
@@ -118,16 +118,17 @@ module("Partial loading", {
     });
     Data.API.stub().PUT('users/%@'.fmt(userId), {
       'user': {
-        'id': userId,
-        'name': "User 42",
-        'description': "varnvzaze54"
+        'login': "User 42",
+        'password': "varnvzaze54"
       }
+    }, {
+      'user': {}
     });
 
     PartialLoading.User.find(userId).then(function (user) {
       equal(user.get('login'), 'User 42', 'Login attribute is defined');
       equal(Data.API.XHR_REQUESTS.length, 1, 'User has been retrieved once');
-      equal(user.get('password'), 'zefljns42', 'Password attribute returns default value when undefined');
+      equal(user.get('password'), null, 'Password attribute returns default value when undefined');
       equal(Data.API.XHR_REQUESTS.length, 1, 'User has been retrieved once, still');
 
       user.set('password', 'varnvzaze54');
