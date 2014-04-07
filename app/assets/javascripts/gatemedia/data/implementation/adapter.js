@@ -338,7 +338,7 @@ Data.Adapter = Ember.Object.extend({
       urlParts.pushObject(parent.get('_url'));
     }
     urlParts.pushObject(type.resourceUrl());
-    if (id) {
+    if (!Ember.isNone(id)) {
       urlParts.pushObject(id);
     }
     return urlParts.join('/');
