@@ -56,7 +56,7 @@ Data.attr = function (type, options) {
           Ember.Logger.warn('Accessing undefined attribute %@[%@].%@ - Fetch full resource'.fmt(
             this.constructor, id, key));
           if (id) {
-            this.reload({ useContext: false, sync: true });
+            this.reload({ /*useContext: false,*/ sync: true });
             value = this.get('_data.' + meta.codec.key(key));
           } else {
             Ember.Logger.error('Missing %@[%@].id - Cannot fetch full resource, trying to use default'.fmt(

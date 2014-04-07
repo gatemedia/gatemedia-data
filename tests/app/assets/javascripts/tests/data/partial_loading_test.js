@@ -49,23 +49,23 @@ module("Partial loading", {
 
     PartialLoading.Stuff.find().then(function (/*stuffs*/) {
       equal(Data.API.XHR_REQUESTS.length, 1, 'Stuffs index has been request once');
-      equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been without context as not set');
+      equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been requested without context, as not set');
 
       PartialLoading.adapter.setContext(context);
 
       PartialLoading.Stuff.find().then(function (/*stuffs*/) {
         equal(Data.API.XHR_REQUESTS.length, 2, 'Stuffs index has been request once');
-        equal(Data.API.XHR_REQUESTS.get('lastObject.url'), '%@/stuffs'.fmt(context), 'Stuffs index has been with context as set');
+        equal(Data.API.XHR_REQUESTS.get('lastObject.url'), '%@/stuffs'.fmt(context), 'Stuffs idx has been requested with context, as set');
 
         PartialLoading.Stuff.find(null, null, { useContext: false }).then(function (/*stuffs*/) {
           equal(Data.API.XHR_REQUESTS.length, 3, 'Stuffs index has been request once');
-          equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been without context as specified');
+          equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been requested without context, as specified');
 
           PartialLoading.adapter.resetContext();
 
           PartialLoading.Stuff.find().then(function (/*stuffs*/) {
             equal(Data.API.XHR_REQUESTS.length, 4, 'Stuffs index has been request once');
-            equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been without context as unset');
+            equal(Data.API.XHR_REQUESTS.get('lastObject.url'), 'stuffs', 'Stuffs index has been requested without context, as unset');
 
             start();
           });
@@ -87,7 +87,7 @@ module("Partial loading", {
         'name': "My stuff"
       }
     });
-    Data.API.stub().GET('stuffs/%@'.fmt(stuffId), {
+    Data.API.stub().GET('%@/stuffs/%@'.fmt(context, stuffId), {
       'stuff': {
         'id': stuffId,
         'name': "My stuff",
