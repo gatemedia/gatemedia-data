@@ -9,6 +9,9 @@ Data.Adapter = Ember.Object.extend({
    */
   authParams: null,
 
+  cachePerContext: true,
+  clearCacheOnContextChange: false,
+
   setNamespace: function (namespace) {
     this.set('namespace', namespace);
   },
@@ -356,4 +359,31 @@ Data.Adapter = Ember.Object.extend({
     }
     return params;
   },
+
+  cacheFor: function (type) {
+    var context = this.get('context') || '_global_',
+        cachePerContext = this.get('cachePerContext'),
+        key = type.toString(),
+        cacheHolder, cache;
+
+    this._cache = this._cache || {};
+    if (cachePerContext) {
+      this._cache[context] = this._cache[context] || {};
+      cacheHolder = this._cache[context];
+    } else {
+      cacheHolder = this._cache;
+    }
+
+    cache = cacheHolder[key];
+    if (Ember.isNone(cache)) {
+      cache = {};
+      cacheHolder[key] = cache;
+    }
+    return cache;
+  },
+  clearCacheAsContextChanged: function () {
+    if (this.get('clearCacheOnContextChange')) {
+      this.set('_cache', {});
+    }
+  }.observes('context')
 });

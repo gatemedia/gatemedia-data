@@ -634,18 +634,17 @@ Data.Model.reopenClass({
     Beware, the result is not bound to the cache so it will reflect the cache state at call time.
    */
   all: function () {
-    var cache = this._cache || {};
+    var cache = this.getAdapter().cacheFor(this);
     return Ember.keys(cache).map(function (id) { return cache[id]; });
   },
 
   cacheRecord: function (id, value) {
-    this._cache = this._cache || {};
-    this._cache[id] = value;
+    var cache = this.getAdapter().cacheFor(this);
+    cache[id] = value;
   },
   cachedRecord: function (id) {
-    if (this._cache) {
-      return this._cache[id];
-    }
+    var cache = this.getAdapter().cacheFor(this);
+    return cache[id];
   },
 
   resourceKey: function () {
