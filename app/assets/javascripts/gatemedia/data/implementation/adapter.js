@@ -382,8 +382,15 @@ Data.Adapter = Ember.Object.extend({
     return cache;
   },
   clearCacheAsContextChanged: function () {
-    if (this.get('clearCacheOnContextChange')) {
-      this.set('_cache', {});
+    var lastContext = this.get('_lastContext'),
+        newContext = this.get('context');
+
+    if (newContext) {
+      if ((newContext !== lastContext) &&
+          this.get('clearCacheOnContextChange')) {
+        this.set('_cache', {});
+      }
+      this.set('_lastContext', newContext);
     }
   }.observes('context')
 });
