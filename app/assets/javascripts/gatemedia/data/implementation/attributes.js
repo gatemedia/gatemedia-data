@@ -59,8 +59,8 @@ Data.attr = function (type, options) {
             this.reload({ /*useContext: false,*/ sync: true });
             value = this.get('_data.' + meta.codec.key(key));
           } else {
-            Ember.Logger.error('Missing %@[%@].id - Cannot fetch full resource, trying to use default'.fmt(
-              this.constructor, id));
+            Ember.Logger.info('New %@ instance, use default %@'.fmt(
+              this.constructor, key));
             value = options.defaultValue;
           }
         }
