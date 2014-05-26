@@ -117,10 +117,14 @@ Data.codec = {
     },
 
     encode: function (value/*, qualifier*/) {
-      if (value === undefined) {
+      if (Ember.isBlank(value)) {
         return undefined;
       }
-      return JSON.parse(value);
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        return null;
+      }
     }
   })
 };
