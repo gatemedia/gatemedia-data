@@ -73,6 +73,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this.set('_data', data);
     this._resetChanges();
     this._resetDirtyness();
+    this.resetCaches();
   },
 
   /**
