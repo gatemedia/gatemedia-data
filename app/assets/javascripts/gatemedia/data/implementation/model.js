@@ -352,7 +352,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       processedKeys.pushObject(meta.codec.key(relation));
     }, this);
 
-    Ember.assert("Model internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
+    Ember.assert("Model's internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
       !Ember.isNone(this._data));
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
       if (Ember.isNone(includeProperties) || includeProperties.contains(dynamicKey)) {

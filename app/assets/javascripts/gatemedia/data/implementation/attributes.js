@@ -253,6 +253,7 @@ Data.belongsTo = function (type, options) {
     - sideLoad: an extra side-loaded entities associated to this relation (exclusive with `sideLoads`)
     - sideLoads: a list of extra side-loaded entities associated to this relation
     - cascadeSaving: defaults to true. if true, the relation is also saved if needed when the holder is saved
+    - inline: serialize as an array, inside holder.
  */
 Data.hasMany = function (type, options) {
   options = options || {};
@@ -264,16 +265,26 @@ Data.hasMany = function (type, options) {
     options: options,
     codec: {
       key: function (key) {
+        if (options.inline) {
+          return key.decamelize();
+        }
         return '%@_ids'.fmt(key.decamelize().singularize());
       },
 
       encode: function (instance, attribute) {
         var cache = instance.get('_relationsCache.%@'.fmt(attribute));
 
-        if (cache) {
-          return cache.getEach('id');
+        if (options.inline) {
+          cache = cache || instance.get('_data.' + this.key(attribute));
+          return cache.map(function (item) {
+            return item.toJSON();
+          });
+        } else {
+          if (cache) {
+            return cache.getEach('id');
+          }
+          return instance.get('_data.' + this.key(attribute));
         }
-        return instance.get('_data.' + this.key(attribute));
       }
     }
   };

@@ -252,6 +252,33 @@ module("Model serialization");
         postTitle,
         moment(postTimestamp, 'YYYY-MM-DDTHH:mmZ').format()));
   });
+
+
+  ModelTest.DictTest = Data.Model.extend({
+    entries: Data.hasMany('ModelTest.EntryTest', { inline: true })
+  });
+  ModelTest.EntryTest = Data.Model.extend({
+    key: Data.attr('string'),
+    value: Data.attr('string')
+  });
+
+  var dict = ModelTest.DictTest.instanciate();
+
+  test("JSON serializes inline hasMany", function () {
+    dict.get('entries').pushObjects([
+      ModelTest.EntryTest.instanciate({
+        key: 'Letters',
+        value: 'Abc'
+      }),
+      ModelTest.EntryTest.instanciate({
+        key: 'Numbers',
+        value: '123'
+      })
+    ]);
+
+    equal(JSON.stringify(dict.toJSON()),
+      '{"entries":[{"key":"Letters","value":"Abc"},{"key":"Numbers","value":"123"}]}');
+  });
 })();
 
 

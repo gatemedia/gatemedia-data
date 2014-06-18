@@ -1,4 +1,4 @@
 
 module GatemediaData
-    VERSION = "0.0.8"
+    VERSION = "1.1.3"
 end
