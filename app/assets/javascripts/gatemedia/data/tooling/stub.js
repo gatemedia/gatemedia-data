@@ -44,7 +44,11 @@
       var match = true;
       Ember.keys(expected).forEach(function (key) {
         if (Ember.typeOf(expected[key]) === 'object') {
-          match = this._checkParams(expected[key], Ember.Object.create(got.get(key)));
+          var obj = got.get(key);
+          if (Ember.typeOf(obj) === 'string') {
+            obj = JSON.parse(obj);
+          }
+          match = this._checkParams(expected[key], Ember.Object.create(obj));
         } else {
           var v1 = got.get(key),
               v2 = expected[key],
