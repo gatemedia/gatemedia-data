@@ -326,8 +326,12 @@ Data.hasMany = function (type, options) {
             params[param] = this.get(valuePath);
           }
 
-          content = type.find(ids, parent, { sync: true, params: params });
-          // Ember.Logger.debug('hasMany(%@.%@): retrieve %@'.fmt(type, key, ids));
+          if (meta.options.inline) {
+            content = type.loadMany(ids);
+          } else {
+            content = type.find(ids, parent, { sync: true, params: params });
+            // Ember.Logger.debug('hasMany(%@.%@): retrieve %@'.fmt(type, key, ids));
+          }
         }
       }
 
