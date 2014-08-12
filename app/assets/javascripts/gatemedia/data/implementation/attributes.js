@@ -68,7 +68,7 @@ Data.attr = function (type, options) {
       value = meta.codec.decode(value);
     }
     return value;
-  }).property('_data').meta(meta);
+  }).property('_data', '_cacheTimestamp').meta(meta);
 };
 
 
