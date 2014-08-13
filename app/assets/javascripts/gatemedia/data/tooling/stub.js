@@ -76,9 +76,10 @@
         assertionsCallback(settings.url, JSON.parse(settings.data));
       }
 
-      Ember.Logger.info('--> AJAX CALL', settings);
+      Ember.Logger.info('--> AJAX CALL' + (settings.async ? ' [ASYNC]' : ''), settings.type, settings.url, settings.data);
 
       function reply () {
+        Ember.Logger.info('<-- AJAX REPLY', Ember.copy(this.get('result'), true));
         var result = Ember.copy(this.get('result'), true);
 
         if (Ember.typeOf(result) === 'number') {
