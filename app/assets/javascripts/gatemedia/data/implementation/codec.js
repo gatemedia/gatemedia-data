@@ -18,6 +18,7 @@ Data.codec = {
       }
       switch (Ember.typeOf(value)) {
       case 'string':
+      case 'number':
         return value;
       case 'object':
         return JSON.stringify(value);
