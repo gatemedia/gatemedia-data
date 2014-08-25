@@ -158,6 +158,7 @@
             path
           ].join('/');
         }
+        //Ember.Logger.info('<-> READY FOR', verb, path, JSON.stringify(params));
         api.get('handlers').pushObject(RequestHandler.create({
           verb: verb,
           path: fullPath,
