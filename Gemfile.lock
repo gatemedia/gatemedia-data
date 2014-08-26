@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gatemedia-data (1.1.7)
+    gatemedia-data (1.1.8)
       rails (>= 3.2.14)
 
 GEM
