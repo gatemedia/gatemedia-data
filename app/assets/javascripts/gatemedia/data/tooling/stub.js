@@ -13,7 +13,7 @@
     params: null,
     result: null,
     assertionsCallback: null,
-    handleCount: null,
+    consumed: false,
 
     doneHandler: null,
     failHandler: null,
@@ -37,7 +37,7 @@
       return (settings.type === this.get('verb')) &&
              (requestPath === this.get('path')) &&
              paramsMatch &&
-             (this.get('handleCount') > 0);
+             !this.get('consumed');
     },
 
     _checkParams: function (expected, got) {
@@ -99,7 +99,7 @@
         Ember.run(this, reply);
       }
 
-      this.decrementProperty('handleCount');
+      this.set('consumed', true);
       return this;
     },
 
@@ -131,18 +131,10 @@
     },
 
     stub: function (count) {
-      var api = this,
-          handleCount = count || 'once';
+      var api = this;
 
-      if (Ember.typeOf(handleCount) === 'string') {
-        switch (handleCount) {
-        case 'once':
-          handleCount = 1;
-          break;
-        case 'forever':
-          handleCount = 100;
-          break;
-        }
+      if (Ember.isNone(count)) {
+        count = 1;
       }
 
       function registerHandler (verb, path, params, result, assertionsCallback) {
@@ -158,15 +150,17 @@
             path
           ].join('/');
         }
-        //Ember.Logger.info('<-> READY FOR', verb, path, JSON.stringify(params));
-        api.get('handlers').pushObject(RequestHandler.create({
-          verb: verb,
-          path: fullPath,
-          params: params,
-          result: result,
-          handleCount: handleCount,
-          assertionsCallback: assertionsCallback
-        }));
+
+        for(var i = 0; i < count; ++i) {
+          Ember.Logger.info('<-> READY FOR', verb, path, JSON.stringify(params));
+          api.get('handlers').pushObject(RequestHandler.create({
+            verb: verb,
+            path: fullPath,
+            params: params,
+            result: result,
+            assertionsCallback: assertionsCallback
+          }));
+        }
       }
 
       return {
