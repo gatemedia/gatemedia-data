@@ -1,0 +1,25 @@
+{
+  "name": "gatemedia-data",
+  "version": "2.0.0",
+  "description": "GateMedia shared data binding",
+  "author": "",
+  "license": "",
+  "homepage": "https://github.com/gatemedia/gatemedia-data",
+  "private": true,
+  "keywords": [
+    "ember-addon"
+  ],
+  "ember-addon": {
+    "main": "lib/ember-addon-main.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gatemedia/gatemedia-data"
+  },
+  "bugs": {
+    "url": "https://github.com/gatemedia/gatemedia-data/issues"
+  }
+}

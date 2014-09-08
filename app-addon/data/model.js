@@ -1,3 +1,4 @@
+import Ember from 'ember';
 //= require ./attributes
 //= require ./model_changes
 //= require ./adapter
@@ -8,7 +9,7 @@
     - record:saved
     - record:failed
  */
-Data.Model = Ember.Object.extend(Ember.Evented, {
+var Model = Ember.Object.extend(Ember.Evented, {
 
   id: Data.attr('number', { serialize: false }),
   createdAt: Data.attr('datetime', { serialize: false }),
@@ -369,7 +370,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 });
 
 
-Data.Model.reopenClass({
+Model.reopenClass({
 
   instanciate: function (data, extraData) {
     var record = this.createRecord(data, extraData);
@@ -684,3 +685,5 @@ Data.Model.reopenClass({
     };
   }
 });
+
+export default Model;
