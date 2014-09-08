@@ -1,15 +1,6 @@
+import Ember from 'ember';
 
-Data.NoTooling = Ember.Object.create({
-
-  readAttribute: Ember.K,
-  readDynamicAttribute: Ember.K,
-  readEmbedded: Ember.K,
-  readBelongsTo: Ember.K,
-  readHasMany: Ember.K
-});
-
-
-Data.LogTooling = Ember.Object.create({
+export default Ember.Object.create({
   uses: [],
   log: true,
 
@@ -179,6 +170,3 @@ Data.LogTooling = Ember.Object.create({
     Ember.Logger.debug('===========================', to ? to.format('HH:mm:ss:sss') : '');
   }
 });
-
-
-Data.tooling =  Data.NoTooling;

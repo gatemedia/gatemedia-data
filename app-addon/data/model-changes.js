@@ -1,5 +1,6 @@
+import Ember from 'ember';
 
-Data.ModelChanges = Ember.Object.extend({
+export default Ember.Object.extend({
   _changed: null,
   _changes: null,
 

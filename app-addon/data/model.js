@@ -1,8 +1,9 @@
 import Ember from 'ember';
-//= require ./attributes
-//= require ./model_changes
-//= require ./adapter
-//= require ./reloader
+import ModelChanges from './model-changes';
+import Reloader from './reloader';
+import attr from './attributes/attr';
+import getType from './utils/get-type';
+import Constants from './utils/constants';
 
 /**
   Events (intended for local model post-processing):
@@ -11,9 +12,9 @@ import Ember from 'ember';
  */
 var Model = Ember.Object.extend(Ember.Evented, {
 
-  id: Data.attr('number', { serialize: false }),
-  createdAt: Data.attr('datetime', { serialize: false }),
-  updatedAt: Data.attr('datetime', { serialize: false }),
+  id: attr('number', { serialize: false }),
+  createdAt: attr('datetime', { serialize: false }),
+  updatedAt: attr('datetime', { serialize: false }),
 
   _container: null,
   _attributeChanges: null,
@@ -61,7 +62,7 @@ var Model = Ember.Object.extend(Ember.Evented, {
   }.property('meta.isNew', 'id'),
 
   _parent: function () {
-    var ownerRelation = this.constructor.ownerRelation(Data.STRICT_OWNER);
+    var ownerRelation = this.constructor.ownerRelation(Constants.STRICT_OWNER);
 
     if (ownerRelation) {
       var relationsCache = this.get('_relationsCache') || {};
@@ -133,8 +134,8 @@ var Model = Ember.Object.extend(Ember.Evented, {
 
   _resetChanges: function () {
     this.set('_original', Ember.copy(this.get('_data'), true));
-    this.set('_attributeChanges', Data.ModelChanges.create());
-    this.set('_relationChanges', Data.ModelChanges.create());
+    this.set('_attributeChanges', ModelChanges.create());
+    this.set('_relationChanges', ModelChanges.create());
   },
 
   resetCaches: function () {
@@ -422,7 +423,7 @@ Model.reopenClass({
 
     record.setProperties(extraData);
     if (this.hasReloading()) {
-      record.set('_reloader', Data.Reloader.create({
+      record.set('_reloader', Reloader.create({
         record: record
       }));
     }
@@ -476,7 +477,7 @@ Model.reopenClass({
 
     var orderedKeys = [],
         types = {},
-        namespace = this._classInfo().namespace;
+        namespace = '-';//NODE this._classInfo().namespace;
 
     orderedKeys.addKey = function (key, type) {
       key = key.decamelize();
@@ -518,7 +519,7 @@ Model.reopenClass({
       }
       if (dataKey) {
         var sideLoad = data[dataKey],
-            type = Data.getType(types[key]);
+            type = getType(types[key]);
         Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances", sideLoad);
         sideLoad.forEach(function (sideItemData) {
           type.load(sideItemData);
@@ -529,7 +530,7 @@ Model.reopenClass({
 
     if (Ember.keys(data).length) {
       orderedKeys.forEach(function (key) {
-        var type = Data.getType(types[key]);
+        var type = getType(types[key]);
         if (type && Ember.keys(data).length) {
           type.sideLoad(data, alreadyLoaded.pushObjects(orderedKeys));
         }
@@ -650,6 +651,7 @@ Model.reopenClass({
   },
 
   resourceKey: function () {
+debugger;
     return this._classInfo().className.decamelize();
   },
 
@@ -661,7 +663,7 @@ Model.reopenClass({
     var ownerRelation;
 
     this.eachRelation(function (relation, meta) {
-      if (meta.options.owner && !((checking === Data.STRICT_OWNER) && (meta.options.follow === false))) {
+      if (meta.options.owner && !((checking === Constants.STRICT_OWNER) && (meta.options.follow === false))) {
         ownerRelation = {
           name: relation,
           meta: meta
@@ -672,6 +674,7 @@ Model.reopenClass({
   },
 
   getAdapter: function () {
+debugger;
     var namespace = Ember.get(this._classInfo().namespace);
     return namespace.adapter ||
            namespace.__container__.lookup('adapter:default'); //TODO improve injection management...

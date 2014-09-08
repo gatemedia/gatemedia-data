@@ -1,5 +1,7 @@
+import Ember from 'ember';
+import ajax from './ajax';
 
-Data.Adapter = Ember.Object.extend({
+export default Ember.Object.extend({
 
   baseUrl: Ember.required(),
   namespace: null,
@@ -97,7 +99,7 @@ Data.Adapter = Ember.Object.extend({
       });
     }
 
-    var call = Data.ajax(settings);
+    var call = ajax(settings);
 
     if (settings.async) {
       call
@@ -287,7 +289,7 @@ Data.Adapter = Ember.Object.extend({
           }
         }
 
-        Data.ajax({
+        ajax({
           async: async,
           type: action,
           url: url,
