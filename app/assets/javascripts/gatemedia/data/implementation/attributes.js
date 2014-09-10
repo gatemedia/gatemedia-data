@@ -327,15 +327,20 @@ Data.hasMany = function (type, options) {
           }
 
           if (meta.options.inline) {
-            var ownRelationKey = Data.belongsToKey(type.ownerRelation().name),
-                ownerId = this.get('id');
-            if (Ember.isNone(ids.get('firstObject.%@'.fmt(ownRelationKey)))) {
-              Ember.Logger.info('Auto-assign %@ using %@'.fmt(type, ownRelationKey));
-              ids.forEach(function (data) {
-                data[ownRelationKey] = ownerId;
-              });
+            var ownerRelation = type.ownerRelation();
+            if (ownerRelation) {
+              var ownRelationKey = Data.belongsToKey(ownerRelation.name),
+                  ownerId = this.get('id');
+              if (Ember.isNone(ids.get('firstObject.%@'.fmt(ownRelationKey)))) {
+                Ember.Logger.info('Auto-assign %@ using %@'.fmt(type, ownRelationKey));
+                ids.forEach(function (data) {
+                  data[ownRelationKey] = ownerId;
+                });
+              }
+              content = type.loadMany(ids);
+            } else {
+              Ember.Logger.warn('%@ is missing owner relation for %@ inlining'.fmt(type, key));
             }
-            content = type.loadMany(ids);
           } else {
             content = type.find(ids, parent, { sync: true, params: params });
             // Ember.Logger.debug('hasMany(%@.%@): retrieve %@'.fmt(type, key, ids));
