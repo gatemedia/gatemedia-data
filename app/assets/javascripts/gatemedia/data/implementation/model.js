@@ -221,8 +221,10 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   hasChanges: function () {
-    return this.get('_attributeChanges.hasChanges') || this.get('_relationChanges.hasChanges');
-  }.property('_attributeChanges.hasChanges', '_relationChanges.hasChanges'),
+    return this.get('_attributeChanges.hasChanges') ||
+           this.get('_relationChanges.hasChanges') ||
+           this.get('meta.isDirty');
+  }.property('_attributeChanges.hasChanges', '_relationChanges.hasChanges', 'meta.isDirty'),
 
   deleteRecord: function () {
     var container = this.get('_container');
