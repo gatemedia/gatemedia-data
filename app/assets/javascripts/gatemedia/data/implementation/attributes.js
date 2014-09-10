@@ -339,7 +339,8 @@ Data.hasMany = function (type, options) {
               }
               content = type.loadMany(ids);
             } else {
-              Ember.Logger.warn('%@ is missing owner relation for %@ inlining'.fmt(type, key));
+              Ember.Logger.error('%@ is missing owner relation for %@ inlining'.fmt(type, key));
+              content = [];
             }
           } else {
             content = type.find(ids, parent, { sync: true, params: params });
