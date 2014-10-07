@@ -152,7 +152,7 @@
         }
 
         for(var i = 0; i < count; ++i) {
-          Ember.Logger.info('<-> READY FOR', verb, path, JSON.stringify(params));
+          Ember.Logger.info('<-> READY FOR', verb, path, params ? JSON.stringify(params) : '-');
           api.get('handlers').pushObject(RequestHandler.create({
             verb: verb,
             path: fullPath,
