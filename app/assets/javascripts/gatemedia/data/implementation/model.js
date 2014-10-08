@@ -273,7 +273,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
           },
           saved: function (/*relation*/) {
             var relationsToSave = this.get('relationsToSave');
-            // relationsToSave.removeObject(relation);
             relationsToSave.popObject();
             if (Ember.isEmpty(relationsToSave)) {
               resolve(record);
