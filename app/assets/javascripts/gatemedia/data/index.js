@@ -8,6 +8,10 @@ Ember.$.support.cors = true;
 Data = Ember.Namespace.create({
 
   ajax: function (settings) {
-    return Ember.$.ajax(settings);
+    return Ember.$.ajax(Ember.merge(settings, {
+      xhrFields: {
+        withCredentials: true
+      }
+    }));
   }
 });
