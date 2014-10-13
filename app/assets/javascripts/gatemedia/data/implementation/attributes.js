@@ -204,7 +204,6 @@ Data.belongsTo = function (type, options) {
       this.get('_relationsCache')[key] = value;
       Ember.run.next(this, function () {
         this._replaceRelation(key, oldValue, value);
-        this.expireCaches();
       });
     } else {
       var type = Data.getType(meta.type),

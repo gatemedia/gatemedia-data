@@ -191,6 +191,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       newValue: newMember
     });
     this._dirty();
+    this.resetCache(relation);
   },
 
   _destroyRelation: function (relation, removedMember) {
