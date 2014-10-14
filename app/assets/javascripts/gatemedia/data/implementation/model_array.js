@@ -38,8 +38,17 @@ Data.ModelArray = Ember.ArrayProxy.extend({
   },
 
   assignRecord: function (record) {
-    record.set('_container', this);
-    this.pushObject(record);
+    var r = record;
+    if (Ember.ObjectProxy.detectInstance(record)) {
+      r = record.get('content');
+    }
+    r.set('_container', this);
+    this.pushObject(r);
+  },
+  assignRecords: function (records) {
+    records.forEach(function (record) {
+      this.assignRecord(record);
+    }, this);
   },
 
   cancelChanges: function () {
