@@ -184,6 +184,25 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   _changeRelation: function (relation, action, oldMember, newMember) {
+    var data = this.get('_data'),
+        attr = '%@_id'.fmt(relation.singularize());
+
+    if (data.hasOwnProperty(attr)) {
+      data[attr] = newMember ? newMember.get('id') : null;
+      this.resetCache(relation);
+    } else {
+      attr = attr.pluralize();
+      if (!data.hasOwnProperty(attr)) {
+        data[attr] = Ember.A();
+      }
+      if (oldMember) {
+        data[attr].removeObject(oldMember.get('id'));
+      }
+      if (newMember) {
+        data[attr].addObject(newMember.get('id'));
+      }
+    }
+
     this.get('_relationChanges').addChange(relation, {
       relation: relation,
       action: action,
@@ -191,7 +210,6 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       newValue: newMember
     });
     this._dirty();
-    this.resetCache(relation);
   },
 
   _destroyRelation: function (relation, removedMember) {
@@ -204,8 +222,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
       attr = attr.pluralize();
       data[attr].removeObject(removedMember.get('id'));
     }
-    delete this.get('_relationsCache')[relation];
-    this.expireCaches();
+    this.resetCache(relation);
   },
 
   _dirty: function () {
