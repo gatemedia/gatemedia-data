@@ -42,6 +42,13 @@ Data.codec = {
         return value;
       }
       return Number(value);
+    },
+
+    encode: function (value/*, qualifier*/) {
+      if (!Ember.isNone(value)) {
+        return parseFloat(value);
+      }
+      return null;
     }
   }),
 
