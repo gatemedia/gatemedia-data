@@ -384,6 +384,20 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   getAdapter: function () {
     return this.constructor.getAdapter();
+  },
+
+
+  clearErrors: function () {
+    var attributes = Array.prototype.slice.call(arguments, 0),
+        errors = this.get('errors');
+    if (errors) {
+      attributes.forEach(function (attribute) {
+        var err = errors.get(attribute);
+        if (err) {
+          err.clear();
+        }
+      });
+    }
   }
 });
 
