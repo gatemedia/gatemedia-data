@@ -19,6 +19,10 @@
     failHandler: null,
 
     match: function (settings) {
+      if (this.get('consumed')) {
+        return false;
+      }
+
       var requestPath = extractURL(settings.url),
           expectedParams = this.get('params'),
           paramsMatch = true;
@@ -36,8 +40,7 @@
 
       return (settings.type === this.get('verb')) &&
              (requestPath === this.get('path')) &&
-             paramsMatch &&
-             !this.get('consumed');
+             paramsMatch;
     },
 
     _checkParams: function (expected, got) {
@@ -79,7 +82,7 @@
       Ember.Logger.info('--> AJAX CALL' + (settings.async ? ' [ASYNC]' : ''), settings.type, settings.url, settings.data);
 
       function reply () {
-        Ember.Logger.info('<-- AJAX REPLY', Ember.copy(this.get('result'), true));
+        Ember.Logger.info('<-- AJAX REPLY', Ember.copy(this.get('result'), true), stubId(this));
         var result = Ember.copy(this.get('result'), true);
 
         if (Ember.typeOf(result) === 'number') {
@@ -152,14 +155,15 @@
         }
 
         for(var i = 0; i < count; ++i) {
-          Ember.Logger.info('<-> READY FOR', verb, path, params ? JSON.stringify(params) : '-');
-          api.get('handlers').pushObject(RequestHandler.create({
+          var stub = RequestHandler.create({
             verb: verb,
             path: fullPath,
             params: params,
             result: result,
             assertionsCallback: assertionsCallback
-          }));
+          });
+          Ember.Logger.info('<-> READY FOR', verb, path, params ? JSON.stringify(params) : '-', stubId(stub));
+          api.get('handlers').pushObject(stub);
         }
       }
 
@@ -217,8 +221,25 @@
     return Data.API.processAjax(settings);
   };
 
-})();
 
-QUnit.moduleDone(function (/*details*/) {
-  Data.API.reset();
-});
+  function stubId (stub) {
+    return '(stub#%@)'.fmt((/\:(\w+)\>/).exec(stub.toString())[1]);
+  }
+
+
+  QUnit.testDone(function (details) {
+    var notConsumed = Data.API.handlers.filterBy('consumed', false);
+    if (!Ember.isEmpty(notConsumed)) {
+      Ember.Logger.error('Some stubs were not consumed by [%@::%@]'.fmt(details.module, details.name));
+      notConsumed.forEach(function (stub) {
+        Ember.Logger.error(' %@ -> %@ %@ %@'.fmt(
+          stubId(stub),
+          stub.get('verb'), stub.get('path'), stub.get('params') || ''));
+      });
+    }
+  });
+
+  QUnit.moduleDone(function (/*details*/) {
+    Data.API.reset();
+  });
+})();
