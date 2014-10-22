@@ -70,7 +70,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   }.property().cacheable(false),
 
   _updateData: function (data) {
-    this.set('_data', data);
+    var orig = this.get('_data') || {};
+    this.set('_data', Ember.merge(orig, data));
     this._resetChanges();
     this._resetDirtyness();
     this.resetCaches();
