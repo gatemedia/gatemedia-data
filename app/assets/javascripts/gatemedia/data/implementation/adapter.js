@@ -77,13 +77,13 @@ Data.Adapter = Ember.Object.extend({
     return new Ember.RSVP.Promise(function (resolve, reject) {
       self._xhr(
         settings,
-        function success (data) {
+        function (data) {
           resolve(data);
         },
-        function error (xhr, status, err) {
+        function (xhr, status, error) {
           Ember.run(function () {
-            Ember.Logger.error(status + ':', settings.method, settings.url, err);
-            reject(err);
+            self.xhrError(settings, xhr, status, error);
+            reject(error);
           });
         });
     });
@@ -120,16 +120,18 @@ Data.Adapter = Ember.Object.extend({
       function (async, ok, ko) {
         var action = 'GET',
             useContext = Ember.isNone(options.useContext) ? true : options.useContext,
-            url = this.buildUrl(type, id, parent, useContext);
-
-        Ember.tryInvoke(hooks, 'willXHR', [url]);
-        this._xhr({
+            url = this.buildUrl(type, id, parent, useContext),
+            self = this,
+            settings = {
           async: async,
           type: action,
           url: url,
           dataType: 'json',
           data: this.buildParams(options.params)
-        },
+        };
+
+        Ember.tryInvoke(hooks, 'willXHR', [url]);
+        this._xhr(settings,
         function (data) {
           Ember.Logger.debug("DATA - Found one", type, "(" + id + "):", data);
           var resourceKey = type.resourceKey();
@@ -147,7 +149,7 @@ Data.Adapter = Ember.Object.extend({
           }
         },
         function (xhr, status, error) {
-          Ember.Logger.error(status + ':', action, url, error);
+          self.xhrError(settings, xhr, status, error);
           ko(error);
         });
       }
@@ -169,12 +171,11 @@ Data.Adapter = Ember.Object.extend({
         return false;
       },
       function (async, ok, ko) {
-        var action = 'GET',
+        var self = this,
+            action = 'GET',
             useContext = Ember.isNone(options.useContext) ? true : options.useContext,
-            url = this.buildUrl(type, null, parent, useContext);
-
-        Ember.tryInvoke(hooks, 'willXHR', [url]);
-        this._xhr({
+            url = this.buildUrl(type, null, parent, useContext),
+            settings = {
           async: async,
           type: action,
           url: url,
@@ -182,7 +183,10 @@ Data.Adapter = Ember.Object.extend({
           data: this.buildParams(options.params, {
             ids: ids, // Ember.isEmpty(ids) ? null : ids,
           })
-        },
+        };
+
+        Ember.tryInvoke(hooks, 'willXHR', [url]);
+        this._xhr(settings,
         function (data) {
           Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
           var resourceKey = type.resourceKey().pluralize(),
@@ -202,7 +206,7 @@ Data.Adapter = Ember.Object.extend({
           }
         },
         function (xhr, status, error) {
-          Ember.Logger.error(status + ':', action, url, error);
+          self.xhrError(settings, xhr, status, error);
           ko(error);
         });
       });
@@ -287,14 +291,16 @@ Data.Adapter = Ember.Object.extend({
           }
         }
 
-        Data.ajax({
+        var settings = {
           async: async,
           type: action,
           url: url,
           // dataType: 'json', // avoid dataType, as it breaks when body is empty.
           contentType: 'application/json',
           data: JSON.stringify(adapter.buildParams(params, extraParams))
-        }).
+        };
+
+        Data.ajax(settings).
         done(function (data) {
           Ember.run(function () {
             Ember.Logger.debug("DATA - Saved (" + action + ")",
@@ -316,7 +322,7 @@ Data.Adapter = Ember.Object.extend({
         }).
         fail(function (xhr, status, error) {
           Ember.run(function () {
-            Ember.Logger.error(status + ':', action, url, error);
+            adapter.xhrError(settings, xhr, status, error);
             reject(xhr);
           });
         });
@@ -392,5 +398,11 @@ Data.Adapter = Ember.Object.extend({
       }
       this.set('_lastContext', newContext);
     }
-  }.observes('context')
+  }.observes('context'),
+
+
+  xhrError: function (settings, xhr, status, error) {
+    Ember.Logger.error(status + ':', settings.method, settings.url, error);
+    Data.trigger('xhr:error', xhr, status, error);
+  }
 });

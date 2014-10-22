@@ -5,7 +5,9 @@
 Ember.$.support.cors = true;
 
 /* global Data:true */
-Data = Ember.Namespace.create({
+Data = Ember.Namespace.createWithMixins(
+  Ember.Evented,
+{
 
   ajax: function (settings) {
     return Ember.$.ajax(Ember.merge(settings, {
@@ -14,4 +16,8 @@ Data = Ember.Namespace.create({
       }
     }));
   }
+});
+
+Data.on('xhr:error', function (xhr, status, error) {
+  Ember.Logger.error('--- XHR Failed:', status, error);
 });
