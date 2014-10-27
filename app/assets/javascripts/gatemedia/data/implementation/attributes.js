@@ -26,7 +26,7 @@ Data.attrMeta = function (type, options) {
             qualifier = parts[1],
             value = attribute ? instance.get(attribute) : instance;
 
-        if (options.formatter) {
+        if (options && options.formatter) {
           return options.formatter(value, qualifier);
         }
         return Data.codec[basicType].encode(value, qualifier);
