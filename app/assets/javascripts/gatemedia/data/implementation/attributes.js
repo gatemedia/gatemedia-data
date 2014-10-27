@@ -13,21 +13,22 @@ Data.attrMeta = function (type, options) {
       },
 
       decode: function (value) {
-        var
-          parts = type.split(':'),
-          basicType = parts[0],
-          qualifier = parts[1];
+        var parts = type.split(':'),
+            basicType = parts[0],
+            qualifier = parts[1];
 
         return Data.codec[basicType].decode(value, qualifier);
       },
 
       encode: function (instance, attribute) {
-        var
-          parts = type.split(':'),
-          basicType = parts[0],
-          qualifier = parts[1],
-          value = attribute ? instance.get(attribute) : instance;
+        var parts = type.split(':'),
+            basicType = parts[0],
+            qualifier = parts[1],
+            value = attribute ? instance.get(attribute) : instance;
 
+        if (options.formatter) {
+          return options.formatter(value, qualifier);
+        }
         return Data.codec[basicType].encode(value, qualifier);
       }
     }
