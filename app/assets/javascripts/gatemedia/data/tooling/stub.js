@@ -24,10 +24,11 @@
       }
 
       var requestPath = extractURL(settings.url),
+          requestMatch = (settings.type === this.get('verb')) && (requestPath === this.get('path')),
           expectedParams = this.get('params'),
           paramsMatch = true;
 
-      if (expectedParams) {
+      if (requestMatch && expectedParams) {
         var data = settings.data;
         if (Ember.typeOf(settings.data) === 'string') {
           data = JSON.parse(settings.data);
@@ -38,12 +39,10 @@
         paramsMatch = this._checkParams(expectedParams, data);
       }
 
-      return (settings.type === this.get('verb')) &&
-             (requestPath === this.get('path')) &&
-             paramsMatch;
+      return requestMatch && paramsMatch;
     },
 
-    _checkParams: function (expected, got) {
+    _checkParams: function (expected, got, path) {
       var match = true;
       Ember.keys(expected).forEach(function (key) {
         if (Ember.typeOf(expected[key]) === 'object') {
@@ -51,7 +50,7 @@
           if (Ember.typeOf(obj) === 'string') {
             obj = JSON.parse(obj);
           }
-          match = this._checkParams(expected[key], Ember.Object.create(obj));
+          match = match && this._checkParams(expected[key], Ember.Object.create(obj), path ? '%@.%@'.fmt(path, key) : key);
         } else {
           var v1 = got.get(key),
               v2 = expected[key],
@@ -65,6 +64,15 @@
           }
           if (!same) {
             match = false;
+            if (v2) {
+              Ember.Logger.error("%@ %@ %@ - Parameter [%@] differ: expected '%@', got '%@'".fmt(
+                stubId(this),
+                this.get('verb'),
+                this.get('path'),
+                path ? '%@.%@'.fmt(path, key) : key,
+                v2,
+                v1));
+            }
           }
         }
       }, this);
