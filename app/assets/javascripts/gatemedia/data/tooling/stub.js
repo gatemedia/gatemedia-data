@@ -214,8 +214,9 @@
       this.set('handlers', []);
       this.set('fallbackHandler', RequestHandler.extend({
         handleRequest: function (settings) {
-          var message = 'Missing handler for XHR call: %@ %@ %@'.fmt(settings.type, settings.url, settings.data);
+          var message = 'Missing handler for XHR call: %@ %@ %@'.fmt(settings.type, settings.url, Ember.repr(settings.data));
 
+          Ember.Logger.error(message);
           ok(false, message);
           Ember.assert(message, false);
         }
@@ -242,7 +243,7 @@
       notConsumed.forEach(function (stub) {
         Ember.Logger.error(' %@ -> %@ %@ %@'.fmt(
           stubId(stub),
-          stub.get('verb'), stub.get('path'), stub.get('params') || ''));
+          stub.get('verb'), stub.get('path'), Ember.repr(stub.get('params')) || ''));
       });
     }
   });
