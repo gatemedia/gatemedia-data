@@ -108,7 +108,7 @@ Data.codec = {
 
   datetime: Data.Codec.create({
     decode: function (value/*, qualifier*/) {
-      return moment(value, 'YYYY-MM-DDTHH:mm:ssZ');
+      return moment.utc(value, 'YYYY-MM-DDTHH:mm:ssZ');
     },
 
     encode: function (value/*, qualifier*/) {
