@@ -83,7 +83,11 @@ Data.Adapter = Ember.Object.extend({
         function (xhr, status, error) {
           Ember.run(function () {
             self.xhrError(settings, xhr, status, error);
-            reject(error);
+            reject({
+              xhr: xhr,
+              status: status,
+              error: error
+            });
           });
         });
     });
@@ -144,13 +148,22 @@ Data.Adapter = Ember.Object.extend({
             ok(record);
           } else {
             var message = "API returned JSON with missing key '" + resourceKey + "'";
+
             Ember.Logger.error(message, data);
-            ko(message);
+            ko({
+              xhr: null,
+              status: null,
+              error: message
+            });
           }
         },
         function (xhr, status, error) {
           self.xhrError(settings, xhr, status, error);
-          ko(error);
+          ko({
+            xhr: xhr,
+            status: status,
+            error: error
+          });
         });
       }
     );
@@ -201,13 +214,23 @@ Data.Adapter = Ember.Object.extend({
             Ember.tryInvoke(hooks, 'didLoad', [data]);
             ok(result);
           } else {
-            Ember.Logger.error("API returned JSON with missing key '" + resourceKey + "'", data);
-            ko();
+            var message = "API returned JSON with missing key '" + resourceKey + "'";
+
+            Ember.Logger.error(message, data);
+            ko({
+              xhr: null,
+              status: null,
+              error: message
+            });
           }
         },
         function (xhr, status, error) {
           self.xhrError(settings, xhr, status, error);
-          ko(error);
+          ko({
+            xhr: xhr,
+            status: status,
+            error: error
+          });
         });
       });
   },
@@ -323,7 +346,11 @@ Data.Adapter = Ember.Object.extend({
         fail(function (xhr, status, error) {
           Ember.run(function () {
             adapter.xhrError(settings, xhr, status, error);
-            reject(xhr);
+            reject({
+              xhr: xhr,
+              status: status,
+              error: error
+            });
           });
         });
       });
@@ -402,7 +429,6 @@ Data.Adapter = Ember.Object.extend({
 
 
   xhrError: function (settings, xhr, status, error) {
-    Ember.Logger.error(status + ':', settings.method, settings.url, error);
     Data.trigger('xhr:error', xhr, status, error);
   }
 });

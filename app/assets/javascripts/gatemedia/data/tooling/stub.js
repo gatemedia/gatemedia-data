@@ -127,7 +127,10 @@
       this.get('doneHandler')(data);
     },
     callFail: function (error) {
-      this.get('failHandler')({}, 'error', error);
+      this.get('failHandler')({
+        type: this.get('verb'),
+        url: this.get('path')
+      }, 'error', error);
     }
   });
 

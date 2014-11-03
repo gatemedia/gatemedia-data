@@ -21,5 +21,5 @@ Data = Ember.Namespace.createWithMixins(
 });
 
 Data.on('xhr:error', function (xhr, status, error) {
-  Ember.Logger.error('--- XHR Failed:', status, error);
+  Ember.Logger.error('XHR Failed:', xhr.type, xhr.url, '->', status, error);
 });
