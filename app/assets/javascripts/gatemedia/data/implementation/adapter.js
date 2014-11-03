@@ -318,7 +318,7 @@ Data.Adapter = Ember.Object.extend({
           async: async,
           type: action,
           url: url,
-          // dataType: 'json', // avoid dataType, as it breaks when body is empty.
+          dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(adapter.buildParams(params, extraParams))
         };
