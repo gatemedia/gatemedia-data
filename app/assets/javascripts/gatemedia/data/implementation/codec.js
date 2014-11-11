@@ -79,6 +79,9 @@ Data.codec = {
 
   date: Data.Codec.create({
     decode: function (value/*, qualifier*/) {
+      if (Ember.isNone(value)) {
+        return null;
+      }
       if (Ember.typeOf(value) === 'date') {
         return moment(value);
       }
@@ -86,36 +89,42 @@ Data.codec = {
     },
 
     encode: function (value/*, qualifier*/) {
-      if (value) {
-        return value.format('YYYY-MM-DD');
+      if (Ember.isNone(value)) {
+        return null;
       }
-      return null;
+      return value.format('YYYY-MM-DD');
     }
   }),
 
   time: Data.Codec.create({
     decode: function (value/*, qualifier*/) {
+      if (Ember.isNone(value)) {
+        return null;
+      }
       return moment(value, 'HH:mm');
     },
 
     encode: function (value/*, qualifier*/) {
-      if (value) {
-        return value.format('HH:mm');
+      if (Ember.isNone(value)) {
+        return null;
       }
-      return null;
+      return value.format('HH:mm');
     }
   }),
 
   datetime: Data.Codec.create({
     decode: function (value/*, qualifier*/) {
+      if (Ember.isNone(value)) {
+        return null;
+      }
       return moment.utc(value, 'YYYY-MM-DDTHH:mm:ssZ');
     },
 
     encode: function (value/*, qualifier*/) {
-      if (value) {
-        return value.format('YYYY-MM-DDTHH:mm:ssZ');
+      if (Ember.isNone(value)) {
+        return null;
       }
-      return null;
+      return value.format('YYYY-MM-DDTHH:mm:ssZ');
     }
   }),
 
