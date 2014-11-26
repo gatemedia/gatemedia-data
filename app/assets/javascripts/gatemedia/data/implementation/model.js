@@ -276,9 +276,9 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   save: function (extraParams, includeProperties) {
+    this.set('meta.isSaving', true);
     this.willSave();
-    var self = this,
-        promise = new Ember.RSVP.Promise(function (resolve, reject) {
+    var promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
       function saveChildren (record, resolve/*, reject*/) {
         var relationCaches = record.get('_relationsCache'),
@@ -317,8 +317,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
         savingTracker.saved(); // in case of no relation to save...
       }
 
-      if (self.get('meta.isNew') || self.get('hasChanges') || self.get('meta.isDeleted')) {
-        self.getAdapter().save(self, extraParams, includeProperties).then(function (record) {
+      if (this.get('meta.isNew') || this.get('hasChanges') || this.get('meta.isDeleted')) {
+        this.getAdapter().save(this, extraParams, includeProperties).then(function (record) {
           Ember.run(record, function () {
             saveChildren(this, resolve, reject);
           });
@@ -326,16 +326,18 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
           reject(error);
         });
       } else {
-        saveChildren(self, resolve, reject);
+        saveChildren(this, resolve, reject);
       }
-    });
+    }.bind(this));
 
     promise.then(function() {
-      self.didSave();
-      self.trigger('record:saved', self);
-    }, function() {
-      self.trigger('record:failed', self);
-    });
+      this.set('meta.isSaving', false);
+      this.didSave();
+      this.trigger('record:saved', this);
+    }.bind(this), function() {
+      this.set('meta.isSaving', false);
+      this.trigger('record:failed', this);
+    }.bind(this));
     return promise;
   },
 
