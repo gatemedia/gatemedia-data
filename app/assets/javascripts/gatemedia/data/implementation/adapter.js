@@ -26,32 +26,34 @@ Data.Adapter = Ember.Object.extend({
     this.setContext(null);
   },
 
-  GET: function (url, data) {
+  GET: function (url, data, sync) {
     var settings = {
       type: 'GET',
       url: this._contextifiedUrl(url),
-      data: this.buildParams(data)
+      data: this.buildParams(data),
+      sync: Ember.isNone(sync) ? false : sync
     };
     return this._promisifiedAjax(settings);
   },
 
-  POST: function (url, data) {
-    return this._jsonBasedAjax('POST', url, data);
+  POST: function (url, data, sync) {
+    return this._jsonBasedAjax('POST', url, data, sync);
   },
-  PUT: function (url, data) {
-    return this._jsonBasedAjax('PUT', url, data);
+  PUT: function (url, data, sync) {
+    return this._jsonBasedAjax('PUT', url, data, sync);
   },
-  DELETE: function (url, data) {
-    return this._jsonBasedAjax('DELETE', url, data);
+  DELETE: function (url, data, sync) {
+    return this._jsonBasedAjax('DELETE', url, data, sync);
   },
 
-  _jsonBasedAjax: function (action, url, data) {
+  _jsonBasedAjax: function (action, url, data, sync) {
     var settings = {
       type: action,
       url: this._contextifiedUrl(url),
       contentType: 'application/json',
       dataType: 'json',
-      data: JSON.stringify(this.buildParams(data))
+      data: JSON.stringify(this.buildParams(data)),
+      sync: Ember.isNone(sync) ? false : sync
     };
     return this._promisifiedAjax(settings);
   },
@@ -382,7 +384,7 @@ Data.Adapter = Ember.Object.extend({
 
   buildParams: function (optionParams, extraParams) {
     var params = {};
-    Ember.merge(params, this.get('authParams'));
+    // Ember.merge(params, this.get('authParams'));
 
     if (optionParams) {
       Ember.merge(params, optionParams);
