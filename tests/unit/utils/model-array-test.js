@@ -1,39 +1,55 @@
-/* global module, test, asyncTest, start,
-          ok, equal, deepEqual, throws,
-          ModelArrayTest:true */
+import Ember from 'ember';
+import ModelArray from 'gatemedia-data/utils/model-array';
+import Adapter from 'gatemedia-data/utils/adapter';
+import Model from 'gatemedia-data/utils/model';
+import attribute from 'gatemedia-data/utils/attribute';
+import belongsTo from 'gatemedia-data/utils/belongs-to';
+import hasMany from 'gatemedia-data/utils/has-many';
 
-ModelArrayTest = Ember.Application.create({
-  apiUrl: Global.apiUrl,
+module('ModelArray');
+
+test('it works', function() {
+  var result = ModelArray;
+  ok(result);
+});
+
+
+
+
+
+// module, test, asyncTest, start,
+//          ok, equal, deepEqual, throws,
+//          ModelArrayTest:true 
+
+var ModelArrayTest = Ember.Application.create({
+  apiUrl: 'https://api.com',
   rootElement: '#model-array-test',
 
-  adapter: Data.Adapter.create({
-    baseUrl: Global.api.url,
-    authParams: {
-      'user_credentials': Auth.user.singleAccessToken
-    }
+  adapter: Adapter.create({
+    baseUrl: 'https://data.api.com'
   })
 });
 
-ModelArrayTest.Post = Data.Model.extend({
-  title: Data.attr('string'),
-  createdAt: Data.attr('datetime'),
-  comments: Data.hasMany('ModelArrayTest.Comment', { cascadeSaving: true })
+ModelArrayTest.Post = Model.extend({
+  title: attribute('string'),
+  createdAt: attribute('datetime'),
+  comments: hasMany('ModelArrayTest.Comment', { cascadeSaving: true })
 });
 
-ModelArrayTest.Comment = Data.Model.extend({
-  post: Data.belongsTo('ModelArrayTest.Post', { owner: true }),
-  text: Data.attr('string', { defaultValue: '' }),
-  author: Data.attr('string'),
-  createdAt: Data.attr('datetime')
+ModelArrayTest.Comment = Model.extend({
+  post: belongsTo('ModelArrayTest.Post', { owner: true }),
+  text: attribute('string', { defaultValue: '' }),
+  author: attribute('string'),
+  createdAt: attribute('datetime')
 });
 
 
-ModelArrayTest.BadPost = Data.Model.extend({
-  comments: Data.hasMany('ModelArrayTest.BadComment')
+ModelArrayTest.BadPost = Model.extend({
+  comments: hasMany('ModelArrayTest.BadComment')
 });
 
-ModelArrayTest.BadComment = Data.Model.extend({
-  post: Data.belongsTo('ModelArrayTest.BadPost')
+ModelArrayTest.BadComment = Model.extend({
+  post: belongsTo('ModelArrayTest.BadPost')
 });
 
 

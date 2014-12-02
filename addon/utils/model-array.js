@@ -1,5 +1,8 @@
+import Ember from 'ember';
+import { getType } from 'gatemedia-data/utils/misc';
+import Constants from 'gatemedia-data/utils/constants';
 
-Data.ModelArray = Ember.ArrayProxy.extend({
+export default Ember.ArrayProxy.extend({
   _type: null,
   _owner: null,
   _field: null,
@@ -15,8 +18,8 @@ Data.ModelArray = Ember.ArrayProxy.extend({
 
   createRecord: function (data) {
     data = data || {};
-    var type = Data.getType(this.get('_type')),
-        ownerRelation = type.ownerRelation(Data.LAX_OWNER),
+    var type = getType(this.get('_type')),
+        ownerRelation = type.ownerRelation(Constants.LAX_OWNER),
         dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
         dataOwnerId = data[dataOwnerKey],
         owner = this.get('_owner'),

@@ -1,18 +1,22 @@
-//= require ./attributes
-//= require ./model_changes
-//= require ./adapter
-//= require ./reloader
+import Ember from 'ember';
+import ModelChanges from 'gatemedia-data/utils/model-changes';
+import Reloader from 'gatemedia-data/utils/reloader';
+import attribute from 'gatemedia-data/utils/attribute';
+import Constants from 'gatemedia-data/utils/constants';
+import { getType } from 'gatemedia-data/utils/misc';
 
 /**
   Events (intended for local model post-processing):
     - record:saved
     - record:failed
  */
-Data.Model = Ember.Object.extend(Ember.Evented, {
+var Model = Ember.Object.extend(
+  Ember.Evented,
+{
 
-  id: Data.attr('number', { serialize: false }),
-  createdAt: Data.attr('datetime', { serialize: false }),
-  updatedAt: Data.attr('datetime', { serialize: false }),
+  id: attribute('number', { serialize: false }),
+  createdAt: attribute('datetime', { serialize: false }),
+  updatedAt: attribute('datetime', { serialize: false }),
 
   _container: null,
   _attributeChanges: null,
@@ -60,7 +64,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
   }.property('meta.isNew', 'id'),
 
   _parent: function () {
-    var ownerRelation = this.constructor.ownerRelation(Data.STRICT_OWNER);
+    var ownerRelation = this.constructor.ownerRelation(Constants.STRICT_OWNER);
 
     if (ownerRelation) {
       var relationsCache = this.get('_relationsCache') || {};
@@ -133,8 +137,8 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _resetChanges: function () {
     this.set('_original', Ember.copy(this.get('_data'), true));
-    this.set('_attributeChanges', Data.ModelChanges.create());
-    this.set('_relationChanges', Data.ModelChanges.create());
+    this.set('_attributeChanges', ModelChanges.create());
+    this.set('_relationChanges', ModelChanges.create());
   },
 
   resetCaches: function () {
@@ -405,7 +409,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 });
 
 
-Data.Model.reopenClass({
+Model.reopenClass({
 
   instanciate: function (data, extraData) {
     var record = this.createRecord(data, extraData);
@@ -457,7 +461,7 @@ Data.Model.reopenClass({
 
     record.setProperties(extraData);
     if (this.hasReloading()) {
-      record.set('_reloader', Data.Reloader.create({
+      record.set('_reloader', Reloader.create({
         record: record
       }));
     }
@@ -553,7 +557,7 @@ Data.Model.reopenClass({
       }
       if (dataKey) {
         var sideLoad = data[dataKey],
-            type = Data.getType(types[key]);
+            type = getType(types[key]);
         Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances", sideLoad);
         sideLoad.forEach(function (sideItemData) {
           type.load(sideItemData);
@@ -564,7 +568,7 @@ Data.Model.reopenClass({
 
     if (Ember.keys(data).length) {
       orderedKeys.forEach(function (key) {
-        var type = Data.getType(types[key]);
+        var type = getType(types[key]);
         if (type && Ember.keys(data).length) {
           type.sideLoad(data, alreadyLoaded.pushObjects(orderedKeys));
         }
@@ -696,7 +700,7 @@ Data.Model.reopenClass({
     var ownerRelation;
 
     this.eachRelation(function (relation, meta) {
-      if (meta.options.owner && !((checking === Data.STRICT_OWNER) && (meta.options.follow === false))) {
+      if (meta.options.owner && !((checking === Constants.STRICT_OWNER) && (meta.options.follow === false))) {
         ownerRelation = {
           name: relation,
           meta: meta
@@ -720,3 +724,6 @@ Data.Model.reopenClass({
     };
   }
 });
+
+
+export default Model;

@@ -1,6 +1,10 @@
+import Ember from 'ember';
 
-Data.Adapter = Ember.Object.extend({
+Ember.$.support.cors = true;
 
+export default Ember.Object.extend(
+  Ember.Evented,
+{
   baseUrl: Ember.required(),
   namespace: null,
   context: null,
@@ -103,7 +107,7 @@ Data.Adapter = Ember.Object.extend({
       });
     }
 
-    var call = Data.ajax(settings);
+    var call = this.ajax(settings);
 
     if (settings.async) {
       call
@@ -325,11 +329,11 @@ Data.Adapter = Ember.Object.extend({
           data: JSON.stringify(adapter.buildParams(params, extraParams))
         };
 
-        Data.ajax(settings).
+        this.ajax(settings).
         done(function (data) {
           Ember.run(function () {
             Ember.Logger.debug("DATA - Saved (" + action + ")",
-              record.toString(), (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
+              record.toString(), ":", data);
 
             if (data && data[resourceKey]) {
               record.reloadFrom(data, resourceKey);
@@ -431,6 +435,15 @@ Data.Adapter = Ember.Object.extend({
 
 
   xhrError: function (settings, xhr, status, error) {
-    Data.trigger('xhr:error', xhr, status, error);
+    Ember.Logger.error('XHR Failed:', xhr.type, xhr.url, '->', status, error);
+    this.trigger('xhr:error', xhr, status, error);
+  },
+
+  ajax: function (settings) {
+    return Ember.$.ajax(Ember.merge(settings, {
+      xhrFields: {
+        withCredentials: true
+      }
+    }));
   }
 });

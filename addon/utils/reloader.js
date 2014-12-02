@@ -1,5 +1,6 @@
+import Ember from 'ember';
 
-Data.reloadingStrategies = Ember.Object.create({
+var reloadingStrategies = Ember.Object.create({
 
   whileTrue: function (value) {
     return value === true;
@@ -11,7 +12,7 @@ Data.reloadingStrategies = Ember.Object.create({
 });
 
 
-Data.Reloader = Ember.Object.extend({
+export default Ember.Object.extend({
   record: null,
   triggers: null,
 
@@ -55,7 +56,7 @@ Data.Reloader = Ember.Object.extend({
 
     this.get('triggers').forEach(function (trigger) {
       var value = record.get(trigger.attribute),
-        check = Data.reloadingStrategies.getWithDefault(trigger.strategy, 'never');
+        check = reloadingStrategies.getWithDefault(trigger.strategy, 'never');
 
       if (check.call(this, value) && (now - createdAt < trigger.timeout * 1000)) {
         needsReload = true;

@@ -1,5 +1,6 @@
+import Ember from 'ember';
 
-Data.Codec = Ember.Object.extend({
+var Codec = Ember.Object.extend({
   decode: function (value/*, qualifier*/) {
     return value;
   },
@@ -10,8 +11,9 @@ Data.Codec = Ember.Object.extend({
 });
 
 
-Data.codec = {
-  string: Data.Codec.create({
+var codec = {
+
+  string: Codec.create({
     decode: function (value) {
       if (Ember.isNone(value)) {
         return value;
@@ -36,7 +38,7 @@ Data.codec = {
     }
   }),
 
-  number: Data.Codec.create({
+  number: Codec.create({
     decode: function (value/*, qualifier*/) {
       if (Ember.typeOf(value) === 'number') {
         return value;
@@ -52,17 +54,17 @@ Data.codec = {
     }
   }),
 
-  boolean: Data.Codec.create({
+  boolean: Codec.create({
     encode: function (value/*, qualifier*/) {
       return value ? true: false;
     }
   }),
 
-  array: Data.Codec.create({
+  array: Codec.create({
     decode: function (value, qualifier) {
       if (value) {
         return value.map(function (item) {
-          return Data.codec[qualifier].decode(item);
+          return codec[qualifier].decode(item);
         });
       }
       return null;
@@ -71,13 +73,13 @@ Data.codec = {
     encode: function (value, qualifier) {
       if (value) {
         return value.map(function (item) {
-          return Data.codec[qualifier].encode(item);
+          return codec[qualifier].encode(item);
         });
       }
     }
   }),
 
-  date: Data.Codec.create({
+  date: Codec.create({
     decode: function (value/*, qualifier*/) {
       if (Ember.isNone(value)) {
         return null;
@@ -96,7 +98,7 @@ Data.codec = {
     }
   }),
 
-  time: Data.Codec.create({
+  time: Codec.create({
     decode: function (value/*, qualifier*/) {
       if (Ember.isNone(value)) {
         return null;
@@ -112,7 +114,7 @@ Data.codec = {
     }
   }),
 
-  datetime: Data.Codec.create({
+  datetime: Codec.create({
     decode: function (value/*, qualifier*/) {
       if (Ember.isNone(value)) {
         return null;
@@ -128,7 +130,7 @@ Data.codec = {
     }
   }),
 
-  json: Data.Codec.create({
+  json: Codec.create({
     decode: function (value/*, qualifier*/) {
       return JSON.stringify(value);
     },
@@ -145,3 +147,5 @@ Data.codec = {
     }
   })
 };
+
+export default codec;

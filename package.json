@@ -1,6 +1,7 @@
 {
   "name": "gatemedia-data",
-  "version": "0.0.0",
+  "version": "2.0.0",
+  "private": true,
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -10,7 +11,6 @@
     "build": "ember build",
     "test": "ember test"
   },
-  "repository": "",
   "engines": {
     "node": ">= 0.10.0"
   },
@@ -29,7 +29,8 @@
     "ember-data": "1.0.0-beta.11",
     "ember-export-application-global": "^1.0.0",
     "express": "^4.8.5",
-    "glob": "^4.0.5"
+    "glob": "^4.0.5",
+    "ember-cli-moment": "0.0.1"
   },
   "description": "The default blueprint for ember-cli addons.",
   "keywords": [
