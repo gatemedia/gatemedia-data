@@ -116,174 +116,63 @@ export default Ember.Object.extend(
     }
   },
 
-  findOne: function (type, id, parent, options, hooks) {
-    options = options || {};
-    return this.findWithCache(options,
-      function (ok) {
-        var cached = type.cachedRecord(id);
-        if (cached) {
-          ok(cached);
-          return true;
+  find: function (model, query, result) {
+    var useContext = Ember.isNone(query.options.useContext) ? true : query.options.useContext,
+        url = this.buildUrl(model.key, query.findMany ? null : model.ids, model.parent, useContext),
+        settings = {
+      async: query.async,
+      type: 'GET',
+      url: url,
+      dataType: 'json',
+      data: this.buildParams(query.options.params, query.findMany ? {
+        ids: model.ids, // Ember.isEmpty(ids) ? null : ids,
+      } : null)
+    };
+
+    Ember.tryInvoke(result.hooks, 'willXHR', [url]);
+    this._xhr(settings,
+
+    function (data) {
+      var resourceKey = model.key;
+      if (query.findMany) {
+        resourceKey = resourceKey.pluralize();
+        Ember.Logger.debug("DATA - Found many", resourceKey,
+          (model.parent ? "(parent " + model.parent.toString() + ")" : '') + ":", data);
+      } else {
+        Ember.Logger.debug("DATA - Found one", resourceKey,
+          "(" + query.ids + "):", data);
+      }
+
+      if (data[resourceKey]) {
+        Ember.tryInvoke(query.hooks, 'willLoad', [data]);
+        var got;
+        if (query.findMany) {
+          got = result.store.loadMany(model.key, data[resourceKey]);
+        } else {
+          got = result.store.load(model.key, data[resourceKey]);
         }
-        return false;
-      },
-      function (async, ok, ko) {
-        var action = 'GET',
-            useContext = Ember.isNone(options.useContext) ? true : options.useContext,
-            url = this.buildUrl(type, id, parent, useContext),
-            self = this,
-            settings = {
-          async: async,
-          type: action,
-          url: url,
-          dataType: 'json',
-          data: this.buildParams(options.params)
-        };
+        result.store.sideLoad(data, resourceKey);
+        Ember.tryInvoke(query.hooks, 'didLoad', [data]);
+        result.ok(got);
+      } else {
+        var message = "API returned JSON with missing key '" + resourceKey + "'";
 
-        Ember.tryInvoke(hooks, 'willXHR', [url]);
-        this._xhr(settings,
-        function (data) {
-          Ember.Logger.debug("DATA - Found one", type, "(" + id + "):", data);
-          var resourceKey = type.resourceKey();
-
-          if (data[resourceKey]) {
-            Ember.tryInvoke(hooks, 'willLoad', [data]);
-            var record = type.load(data[resourceKey]);
-            type.sideLoad(data, resourceKey);
-            Ember.tryInvoke(hooks, 'didLoad', [data]);
-            ok(record);
-          } else {
-            var message = "API returned JSON with missing key '" + resourceKey + "'";
-
-            Ember.Logger.error(message, data);
-            ko({
-              xhr: null,
-              status: null,
-              error: message
-            });
-          }
-        },
-        function (xhr, status, error) {
-          self.xhrError(settings, xhr, status, error);
-          ko({
-            xhr: xhr,
-            status: status,
-            error: error
-          });
+        Ember.Logger.error(message, data);
+        result.ko({
+          xhr: null,
+          status: null,
+          error: message
         });
       }
-    );
-  },
-
-  findMany: function (type, ids, parent, options, hooks) {
-    options = options || {};
-    return this.findWithCache(options,
-      function (ok) {
-        var cached = ids.map(function (id) {
-          return type.cachedRecord(id);
-        }).compact();
-
-        if (!Ember.isEmpty(ids) && (cached.length === ids.length)) {
-          ok(cached);
-          return true;
-        }
-        return false;
-      },
-      function (async, ok, ko) {
-        var self = this,
-            action = 'GET',
-            useContext = Ember.isNone(options.useContext) ? true : options.useContext,
-            url = this.buildUrl(type, null, parent, useContext),
-            settings = {
-          async: async,
-          type: action,
-          url: url,
-          dataType: 'json',
-          data: this.buildParams(options.params, {
-            ids: ids, // Ember.isEmpty(ids) ? null : ids,
-          })
-        };
-
-        Ember.tryInvoke(hooks, 'willXHR', [url]);
-        this._xhr(settings,
-        function (data) {
-          Ember.Logger.debug("DATA - Found many", type, (parent ? "(parent " + parent.toString() + ")" : '') + ":", data);
-          var resourceKey = type.resourceKey().pluralize(),
-              result = [];
-
-          if (data[resourceKey]) {
-            Ember.tryInvoke(hooks, 'willLoad', [data]);
-            result.addObjects(data[resourceKey].map(function (itemData) {
-              return type.load(itemData);
-            }));
-            type.sideLoad(data, resourceKey);
-            Ember.tryInvoke(hooks, 'didLoad', [data]);
-            ok(result);
-          } else {
-            var message = "API returned JSON with missing key '" + resourceKey + "'";
-
-            Ember.Logger.error(message, data);
-            ko({
-              xhr: null,
-              status: null,
-              error: message
-            });
-          }
-        },
-        function (xhr, status, error) {
-          self.xhrError(settings, xhr, status, error);
-          ko({
-            xhr: xhr,
-            status: status,
-            error: error
-          });
-        });
+    },
+    function (xhr, status, error) {
+      this.xhrError(settings, xhr, status, error);
+      result.ko({
+        xhr: xhr,
+        status: status,
+        error: error
       });
-  },
-
-  findWithCache: function (options, findInCache, find) {
-    options = options || {};
-
-    var adapter = this,
-        async = !options.sync,
-        noCache = options.noCache;
-
-    function run (async, noCache, resolve, reject) {
-      var result = null;
-
-      function ok (record) {
-        Ember.run(function () {
-          if (async) {
-            resolve(record);
-          } else {
-            result = record;
-          }
-        });
-      }
-
-      function ko (error) {
-        Ember.run(function () {
-          if (async) {
-            reject(error);
-          } else {
-            result = null;
-          }
-        });
-      }
-
-      if (noCache || !findInCache.call(adapter, ok)) {
-        find.call(adapter, async, ok, ko);
-      }
-      return result;
-    }
-
-    if (async) {
-      return new Ember.RSVP.Promise(function (resolve, reject) {
-        run(true, noCache, resolve, reject);
-      });
-    } else {
-      return run(false, noCache);
-    }
+    }.bind(this));
   },
 
   save: function (record, extraParams, includeProperties) {
@@ -399,41 +288,6 @@ export default Ember.Object.extend(
     return params;
   },
 
-  cacheFor: function (type) {
-    var context = this.get('context') || '_global_',
-        cachePerContext = this.get('cachePerContext'),
-        key = type.toString(),
-        cacheHolder, cache;
-
-    this._cache = this._cache || {};
-    if (cachePerContext) {
-      this._cache[context] = this._cache[context] || {};
-      cacheHolder = this._cache[context];
-    } else {
-      cacheHolder = this._cache;
-    }
-
-    cache = cacheHolder[key];
-    if (Ember.isNone(cache)) {
-      cache = {};
-      cacheHolder[key] = cache;
-    }
-    return cache;
-  },
-  clearCacheAsContextChanged: function () {
-    var lastContext = this.get('_lastContext'),
-        newContext = this.get('context');
-
-    if (newContext) {
-      if ((newContext !== lastContext) &&
-          this.get('clearCacheOnContextChange')) {
-        this.set('_cache', {});
-      }
-      this.set('_lastContext', newContext);
-    }
-  }.observes('context'),
-
-
   xhrError: function (settings, xhr, status, error) {
     Ember.Logger.error('XHR Failed:', xhr.type, xhr.url, '->', status, error);
     this.trigger('xhr:error', xhr, status, error);
@@ -445,5 +299,5 @@ export default Ember.Object.extend(
         withCredentials: true
       }
     }));
-  }
+  },
 });

@@ -23,7 +23,7 @@ test('it works', function() {
 
 var ModelArrayTest = Ember.Application.create({
   apiUrl: 'https://api.com',
-  rootElement: '#model-array-test',
+  rootElement: '#ember-testing',
 
   adapter: Adapter.create({
     baseUrl: 'https://data.api.com'

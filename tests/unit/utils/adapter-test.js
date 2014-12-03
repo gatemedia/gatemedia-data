@@ -1,9 +1,4 @@
-import adapter from 'gatemedia-data/utils/adapter';
+import Adapter from 'gatemedia-data/utils/adapter';
 
-module('adapter');
+module('Adapter');
 
-// Replace this with your real tests.
-test('it works', function() {
-  var result = adapter();
-  ok(result);
-});

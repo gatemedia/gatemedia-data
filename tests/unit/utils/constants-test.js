@@ -1,6 +1,6 @@
 import Constants from 'gatemedia-data/utils/constants';
 
-module('constants');
+module('Constants');
 
 test('values are correct', function() {
   equal(Constants.STRICT_OWNER, 'strict');
