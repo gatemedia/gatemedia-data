@@ -118,7 +118,11 @@ export default Ember.Object.extend(
 
   find: function (model, query, result) {
     var useContext = Ember.isNone(query.options.useContext) ? true : query.options.useContext,
-        url = this.buildUrl(model.key, query.findMany ? null : model.ids, model.parent, useContext),
+        url = this.buildUrl(
+          model.key,
+          query.findMany ? null : model.ids,
+          model.parent,
+          useContext),
         settings = {
       async: query.async,
       type: 'GET',
@@ -252,7 +256,7 @@ export default Ember.Object.extend(
     });
   },
 
-  buildUrl: function (type, id, parent, useContext) {
+  buildUrl: function (key, id, parent, useContext) {
     var namespace = this.get('namespace'),
         context = this.get('context'),
         urlParts = [
@@ -268,7 +272,7 @@ export default Ember.Object.extend(
     if (parent) {
       urlParts.pushObject(parent.get('_url'));
     }
-    urlParts.pushObject(type.resourceUrl());
+    urlParts.pushObject(key.pluralize());
     if (!Ember.isNone(id)) {
       urlParts.pushObject(id);
     }
