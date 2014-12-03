@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import Store from 'gatemedia-data/utils/store';
 
 module('Store basics');
@@ -40,13 +41,28 @@ module('Store', {
         this.set('meta.isDirty', true);
       }
     });
+    Model.reopenClass({
+
+      eachRelation: function (callback, binding) {
+        this.relations.forEach(function (name) {
+          callback.call(binding || this, name, { options: {} });
+        }, this);
+      }
+    });
 
     this.store = Store.create({
       container: Ember.Object.create({
         lookupFactory: function (key) {
-          return Model.extend({
-            '__modelFor__': key
-          });
+          switch (key) {
+          case 'model:user':
+            return Model.extend({ '__modelFor__': key }).reopenClass({ relations: [ 'posts' ] });
+          case 'model:post':
+            return Model.extend({ '__modelFor__': key }).reopenClass({ relations: [ 'comments' ]  });
+          case 'model:comment':
+            return Model.extend({ '__modelFor__': key }).reopenClass({ relations: [] });
+          default:
+            return Model.extend({ '__modelFor__': key }).reopenClass({ relations: [] });
+          }
         }
       })
     });
@@ -159,6 +175,46 @@ test('loadMany instanciate new records', function () {
     equal(record.get('meta.isNew'), false, 'Record has meta.isNew false');
   });
   deepEqual(Ember.keys(this.store._cache.stuff), ['12','34'], 'Record is cached');
+});
+
+test('sideLoad loads extra data', function () {
+  var data = {
+    'user': {
+      'id': 42,
+      'first_name': 'John',
+      'last_name': 'Doe',
+      'post_ids': [ 1, 2, 3 ]
+    },
+    'comments': [{
+      'id': 11,
+      'text': 'Why not...'
+    }, {
+      'id': 12,
+      'text': 'Incredible!'
+    }, {
+      'id': 13,
+      'text': 'You think so?'
+    }],
+    'posts': [{
+      'id': 1,
+      'title': 'My first post',
+      'comment_ids': [ 11 ]
+    }, {
+      'id': 2,
+      'title': 'My second post',
+      'comment_ids': []
+    }, {
+      'id': 3,
+      'title': 'Yet another post',
+      'comment_ids': [ 12, 13 ]
+    }]
+  };
+  this.store.load('user', data.user);
+  this.store.sideLoad('user', data);
+
+  deepEqual(Ember.keys(this.store._cache.user), [ '42' ], '1 user record cached');
+  deepEqual(Ember.keys(this.store._cache.post), [ '1', '2', '3' ], '3 post records cached');
+  deepEqual(Ember.keys(this.store._cache.comment), [ '11', '12', '13' ], '3 comment records cached');
 });
 
 

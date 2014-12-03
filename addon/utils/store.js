@@ -57,7 +57,7 @@ export default Ember.Object.extend({
     return record;
   },
 
-  sideLoad: function (data, alreadyLoaded) {
+  sideLoad: function (key, data, alreadyLoaded) {
     alreadyLoaded = alreadyLoaded || [];
 
     Ember.assert('You must call %@.sideLoad() with the initial key'.fmt(this.constructor), !Ember.isNone(alreadyLoaded));
@@ -84,7 +84,7 @@ export default Ember.Object.extend({
       });
     }
 
-    this.eachRelation(function (relationName, meta) {
+    this.modelFor(key).eachRelation(function (relationName, meta) {
       var sideLoads;
       if (meta.options.sideLoad) {
         sideLoads = [ meta.options.sideLoad ];
@@ -108,21 +108,18 @@ export default Ember.Object.extend({
         dataKey = key.pluralize();
       }
       if (dataKey) {
-        var sideLoad = data[dataKey],
-            type = getType(types[key]);
-        Ember.Logger.debug('DATA - Sideload', sideLoad.length, type, "instances", sideLoad);
-        sideLoad.forEach(function (sideItemData) {
-          type.load(sideItemData);
-        });
+        var sideLoad = data[dataKey];
+        Ember.Logger.debug('DATA - Sideload', sideLoad.length, key, "instances", sideLoad);
+        this.loadMany(dataKey.singularize(), sideLoad);
         delete data[dataKey];
       }
     }, this);
 
     if (Ember.keys(data).length) {
       orderedKeys.forEach(function (key) {
-        var type = getType(types[key]);
-        if (type && Ember.keys(data).length) {
-          type.sideLoad(data, alreadyLoaded.pushObjects(orderedKeys));
+        var model = this.modelFor(key);
+        if (model && Ember.keys(data).length) {
+          this.sideLoad(key, data, alreadyLoaded.pushObjects(orderedKeys));
         }
       }, this);
     }
