@@ -44,8 +44,7 @@ export default function (type, options) {
         this._replaceRelation(key, oldValue, value);
       });
     } else {
-      var type = getType(meta.type),
-          id = this.get('_data.' + meta.codec.key(key)),
+      var id = this.get('_data.' + meta.codec.key(key)),
           parent = meta.options.nested ? this : null,
           relationsCache = this.get('_relationsCache') || {},
           relation = relationsCache[key];
@@ -56,9 +55,9 @@ export default function (type, options) {
       }
       if (id) {
         if (options.embedded) {
-          relation = type.load(id);
+          relation = this._store.load(type, id);
         } else {
-          relation = type.find(id, parent, { sync: true });
+          relation = this._store.find(type, id, parent, { sync: true });
         }
         if (relation) {
           relation.set('_owner', this);
