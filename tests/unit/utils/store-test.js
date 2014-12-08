@@ -209,11 +209,13 @@ test('sideLoad loads extra data', function () {
       'comment_ids': [ 12, 13 ]
     }]
   };
-  this.store.load('user', data.user);
-  this.store.sideLoad('user', data);
+  this.store.load('user', data);
 
+  ok(!Ember.isNone(this.store._cache.user), 'User records cache is defined');
   deepEqual(Ember.keys(this.store._cache.user), [ '42' ], '1 user record cached');
+  ok(!Ember.isNone(this.store._cache.post), 'Post records cache is defined');
   deepEqual(Ember.keys(this.store._cache.post), [ '1', '2', '3' ], '3 post records cached');
+  ok(!Ember.isNone(this.store._cache.comment), 'Comment records cache is defined');
   deepEqual(Ember.keys(this.store._cache.comment), [ '11', '12', '13' ], '3 comment records cached');
 });
 
