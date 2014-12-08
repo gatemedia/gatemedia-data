@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import { belongsToKey, getType } from 'gatemedia-data/utils/misc';
+import { belongsToKey } from 'gatemedia-data/utils/misc';
 import tooling from 'gatemedia-data/utils/tooling';
 
 /**

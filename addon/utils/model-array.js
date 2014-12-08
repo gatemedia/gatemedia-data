@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import { getType } from 'gatemedia-data/utils/misc';
 import Constants from 'gatemedia-data/utils/constants';
 
 export default Ember.ArrayProxy.extend({
@@ -18,22 +17,22 @@ export default Ember.ArrayProxy.extend({
 
   createRecord: function (data) {
     data = data || {};
-    var type = getType(this.get('_type')),
-        ownerRelation = type.ownerRelation(Constants.LAX_OWNER),
+    var key = this.get('_type'),
+        ownerRelation = this._store.modelFor(key).ownerRelation(Constants.LAX_OWNER),
         dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
         dataOwnerId = data[dataOwnerKey],
         owner = this.get('_owner'),
         ownerId = owner.get('id'),
         record;
 
-    Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(type), ownerRelation);
+    Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(key), ownerRelation);
     if (dataOwnerId) {
-      Ember.assert("Trying to add a %@ which owner mismatches ModelArray holder".fmt(type), ownerId === dataOwnerId);
+      Ember.assert("Trying to add a %@ which owner mismatches ModelArray holder".fmt(key), ownerId === dataOwnerId);
     } else {
       data[dataOwnerKey] = ownerId;
     }
 
-    record = type.instanciate(data);
+    record = this._store.instanciate(key, data);
     record.get('_relationsCache')[ownerRelation.name] = owner;
     this.assignRecord(record);
 

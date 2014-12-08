@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import ModelArray from 'gatemedia-data/utils/model-array';
-import { belongsToKey, getType } from 'gatemedia-data/utils/misc';
+import { belongsToKey } from 'gatemedia-data/utils/misc';
 import tooling from 'gatemedia-data/utils/tooling';
 
 /**
@@ -52,13 +52,12 @@ export default function (type, options) {
     }
   };
 
-  /* jshint maxcomplexity:14 */
+  /* jshint maxcomplexity:14, maxstatements:29 */
   return Ember.computed(function(key/*, value, oldValue*/) {
     if (arguments.length > 1) {
       Ember.assert('SHOULD NOT DO THAT, BRO', false);
     } else {
       var meta = this.constructor.metaForProperty(key),
-          type = getType(meta.type),
           ids = this.get('_data.' + meta.codec.key(key)),
           parent = meta.options.nested ? this : null,
           params,
@@ -90,7 +89,7 @@ export default function (type, options) {
           }
 
           if (meta.options.inline) {
-            var ownerRelation = type.ownerRelation();
+            var ownerRelation = this._store.modelFor(type).ownerRelation();
             if (ownerRelation) {
               var ownRelationKey = belongsToKey(ownerRelation.name),
                   ownerId = this.get('id');
@@ -100,13 +99,13 @@ export default function (type, options) {
                   data[ownRelationKey] = ownerId;
                 });
               }
-              content = type.loadMany(ids);
+              content = this._store.loadMany(type, ids);
             } else {
               Ember.Logger.error('%@ is missing owner relation for %@ inlining'.fmt(type, key));
               content = [];
             }
           } else {
-            content = type.find(ids, parent, { sync: true, params: params });
+            content = this._store.find(type, ids, parent, { sync: true, params: params });
             // Ember.Logger.debug('hasMany(%@.%@): retrieve %@'.fmt(type, key, ids));
           }
         }
