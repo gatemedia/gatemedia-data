@@ -147,18 +147,7 @@ export default Ember.Object.extend(
           "(" + query.ids + "):", data);
       }
 
-      if (data[resourceKey]) {
-        Ember.tryInvoke(query.hooks, 'willLoad', [data]);
-        var got;
-        if (query.findMany) {
-          got = result.store.loadMany(model.key, data[resourceKey]);
-        } else {
-          got = result.store.load(model.key, data[resourceKey]);
-        }
-        result.store.sideLoad(data, resourceKey);
-        Ember.tryInvoke(query.hooks, 'didLoad', [data]);
-        result.ok(got);
-      } else {
+      if (Ember.isNone(data[resourceKey])) {
         var message = "API returned JSON with missing key '" + resourceKey + "'";
 
         Ember.Logger.error(message, data);
@@ -167,6 +156,16 @@ export default Ember.Object.extend(
           status: null,
           error: message
         });
+      } else {
+        Ember.tryInvoke(query.hooks, 'willLoad', [data]);
+        var got;
+        if (query.findMany) {
+          got = result.store.loadMany(model.key, data);
+        } else {
+          got = result.store.load(model.key, data);
+        }
+        Ember.tryInvoke(query.hooks, 'didLoad', [data]);
+        result.ok(got);
       }
     },
     function (xhr, status, error) {
