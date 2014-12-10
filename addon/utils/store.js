@@ -20,26 +20,19 @@ export default Ember.Object.extend({
       sideLoadData = data;
     } else {
       entityData = data;
-      sideLoadData = {};
-      Ember.Logger.warn('Loading [%@] entity from raw definition. Side load will not occur!'.fmt(key));
+      sideLoadData = null;
     }
 
-    var useCache = extraData ? !extraData._embeddedContainer : true,
-        cachedRecord = useCache ? this.cachedRecord(key, entityData.id) : null,
-        record;
+    var load = this._load(key, entityData, extraData);
+    Ember.Logger.debug('DATA - %@ [%@][%@] instance'.fmt(load.action, key, entityData.id));
 
-    if (cachedRecord) {
-      cachedRecord._updateData(entityData);
-      record = cachedRecord;
+    if (sideLoadData) {
+      this.sideLoad(key, sideLoadData);
     } else {
-      record = this.createRecord(key, entityData, extraData);
-      record.set('meta.isNew', false);
+      Ember.Logger.warn('DATA - Loaded [%@] entity from raw definition. No side load!'.fmt(key));
     }
-    record.resetCaches();
 
-    this.sideLoad(key, sideLoadData);
-
-    return record;
+    return load.record;
   },
 
   loadMany: function (key, data, extraData) {
@@ -49,18 +42,54 @@ export default Ember.Object.extend({
 
     if (Ember.typeOf(data) === 'array') {
       entitiesData = data;
-      sideLoadData = {};
-      Ember.Logger.warn('Loading [%@] entities from raw definition. Side load will not occur!'.fmt(key));
+      sideLoadData = null;
     } else {
       entitiesData = data[key.pluralize()];
       sideLoadData = data;
     }
 
-    this.sideLoad(key, sideLoadData);
-
-    return entitiesData.map(function (itemData) {
-      return this.load(key, itemData, extraData);
+    var loads = entitiesData.map(function (entityData) {
+      return this._load(key, entityData, extraData);
     }, this);
+
+    var loaded = loads.filterBy('action', 'Load'),
+        updated = loads.filterBy('action', 'Update');
+    if (loaded.length) {
+      Ember.Logger.debug('DATA - Loaded %@ [%@] instances [%@]'.fmt(loaded.length, key, loaded.getEach('record.id').join(',')));
+    }
+    if (updated.length) {
+      Ember.Logger.debug('DATA - Updated %@ [%@] instances [%@]'.fmt(updated.length, key, updated.getEach('record.id').join(',')));
+    }
+
+    if (sideLoadData) {
+      this.sideLoad(key, sideLoadData);
+    } else {
+      Ember.Logger.warn('DATA - Loaded [%@] entities from raw definition. No side load!'.fmt(key));
+    }
+
+    return loads.getEach('record');
+  },
+
+  _load: function (key, entityData, extraData) {
+    var useCache = extraData ? !extraData._embeddedContainer : true,
+        cachedRecord = useCache ? this.cachedRecord(key, entityData.id) : null,
+        record, action;
+
+    if (cachedRecord) {
+      cachedRecord._updateData(entityData);
+      record = cachedRecord;
+      action = 'Update';
+    } else {
+      record = this.createRecord(key, entityData, extraData);
+      record.set('meta.isNew', false);
+      action = 'Load';
+    }
+    record.resetCaches();
+
+    return {
+      record: record,
+      action: action
+    };
   },
 
   createRecord: function (key, data, extraData) {
@@ -138,8 +167,10 @@ export default Ember.Object.extend({
         }
       }
       if (dataKey) {
-        Ember.Logger.debug('DATA - Sideload %@ %@ instances (key=%@)'.fmt(data[dataKey].length, types[key], dataKey), data[dataKey]);
-        this.loadMany(types[key], data[dataKey]);
+        Ember.Logger.debug('DATA - Sideload %@ [%@] instances (from key "%@")'.fmt(data[dataKey].length, types[key], dataKey));
+        data[dataKey].forEach(function (entityData) {
+          this._load(types[key], entityData);
+        }, this);
         delete data[dataKey];
       }
     }, this);
