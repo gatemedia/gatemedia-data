@@ -1,10 +1,10 @@
 import Ember from 'ember';
-import attrMeta from 'gatemedia-data/utils/attr-meta';
+import attributeMeta from 'gatemedia-data/utils/attribute-meta';
 import tooling from 'gatemedia-data/utils/tooling';
 
 export default function (type, options) {
   options = options || {};
-  var meta = attrMeta(type, options);
+  var meta = attributeMeta(type, options);
 
   return Ember.computed(function(key, value, oldValue) {
     if (arguments.length > 1) {

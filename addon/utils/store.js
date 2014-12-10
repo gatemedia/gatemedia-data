@@ -167,17 +167,23 @@ export default Ember.Object.extend({
         }
       }
       if (dataKey) {
-        Ember.Logger.debug('DATA - Sideload %@ [%@] instances (from key "%@")'.fmt(data[dataKey].length, types[key], dataKey));
-        data[dataKey].forEach(function (entityData) {
-          this._load(types[key], entityData);
-        }, this);
+        if (Ember.typeOf(data[dataKey]) === 'array') {
+          Ember.Logger.debug('DATA - Sideload %@ [%@] instances (from key "%@")'.fmt(data[dataKey].length, types[key], dataKey));
+          data[dataKey].forEach(function (entityData) {
+            this._load(types[key], entityData);
+          }, this);
+        } else {
+          Ember.Logger.debug('DATA - Sideload a single [%@] instance (from key "%@")'.fmt(types[key], dataKey));
+          this._load(types[key], data[dataKey]);
+        }
         delete data[dataKey];
       }
     }, this);
 
     if (Ember.keys(data).length) {
-      orderedRelations.forEach(function (key) {
-        var model = this.modelFor(key);
+      orderedRelations.forEach(function (relation) {
+        var key = relation.singularize(),
+            model = this.modelFor(key, true);
         if (model && Ember.keys(data).length) {
           this.sideLoad(key, data, alreadyLoaded.pushObjects(orderedRelations));
         }
@@ -359,10 +365,12 @@ export default Ember.Object.extend({
   },
 
 
-  modelFor: function (key) {
-    Ember.assert('Data store is missing its container', !Ember.isNone(this.container));
-
+  modelFor: function (key, permissive) {
+    Ember.assert('Data store is missing its container', this.container);
     var factory = this.container.lookupFactory('model:%@'.fmt(key));
+    if (!permissive) {
+      Ember.assert('Unknown model "%@"'.fmt(key), factory);
+    }
     return factory;
   },
 
