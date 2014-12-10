@@ -98,7 +98,9 @@ var Model = Ember.Object.extend(
    */
   reload: function (options) {
     options = options || {};
-    return this.constructor.find(this.get('id'), this.get('_parent'), Ember.merge(options, {
+    var store = this.get('_store'),
+        key = this.constructor.toString().match(/model:(.+):/)[1];
+    return store.find(key, this.get('id'), this.get('_parent'), Ember.merge(options, {
       noCache: true
     }));
   },
