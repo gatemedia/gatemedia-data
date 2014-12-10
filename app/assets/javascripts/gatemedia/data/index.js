@@ -14,7 +14,7 @@ Data = Ember.Namespace.createWithMixins(
   ajax: function (settings) {
     return Ember.$.ajax(Ember.merge(settings, {
       xhrFields: {
-        withCredentials: true
+        // withCredentials: true
       }
     }));
   }
