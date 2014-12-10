@@ -8,10 +8,6 @@ export default Ember.Object.extend(
   baseUrl: Ember.required(),
   namespace: null,
   context: null,
-  /**
-    To be defined as needed by app.
-   */
-  authParams: null,
 
   cachePerContext: true,
   clearCacheOnContextChange: false,
@@ -280,7 +276,6 @@ export default Ember.Object.extend(
 
   buildParams: function (optionParams, extraParams) {
     var params = {};
-    // Ember.merge(params, this.get('authParams'));
 
     if (optionParams) {
       Ember.merge(params, optionParams);
