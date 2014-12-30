@@ -186,7 +186,7 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
 
   _changeRelation: function (relation, action, oldMember, newMember) {
     var data = this.get('_data'),
-        attr = '%@_id'.fmt(relation.singularize());
+        attr = '%@_id'.fmt(relation.underscore().singularize());
 
     if (data.hasOwnProperty(attr)) {
       data[attr] = newMember ? newMember.get('id') : null;
