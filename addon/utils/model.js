@@ -3,6 +3,22 @@ import ModelChanges from 'gatemedia-data/utils/model-changes';
 import attribute from 'gatemedia-data/utils/attribute';
 import Constants from 'gatemedia-data/utils/constants';
 
+var Meta = Ember.Object.extend({
+  _model: this,
+
+  modelKey: function () {
+    return (/model:(.+):/).exec(this.get('_model').constructor.toString())[1];
+  }.property('_model'),
+
+  resourceKey: function () {
+    return this.get('modelKey').underscore();
+  }.property('modelKey'),
+
+  resourceUrlToken: function () {
+    return this.get('resourceKey').pluralize();
+  }.property('resourceKey')
+});
+
 /**
   Events (intended for local model post-processing):
     - record:saved
@@ -39,10 +55,11 @@ var Model = Ember.Object.extend(
     this._super();
     this._resetChanges();
     this.resetCaches();
-    this.set('meta', Ember.Object.create({
+    this.set('meta', Meta.create({
         isNew: true,
         isDirty: false,
-        isDeleted: false
+        isDeleted: false,
+        _model: this
       })
     );
   },
@@ -54,7 +71,7 @@ var Model = Ember.Object.extend(
     if (parent) {
       parts.pushObject(parent.get('_url'));
     }
-    parts.pushObject(this.constructor.resourceUrl());
+    parts.pushObject(this.get('meta.resourceUrlToken'));
     if (!this.get('meta.isNew')) {
       parts.pushObject(this.get('id'));
     }
@@ -83,11 +100,10 @@ var Model = Ember.Object.extend(
     Reload this instance's properties from passed raw data.
    */
   reloadFrom: function (data, key) {
-    var type = this.constructor;
-    key = key || type.resourceKey();
+    key = key || this.get('meta.modelKey');
 
     this._updateData(data[key]);
-    type.sideLoad(data, key);
+    this.get('_store').sideLoad(key, data);
     this.resetCaches();
   },
 
@@ -99,7 +115,7 @@ var Model = Ember.Object.extend(
   reload: function (options) {
     options = options || {};
     var store = this.get('_store'),
-        key = this.constructor.toString().match(/model:(.+):/)[1];
+        key = this.get('meta.modelKey');
     return store.find(key, this.get('id'), this.get('_parent'), Ember.merge(options, {
       noCache: true
     }));
@@ -322,7 +338,7 @@ var Model = Ember.Object.extend(
       }
 
       if (this.get('meta.isNew') || this.get('hasChanges') || this.get('meta.isDeleted')) {
-        this.getAdapter().save(this, extraParams, includeProperties).then(function (record) {
+        this.get('_store.adapter').save(this, extraParams, includeProperties).then(function (record) {
           Ember.run(record, function () {
             saveChildren(this, resolve, reject);
           });
@@ -387,10 +403,6 @@ var Model = Ember.Object.extend(
     }, this);
 
     return json;
-  },
-
-  getAdapter: function () {
-    return this.constructor.getAdapter();
   },
 
 

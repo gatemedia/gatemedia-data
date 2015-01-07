@@ -179,7 +179,7 @@ export default Ember.Object.extend(
         action,
         async = true,
         params = {},
-        resourceKey = record.constructor.resourceKey(),
+        resourceKey = record.get('meta.resourceKey'),
         url = [
       this.get('baseUrl'),
       this.get('namespace'),
