@@ -172,7 +172,7 @@ var Model = Ember.Object.extend(
           newValue: newValue
         });
       }
-      changeHolder._dirty();
+      changeHolder.dirty();
     }
   },
 
@@ -214,7 +214,7 @@ var Model = Ember.Object.extend(
       oldValue: oldMember,
       newValue: newMember
     });
-    this._dirty();
+    this.dirty();
   },
 
   _destroyRelation: function (relation, removedMember) {
@@ -230,16 +230,16 @@ var Model = Ember.Object.extend(
     this.resetCache(relation);
   },
 
-  _dirty: function () {
+  dirty: function () {
     var parent = this.get('_parent'),
         embeddedContainer = this.get('_embeddedContainer');
 
     this.set('meta.isDirty', true);
     if (embeddedContainer) {
-      embeddedContainer._dirty();
+      embeddedContainer.dirty();
     }
     if (parent) {
-      parent._dirty();
+      parent.dirty();
     }
   },
 
@@ -262,7 +262,7 @@ var Model = Ember.Object.extend(
 
     this.set('meta.isDeleted', true);
     if (!this.get('meta.isNew')) {
-      this._dirty();
+      this.dirty();
     } else {
       this._resetDirtyness();
     }
