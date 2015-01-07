@@ -44,7 +44,7 @@ export default Ember.Object.extend({
       entitiesData = data;
       sideLoadData = null;
     } else {
-      entitiesData = data[key.pluralize()];
+      entitiesData = data[key.underscore().pluralize()];
       sideLoadData = data;
     }
 
@@ -341,7 +341,7 @@ export default Ember.Object.extend({
       } else {
         Ember.assert('Store is missing its adapter', !Ember.isNone(this.adapter));
         this.adapter.find(
-          { key: key, ids: ids, parent: parent },
+          { key: key.underscore(), ids: ids, parent: parent },
           { options: options, findMany: findMany, async: async, hooks: hooks },
           { ok: ok, ko: ko, store: this });
       }
