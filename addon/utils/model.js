@@ -206,7 +206,7 @@ var Model = Ember.Object.extend(
 
   _changeRelation: function (relation, action, oldMember, newMember) {
     var data = this.get('_data'),
-        attr = '%@_id'.fmt(relation.singularize());
+        attr = '%@_id'.fmt(relation.underscore().singularize());
 
     if (data.hasOwnProperty(attr)) {
       data[attr] = newMember ? newMember.get('id') : null;
@@ -235,7 +235,7 @@ var Model = Ember.Object.extend(
 
   _destroyRelation: function (relation, removedMember) {
     var data = this.get('_data'),
-        attr = '%@_id'.fmt(relation.singularize());
+        attr = '%@_id'.fmt(relation.underscore().singularize());
 
     if (data.hasOwnProperty(attr)) {
       delete data[attr];

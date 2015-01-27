@@ -294,7 +294,7 @@ export default Ember.Object.extend(
   ajax: function (settings) {
     return Ember.$.ajax(Ember.merge(settings, {
       xhrFields: {
-        withCredentials: true
+        // withCredentials: true
       }
     }));
   },
