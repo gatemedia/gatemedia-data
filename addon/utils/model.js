@@ -3,7 +3,7 @@ import ModelChanges from 'gatemedia-data/utils/model-changes';
 import attribute from 'gatemedia-data/utils/attribute';
 import Constants from 'gatemedia-data/utils/constants';
 
-var Meta = Ember.Object.extend({
+export var Meta = Ember.Object.extend({
   _model: this,
 
   modelKey: function () {
@@ -168,7 +168,7 @@ var Model = Ember.Object.extend(
   },
 
   expireCaches: function () {
-    this.set('_cacheTimestamp', new Date().getTime());
+    this.set('_cacheTimestamp', this.constructor.timestampFactory());
   },
 
   _changeAttribute: function (attribute, oldValue, newValue) {
@@ -422,6 +422,10 @@ var Model = Ember.Object.extend(
 
 
 Model.reopenClass({
+
+  timestampFactory: function () {
+    return new Date().getTime();
+  },
 
   /**
    * Iterate through model relations, invoking callback with relation's name & meta.

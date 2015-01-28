@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import resolver from './helpers/resolver';
 import {
   setResolver
@@ -40,4 +41,23 @@ String.prototype.singularize = function () {
     return this.slice(0, this.length - 1);
   }
   return this;
+};
+
+
+//TODO use gm-ext
+Ember.repr = function (stuff) {
+  switch (Ember.typeOf(stuff)) {
+  case 'object':
+    return '{%@}'.fmt(Ember.keys(stuff).map(function (key) {
+      return "%@:%@".fmt(key, Ember.repr(stuff[key]));
+    }).join(', '));
+  case 'array':
+    return '[%@]'.fmt(stuff.map(function (item) {
+      return Ember.repr(item);
+    }).join(', '));
+  case 'string':
+    return '"%@"'.fmt(stuff);
+  default:
+    return Ember.inspect(stuff);
+  }
 };

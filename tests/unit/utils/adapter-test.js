@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import Adapter from 'gatemedia-data/utils/adapter';
 
 module('Adapter');

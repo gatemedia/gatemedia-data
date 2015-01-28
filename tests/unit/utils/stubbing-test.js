@@ -7,10 +7,15 @@ test('it works', function() {
     hop: 42
   });
 
-  var result = fakeAPI.processAjax({
+  var got = false,
+      processing = fakeAPI.processAjax({
     type: 'GET',
-    url: 'hop'
+    url: 'http://gm.com/hop',
+    success: function (result) {
+      got = result;
+    }
   });
 
-  equal(result.hop, 42);
+  equal(processing.result.hop, 42);
+  equal(got.hop, 42);
 });

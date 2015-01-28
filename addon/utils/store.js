@@ -6,8 +6,8 @@ export default Ember.Object.extend({
   instanciate: function (key, data, extraData) {
     var record = this.createRecord(key, data, extraData);
     record.set('meta.isNew', true);
-    Ember.run.next(record, function () {
-      this.dirty();
+    Ember.run.next(function () {
+      record.dirty();
     });
     return record;
   },

@@ -37,7 +37,7 @@ module('Store', {
         this.incrementProperty('cacheReset');
       },
 
-      _dirty: function () {
+      dirty: function () {
         this.set('meta.isDirty', true);
       }
     });
@@ -45,7 +45,10 @@ module('Store', {
 
       eachRelation: function (callback, binding) {
         this.relations.forEach(function (name) {
-          callback.call(binding || this, name, { options: {} });
+          callback.call(binding || this, name, {
+            type: name.singularize(),
+            options: {}
+          });
         }, this);
       }
     });
@@ -240,7 +243,7 @@ module('Store find', {
         this.incrementProperty('cacheReset');
       },
 
-      _dirty: function () {
+      dirty: function () {
         this.set('meta.isDirty', true);
       }
     });
