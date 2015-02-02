@@ -377,18 +377,23 @@ var Model = Ember.Object.extend(
   },
 
   toJSON: function (includeProperties) {
+    includeProperties = includeProperties || [];
+    if (!Ember.Array.detect(includeProperties)) {
+      Ember.Logger.error('Bad includeProperties value:', includeProperties);
+      includeProperties = [];
+    }
     var json = {},
         processedKeys = [];
 
     this.constructor.eachAttribute(function (attribute, meta) {
-      if ((meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(attribute))) {
+      if ((meta.options.serialize !== false) && (Ember.isEmpty(includeProperties) || includeProperties.contains(attribute))) {
         json[meta.codec.key(attribute)] = meta.codec.encode(this, attribute);
       }
       processedKeys.pushObject(meta.codec.key(attribute));
     }, this);
 
     this.constructor.eachRelation(function (relation, meta) {
-      if ((meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(relation))) {
+      if ((meta.options.serialize !== false) && (Ember.isEmpty(includeProperties) || includeProperties.contains(relation))) {
         json[meta.codec.key(relation)] = meta.codec.encode(this, relation);
       }
       processedKeys.pushObject(meta.codec.key(relation));
@@ -397,7 +402,7 @@ var Model = Ember.Object.extend(
     Ember.assert("Model's internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
       !Ember.isNone(this._data));
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
-      if (Ember.isNone(includeProperties) || includeProperties.contains(dynamicKey)) {
+      if (Ember.isEmpty(includeProperties) || includeProperties.contains(dynamicKey)) {
         json[dynamicKey] = this._data[dynamicKey];
       }
     }, this);
