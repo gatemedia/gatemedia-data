@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import ModelArray from 'gatemedia-data/utils/model-array';
+import hasManyMeta from 'gatemedia-data/utils/has-many-meta';
 import { belongsToKey } from 'gatemedia-data/utils/misc';
 import tooling from 'gatemedia-data/utils/tooling';
 
@@ -22,35 +23,7 @@ export default function (type, options) {
   options = options || {};
   options.cascadeSaving = !!options.cascadeSaving;
 
-  var meta = {
-    type: type,
-    isRelation: true,
-    options: options,
-    codec: {
-      key: function (key) {
-        if (options.inline) {
-          return key.decamelize();
-        }
-        return '%@_ids'.fmt(key.decamelize().singularize());
-      },
-
-      encode: function (instance, attribute) {
-        var cache = instance.get('_relationsCache.%@'.fmt(attribute));
-
-        if (options.inline) {
-          cache = cache || instance.get('_data.' + this.key(attribute));
-          return cache.map(function (item) {
-            return item.toJSON();
-          });
-        } else {
-          if (cache) {
-            return cache.getEach('id');
-          }
-          return instance.get('_data.' + this.key(attribute));
-        }
-      }
-    }
-  };
+  var meta = hasManyMeta(type, options);
 
   /* jshint maxcomplexity:14, maxstatements:29 */
   return Ember.computed(function(key/*, value, oldValue*/) {

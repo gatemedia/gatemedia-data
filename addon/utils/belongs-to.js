@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import { belongsToKey } from 'gatemedia-data/utils/misc';
+import belongsToMeta from 'gatemedia-data/utils/belongs-to-meta';
 import tooling from 'gatemedia-data/utils/tooling';
 
 /**
@@ -18,23 +18,7 @@ export default function (type, options) {
   options = options || {};
   options.cascadeSaving = !!options.cascadeSaving;
 
-  var meta = {
-    type: type,
-    isRelation: true,
-    options: options,
-    codec: {
-      key: function (key) {
-        if (options.embedded) {
-          return key;
-        }
-        return belongsToKey(key);
-      },
-
-      encode: function (instance, attribute) {
-        return instance.get('_data.' + this.key(attribute));
-      }
-    }
-  };
+  var meta = belongsToMeta(type, options);
 
   return Ember.computed(function(key, value, oldValue) {
     if (arguments.length > 1) {
