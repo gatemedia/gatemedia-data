@@ -8,6 +8,9 @@ export default function (type, options) {
     options: options,
     codec: {
       key: function (key) {
+        if (options.alias) {
+          return options.alias;
+        }
         return key.decamelize();
       },
 
