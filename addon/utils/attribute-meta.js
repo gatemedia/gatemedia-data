@@ -1,10 +1,11 @@
 import codec from 'gatemedia-data/utils/codec';
 
 export default function (type, options) {
+  options = options || {};
   return {
     type: type,
     isAttribute: true,
-    options: options || {},
+    options: options,
     codec: {
       key: function (key) {
         return key.decamelize();
@@ -24,7 +25,7 @@ export default function (type, options) {
             qualifier = parts[1],
             value = attribute ? instance.get(attribute) : instance;
 
-        if (options && options.formatter) {
+        if (options.formatter) {
           return options.formatter(value, qualifier);
         }
         return codec[basicType].encode(value, qualifier);

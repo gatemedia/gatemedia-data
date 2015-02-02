@@ -1,180 +1,214 @@
 import Ember from 'ember';
 import ModelArray from 'gatemedia-data/utils/model-array';
-import Adapter from 'gatemedia-data/utils/adapter';
 import Model from 'gatemedia-data/utils/model';
 import attribute from 'gatemedia-data/utils/attribute';
 import belongsTo from 'gatemedia-data/utils/belongs-to';
 import hasMany from 'gatemedia-data/utils/has-many';
 
-module('ModelArray');
+module('model-array', {
+  setup: function () {
+    var Orphan = Model.extend({
+    });
 
-test('it works', function() {
-  var result = ModelArray;
-  ok(result);
+    var Post = Model.extend({
+      title: attribute('string'),
+      comments: hasMany('comment', { cascadeSaving: true })
+    });
+    var Comment = Model.extend({
+      post: belongsTo('post', { owner: true }),
+      text: attribute('string', { defaultValue: '' }),
+      author: attribute('string'),
+      createdAt: attribute('datetime')
+    });
+
+    var BadPost = Model.extend({
+      comments: hasMany('badComment')
+    });
+
+    var BadComment = Model.extend({
+      post: belongsTo('badPost')
+    });
+
+
+    this.testAdapter = Ember.Object.create({
+      saved: [],
+
+      save: function (record, extraParams, includeProperties) {
+        this.get('saved').pushObject({
+          record: record.toJSON(),
+          extraParams: extraParams,
+          includeProperties: includeProperties
+        });
+        return new Ember.RSVP.Promise(function (resolve/*, reject*/) {
+          resolve(record);
+        });
+      }
+    });
+
+
+    this.store = Ember.Object.create({
+      adapter: this.testAdapter,
+
+      modelFor: function (key) {
+        switch (key) {
+        case 'orphan':
+          return Orphan;
+        case 'post':
+          return Post;
+        case 'comment':
+          return Comment;
+        case 'badPost':
+          return BadPost;
+        case 'badComment':
+          return BadComment;
+        }
+      },
+
+      instanciate: function (key, data) {
+        return this.modelFor(key).create({
+          _store: this,
+          _data: data
+        });
+      },
+
+      find: function () {
+        throw('Not stubbed...');
+      }
+    });
+
+    this.post = this.store.instanciate('post', {
+      id: 42
+    });
+    this.array = ModelArray.create({
+      _type: 'comment',
+      _owner: this.post,
+      _store: this.store
+    });
+  }
 });
 
-
-
-
-
-// module, test, asyncTest, start,
-//          ok, equal, deepEqual, throws,
-//          ModelArrayTest:true 
-
-var ModelArrayTest = Ember.Application.create({
-  apiUrl: 'https://api.com',
-  rootElement: '#ember-testing',
-
-  adapter: Adapter.create({
-    baseUrl: 'https://data.api.com'
-  })
+test('creation', function() {
+  deepEqual(this.array.get('_removed'), [], 'No object removed');
 });
 
-ModelArrayTest.Post = Model.extend({
-  title: attribute('string'),
-  createdAt: attribute('datetime'),
-  comments: hasMany('ModelArrayTest.Comment', { cascadeSaving: true })
-});
-
-ModelArrayTest.Comment = Model.extend({
-  post: belongsTo('ModelArrayTest.Post', { owner: true }),
-  text: attribute('string', { defaultValue: '' }),
-  author: attribute('string'),
-  createdAt: attribute('datetime')
-});
-
-
-ModelArrayTest.BadPost = Model.extend({
-  comments: hasMany('ModelArrayTest.BadComment')
-});
-
-ModelArrayTest.BadComment = Model.extend({
-  post: belongsTo('ModelArrayTest.BadPost')
-});
-
-
-module("Data extension: model array");
-
-test("record creation should prevent type without any owner relation", function () {
-  var post = ModelArrayTest.BadPost.load({});
+test('record creation should prevent type without any owner relation', function () {
+  var orphans = ModelArray.create({
+    _type: 'orphan',
+    _owner: this.post,
+    _store: this.store
+  });
 
   throws(
     function () {
-      post.get('comments').createRecord();
+      orphans.createRecord();
     },
-    'paf');
+    'createRecord thrown');
 });
 
-test("record creation should prevent owner attribute and container owner mismatch", function () {
-  var postId1 = 101,
-      postId2 = 102,
-      postTitle1 = 'My very first post',
-      postTitle2 = 'My less first post',
-      post1, post2;
-
-  post1 = ModelArrayTest.Post.load({
-    id: postId1,
-    title: postTitle1
-  });
-  post2 = ModelArrayTest.Post.load({
-    id: postId2,
-    title: postTitle2
+test('record creation should prevent owner attribute and container owner mismatch', function () {
+  var otherPost = this.store.instanciate('post', {
+    id: 36
   });
 
   throws(
     function () {
-      post1.get('comments').createRecord({
-        'post_id': postId2
+      this.array.createRecord({
+        'post_id': otherPost
       });
     },
-    'paf');
+    'Mismatching parent failed createRecord');
 });
 
-test("record creation should auto-parent new records to owner", function () {
-  var postId = 200,
-      postTitle = 'My very first post',
-      now = moment(),
-      post, comment;
-
-  post = ModelArrayTest.Post.load({
-    'id': postId,
-    'title': postTitle
-  });
-  comment = post.get('comments').createRecord({
+test('record creation should auto-parent new records to owner', function () {
+  var now = moment().utc(),
+      comment = this.array.createRecord({
+    'text': "Nice, isn't it?",
     'created_at': now
   });
 
-  equal(comment.get('post'), post);
-  var gotJSON = comment.toJSON(),
-    expectedJSON = {
-      'text': '',
-      'author': null,
-      'created_at': now.format('YYYY-MM-DDTHH:mm:ssZ'),
-      'post_id': postId
-    };
-  deepEqual(gotJSON, expectedJSON, '\n%@\ndoes not deep equals\n%@\n'.fmt(
-      Ember.inspect(gotJSON),
-      Ember.inspect(expectedJSON)
-  ));
+  equal(comment.get('post.id'), this.post.get('id'), 'Comment has been parented');
+  deepEqual(
+    comment.toJSON(), {
+    'text': "Nice, isn't it?",
+    'author': null,
+    'created_at': now.format('YYYY-MM-DDTHH:mm:ssZ'),
+    'post_id': 42
+  }, 'Serialized comment is: %@'.fmt(comment.toJSON()));
 });
 
-asyncTest("new records should be saved after owner", 1, function () {
-  var postId = 300,
-      postTitle = 'My very first post',
-      now = moment(),
-      post, comment;
+asyncTest('new records should be saved', 1, function () {
+  var t1 = moment().utc(),
+      t2 = t1.clone().add(1, 'minute');
 
-  post = ModelArrayTest.Post.load({
-    'id': postId,
-    'title': postTitle
+  this.array.createRecord({
+    'text': "Hello...",
+    'created_at': t1
   });
-  comment = post.get('comments').createRecord({
-    'created_at': now
+  this.array.createRecord({
+    'text': "... world!",
+    'created_at': t2
   });
 
   // Post not changed, useless: fakeXHR('PUT', 'posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
-  Data.API.stub().POST('posts/%@/comments'.fmt(postId), { 'comments': [{ 'id': 300100, 'post_id': postId }] });
+  // Data.API.stub().POST('posts/%@/comments'.fmt(this.post.get('id')), { 'comments': [{ 'id': 300100, 'post_id': this.post.get('id') }] });
 
-  Ember.run(function () {
-    post.save().then(function () {
-      equal(Data.API.XHR_REQUESTS.length, 1);
-      start();
-    }, function (error) {
-      ok(false, 'Failed: %@'.fmt(error));
-    });
-  });
+  this.array.save().then(function () {
+    deepEqual(
+      this.testAdapter.saved,
+      [{
+        record: {
+          'text': "Hello...",
+          'author': null,
+          'created_at': t1.format(),
+          'post_id': this.post.get('id')
+        },
+        extraParams: undefined,
+        includeProperties: undefined
+      }, {
+        record: {
+          'text': "... world!",
+          'author': null,
+          'created_at': t2.format(),
+          'post_id': this.post.get('id')
+        },
+        extraParams: undefined,
+        includeProperties: undefined
+      }], 'Records have been saved');
+    start();
+  }.bind(this), function (error) {
+    ok(false, 'Failed: %@'.fmt(error));
+  }.bind(this));
 });
 
+//TODO test: assignRecord
+//TODO test: assignRecords
+//TODO test: cancelChanges
+//TODO test: clear
+//TODO test: pushObject
+//TODO test: pushObjects
+//TODO test: removeObject
+//TODO test: removeObjects
 
-test("deleted record should be removed from array", function () {
-  var postId = 1001,
-      postTitle = 'My very first post',
-      comment1 = 'Great! I like it',
-      comment2 = 'Sorry but I do not agree',
-      comment3 = 'Could be better...',
-      comments, post, postComments;
 
-  comments = ModelArrayTest.Comment.loadMany([{
-    'id': 1001001,
-    'post_id': postId,
-    'text': comment1
-  }, {
-    'id': 1001002,
-    'post_id': postId,
-    'text': comment2
-  }, {
-    'id': 1001003,
-    'post_id': postId,
-    'text': comment3
-  }]);
-  post = ModelArrayTest.Post.load({
-    'id': postId,
-    'title': postTitle,
-    'comment_ids': [ 1001001, 1001002, 1001003 ]
-  });
-  postComments = post.get('comments');
+// test('deleted record should be removed from array', function () {
+//   var comments = [
+//     this.array.createRecord({
+//       'id': 1001001,
+//       'text': 'Great! I like it'
+//     }),
+//     this.array.createRecord({
+//       'id': 1001002,
+//       'text': 'Sorry but I do not agree'
+//     }),
+//     this.array.createRecord({
+//       'id': 1001003,
+//       'text': 'Could be better...'
+//     })
+//   ];
 
-  equal(postComments.get('length'), 3);
-  comments[2].deleteRecord();
-  equal(postComments.get('length'), 2);
-});
+//   equal(this.array.get('length'), 3, 'Array has 3 comments');
+//   equal(this.post.get('comments.length'), 3, 'Post has 3 comments');
+//   comments[2].deleteRecord();
+//   equal(this.array.get('length'), 2, 'Array has 2 comments');
+//   equal(this.post.get('comments.length'), 2, 'Post has 2 comments');
+// });
