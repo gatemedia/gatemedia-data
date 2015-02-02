@@ -82,7 +82,8 @@ module('model-array', {
     this.array = ModelArray.create({
       _type: 'comment',
       _owner: this.post,
-      _store: this.store
+      _store: this.store,
+      content: []
     });
   }
 });

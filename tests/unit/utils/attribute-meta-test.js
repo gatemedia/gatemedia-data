@@ -35,7 +35,7 @@ test('key is decamelized', function() {
 
 test('key may be aliased', function() {
   var meta = attributeMeta('string', {
-    alias: 'bar'
+    key: 'bar'
   });
 
   equal(meta.codec.key('foo'), 'bar');

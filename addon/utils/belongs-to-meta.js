@@ -1,4 +1,3 @@
-import { belongsToKey } from 'gatemedia-data/utils/misc';
 
 export default function belongsToMeta(type, options) {
   options = options || {};
@@ -8,13 +7,14 @@ export default function belongsToMeta(type, options) {
     options: options,
     codec: {
       key: function (key) {
-        if (options.alias) {
-          key = options.alias;
+        if (options.key) {
+          key = options.key;
         }
+        key = key.decamelize().underscore().singularize();
         if (options.embedded) {
-          return key.decamelize().singularize();
+          return key;
         }
-        return belongsToKey(key);
+        return key + '_id';
       },
 
       encode: function (instance, attribute) {

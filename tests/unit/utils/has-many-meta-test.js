@@ -41,6 +41,8 @@ test('key is camelized', function() {
 
   equal(meta.codec.key('myStuffs'), 'my_stuff_ids');
   equal(meta.codec.key('myStuff'), 'my_stuff_ids');
+  equal(meta.codec.key('my-stuffs'), 'my_stuff_ids');
+  equal(meta.codec.key('my-stuff'), 'my_stuff_ids');
 });
 
 test('embedded key is decamelized', function() {
@@ -50,11 +52,13 @@ test('embedded key is decamelized', function() {
 
   equal(meta.codec.key('myStuff'), 'my_stuffs');
   equal(meta.codec.key('myStuffs'), 'my_stuffs');
+  equal(meta.codec.key('my-stuff'), 'my_stuffs');
+  equal(meta.codec.key('my-stuffs'), 'my_stuffs');
 });
 
 test('key may be aliased', function() {
   var meta = hasManyMeta('string', {
-    alias: 'bar'
+    key: 'bar'
   });
 
   equal(meta.codec.key('foo'), 'bar_ids');

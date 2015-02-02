@@ -53,7 +53,7 @@ test('embedded key is decamelized', function() {
 
 test('key may be aliased', function() {
   var meta = belongsToMeta('string', {
-    alias: 'bar'
+    key: 'bar'
   });
 
   equal(meta.codec.key('foo'), 'bar_id');

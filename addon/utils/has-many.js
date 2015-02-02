@@ -1,7 +1,6 @@
 import Ember from 'ember';
 import ModelArray from 'gatemedia-data/utils/model-array';
 import hasManyMeta from 'gatemedia-data/utils/has-many-meta';
-import { belongsToKey } from 'gatemedia-data/utils/misc';
 import tooling from 'gatemedia-data/utils/tooling';
 
 /**
@@ -64,10 +63,10 @@ export default function (type, options) {
           if (meta.options.inline) {
             var ownerRelation = this._store.modelFor(type).ownerRelation();
             if (ownerRelation) {
-              var ownRelationKey = belongsToKey(ownerRelation.name),
+              var ownRelationKey = ownerRelation.meta.codec.key(ownerRelation.name),
                   ownerId = this.get('id');
               if (Ember.isNone(ids.get('firstObject.%@'.fmt(ownRelationKey)))) {
-                Ember.Logger.info('Auto-assign %@ using %@'.fmt(type, ownRelationKey));
+                Ember.Logger.info('Auto-assign %@ using %@ (%@)'.fmt(type, ownRelationKey, ownerId));
                 ids.forEach(function (data) {
                   data[ownRelationKey] = ownerId;
                 });

@@ -8,10 +8,10 @@ export default function (type, options) {
     options: options,
     codec: {
       key: function (key) {
-        if (options.alias) {
-          return options.alias;
+        if (options.key) {
+          key = options.key;
         }
-        return key.decamelize();
+        return key.decamelize().underscore();
       },
 
       decode: function (value) {

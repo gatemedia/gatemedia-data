@@ -7,13 +7,14 @@ export default function hasManyMeta(type, options) {
     options: options,
     codec: {
       key: function (key) {
-        if (options.alias) {
-          key = options.alias;
+        if (options.key) {
+          key = options.key;
         }
+        key = key.decamelize().underscore();
         if (options.inline) {
-          return key.decamelize().pluralize();
+          return key.pluralize();
         }
-        return '%@_ids'.fmt(key.decamelize().singularize());
+        return '%@_ids'.fmt(key.singularize());
       },
 
       encode: function (instance, attribute) {
