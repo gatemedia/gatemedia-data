@@ -168,12 +168,12 @@ export default Ember.Object.extend({
       }
       if (dataKey) {
         if (Ember.typeOf(data[dataKey]) === 'array') {
-          Ember.Logger.debug('DATA - Sideload %@ [%@] instances (from key "%@")'.fmt(data[dataKey].length, types[key], dataKey));
+          Ember.Logger.debug('DATA - Sideload %@ [%@] instances (`%@`)'.fmt(data[dataKey].length, types[key], dataKey));
           data[dataKey].forEach(function (entityData) {
             this._load(types[key], entityData);
           }, this);
         } else {
-          Ember.Logger.debug('DATA - Sideload a single [%@] instance (from key "%@")'.fmt(types[key], dataKey));
+          Ember.Logger.debug('DATA - Sideload a single [%@] instance (`%@`)'.fmt(types[key], dataKey));
           this._load(types[key], data[dataKey]);
         }
         delete data[dataKey];

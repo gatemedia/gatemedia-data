@@ -136,10 +136,10 @@ export default Ember.Object.extend(
       var resourceKey = model.key;
       if (query.findMany) {
         resourceKey = resourceKey.pluralize();
-        Ember.Logger.debug('DATA - Found many %@%@:'.fmt(resourceKey, model.parent ? ' (parent ' + model.parent.toString() + ')' : ''),
+        Ember.Logger.debug('DATA - Got many %@%@:'.fmt(resourceKey, model.parent ? ' (parent ' + model.parent.toString() + ')' : ''),
           Ember.copy(data));
       } else {
-        Ember.Logger.debug('DATA - Found one %@%@:'.fmt(resourceKey, query.ids ? ' (' + query.ids + ')' : ''),
+        Ember.Logger.debug('DATA - Got one %@%@:'.fmt(resourceKey, query.ids ? ' (' + query.ids + ')' : ''),
           Ember.copy(data));
       }
 
