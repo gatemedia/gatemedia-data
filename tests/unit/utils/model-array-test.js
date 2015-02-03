@@ -4,6 +4,7 @@ import Model from 'gatemedia-data/utils/model';
 import attribute from 'gatemedia-data/utils/attribute';
 import belongsTo from 'gatemedia-data/utils/belongs-to';
 import hasMany from 'gatemedia-data/utils/has-many';
+import startApp from '../../helpers/start-app';
 
 module('model-array', {
   setup: function () {
@@ -12,7 +13,21 @@ module('model-array', {
 
     var Post = Model.extend({
       title: attribute('string'),
-      comments: hasMany('comment', { cascadeSaving: true })
+      comments: hasMany('comment', { cascadeSaving: true }),
+
+      init: function () {
+        this._super();
+        this.setProperties({
+          addedRelations: [],
+          removedRelations: []
+        });
+      },
+      _addRelation: function (field, object) {
+        this.get('addedRelations').pushObject('%@ + %@'.fmt(field, object.get('id')));
+      },
+      _removeRelation: function (field, object) {
+        this.get('removedRelations').pushObject('%@ - %@'.fmt(field, object.get('id')));
+      }
     });
     var Comment = Model.extend({
       post: belongsTo('post', { owner: true }),
@@ -80,11 +95,14 @@ module('model-array', {
       id: 42
     });
     this.array = ModelArray.create({
+      _field: 'comments',
       _type: 'comment',
       _owner: this.post,
       _store: this.store,
       content: []
     });
+
+    startApp();
   }
 });
 
@@ -186,31 +204,262 @@ asyncTest('new records should be saved', 1, function () {
 //TODO test: assignRecords
 //TODO test: cancelChanges
 //TODO test: clear
-//TODO test: pushObject
-//TODO test: pushObjects
-//TODO test: removeObject
-//TODO test: removeObjects
 
+test('pushed record should not affect owner', function () {
+  var now = moment().utc();
 
-// test('deleted record should be removed from array', function () {
-//   var comments = [
-//     this.array.createRecord({
-//       'id': 1001001,
-//       'text': 'Great! I like it'
-//     }),
-//     this.array.createRecord({
-//       'id': 1001002,
-//       'text': 'Sorry but I do not agree'
-//     }),
-//     this.array.createRecord({
-//       'id': 1001003,
-//       'text': 'Could be better...'
-//     })
-//   ];
+  equal(this.array.get('length'), 0, 'Array has no comment');
+  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
 
-//   equal(this.array.get('length'), 3, 'Array has 3 comments');
-//   equal(this.post.get('comments.length'), 3, 'Post has 3 comments');
-//   comments[2].deleteRecord();
-//   equal(this.array.get('length'), 2, 'Array has 2 comments');
-//   equal(this.post.get('comments.length'), 2, 'Post has 2 comments');
-// });
+  this.array.pushObject(
+    this.store.instanciate('comment', {
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    })
+  );
+
+  equal(this.array.get('length'), 1, 'Array has 1 comment');
+  equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
+});
+
+test('pushed record should affect owner', function () {
+  var now = moment().utc();
+
+  equal(this.array.get('length'), 0, 'Array has no comment');
+  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+
+  this.array.set('_affectOwner', true);
+
+  this.array.pushObject(
+    this.store.instanciate('comment', {
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    })
+  );
+
+  equal(this.array.get('length'), 1, 'Array has 1 comment');
+  equal(this.post.get('addedRelations.length'), 1, 'Post has 1 added relation');
+  equal(this.post.get('addedRelations.firstObject'), 'comments + 1001001', 'Post has 1 added relation');
+});
+
+test('pushed records should not affect owner', function () {
+  var now = moment().utc();
+
+  equal(this.array.get('length'), 0, 'Array has no comment');
+  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+
+  this.array.pushObjects([
+    this.store.instanciate('comment', {
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.store.instanciate('comment', {
+      'id': 1001002,
+      'text': 'Great! I like it again',
+      'author': 'Me',
+      'created_at': now
+    })
+  ]);
+
+  equal(this.array.get('length'), 2, 'Array has 2 comments');
+  equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
+});
+
+test('pushed records should affect owner', function () {
+  var now = moment().utc();
+
+  equal(this.array.get('length'), 0, 'Array has no comment');
+  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+
+  this.array.set('_affectOwner', true);
+
+  this.array.pushObjects([
+    this.store.instanciate('comment', {
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.store.instanciate('comment', {
+      'id': 1001002,
+      'text': 'Great! I like it again',
+      'author': 'Me',
+      'created_at': now
+    })
+  ]);
+
+  equal(this.array.get('length'), 2, 'Array has 2 comments');
+  equal(this.post.get('addedRelations.length'), 2, 'Post has 1 added relation');
+  equal(this.post.get('addedRelations').sort().join(', '), 'comments + 1001001, comments + 1001002', 'Post has 1 added relation');
+});
+
+asyncTest('deleted record should be removed from array when saving', function () {
+  var now = moment().utc(),
+      comments = [
+    this.array.createRecord({
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001002,
+      'text': 'Sorry but I do not agree',
+      'author': 'You',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001003,
+      'text': 'Could be better...',
+      'author': 'Him',
+      'created_at': now
+    })
+  ];
+
+  equal(this.array.get('length'), 3, 'Array has 3 comments');
+  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+  this.array.removeObject(comments[2]);
+
+  var self = this;
+  this.array.save().then(function (saved) {
+    equal(saved.get('length'), 2, 'Saved 2 comments');
+    equal(self.array.get('length'), 2, 'Array has 2 comments');
+    equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+    start();
+  });
+});
+
+asyncTest('deleted record should be removed from array & from owner when saving', function () {
+  var now = moment().utc(),
+      comments = [
+    this.array.createRecord({
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001002,
+      'text': 'Sorry but I do not agree',
+      'author': 'You',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001003,
+      'text': 'Could be better...',
+      'author': 'Him',
+      'created_at': now
+    })
+  ];
+
+  this.array.set('_affectOwner', true);
+
+  equal(this.array.get('length'), 3, 'Array has 3 comments');
+  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+  this.array.removeObject(comments[2]);
+
+  var self = this;
+  this.array.save().then(function (saved) {
+    equal(saved.get('length'), 2, 'Saved 2 comments');
+    equal(self.array.get('length'), 2, 'Array has 2 comments');
+    equal(self.post.get('removedRelations.length'), 1, 'Post has one removed relation');
+    equal(self.post.get('removedRelations.firstObject'), 'comments - 1001003', 'Post has expected removed relation');
+
+    start();
+  });
+});
+
+asyncTest('deleted records should be removed from array when saving', function () {
+  var now = moment().utc(),
+      comments = [
+    this.array.createRecord({
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001002,
+      'text': 'Sorry but I do not agree',
+      'author': 'You',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001003,
+      'text': 'Could be better...',
+      'author': 'Him',
+      'created_at': now
+    })
+  ];
+
+  equal(this.array.get('length'), 3, 'Array has 3 comments');
+  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+  this.array.removeObjects([
+    comments[0],
+    comments[2]
+  ]);
+
+  var self = this;
+  this.array.save().then(function (saved) {
+    equal(saved.get('length'), 1, 'Saved 1 comments');
+    equal(self.array.get('length'), 1, 'Array has 1 comment');
+    equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+    start();
+  });
+});
+
+asyncTest('deleted records should be removed from array & from owner when saving', function () {
+  var now = moment().utc(),
+      comments = [
+    this.array.createRecord({
+      'id': 1001001,
+      'text': 'Great! I like it',
+      'author': 'Me',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001002,
+      'text': 'Sorry but I do not agree',
+      'author': 'You',
+      'created_at': now
+    }),
+    this.array.createRecord({
+      'id': 1001003,
+      'text': 'Could be better...',
+      'author': 'Him',
+      'created_at': now
+    })
+  ];
+
+  this.array.set('_affectOwner', true);
+
+  equal(this.array.get('length'), 3, 'Array has 3 comments');
+  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+
+  this.array.removeObjects([
+    comments[0],
+    comments[2]
+  ]);
+
+  var self = this;
+  this.array.save().then(function (saved) {
+    equal(saved.get('length'), 1, 'Saved 1 comments');
+    equal(self.array.get('length'), 1, 'Array has 1 comment');
+    equal(self.post.get('removedRelations.length'), 2, 'Post has 2 removed relations');
+    equal(self.post.get('removedRelations').sort().join(', '), 'comments - 1001001, comments - 1001003',
+      'Post has expected removed relations');
+
+    start();
+  });
+});

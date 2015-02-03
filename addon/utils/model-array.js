@@ -107,40 +107,20 @@ export default Ember.ArrayProxy.extend({
       owner._removeRelation(field, object);
     }
   },
-  removeObjects: function (objects) {
-    this._super(objects);
-
-    if (this.get('_affectOwner')) {
-      var owner = this.get('_owner'),
-          field = this.get('_field');
-
-      objects.forEach(function (object) {
-        owner._removeRelation(field, object);
-      });
-    }
-  },
   //TODO wrap other MutableEnumerable methods...
 
   save: function () {
     var content = this.get('content'),
-        removed = this.get('_removed'),
-        saved = [];
+        removed = this.get('_removed');
 
-    return new Ember.RSVP.Promise(function (resolve/*, reject*/) {
-      Ember.run(function () {
-        for (var i = 0; i < removed.get('length'); ++i) {
-          var removedItem = removed.popObject();
-          removedItem.save();
-        }
-        content.forEach(function (item) {
-          item.save().then(function (item) {
-            saved.pushObject(item);
-            if (saved.length === content.length) {
-              resolve(saved);
-            }
-          });
-        });
-      });
+    return Ember.RSVP.all(removed.map(function (removedItem) {
+      return removedItem.save();
+    })).then(function () {
+      removed.clear();
+
+      return Ember.RSVP.all(content.map(function (item) {
+        return item.save();
+      }));
     });
   }
 });
