@@ -1,6 +1,6 @@
 import Ember from 'ember';
 
-var NoTooling = Ember.Object.create({
+export var NoTooling = Ember.Object.create({
 
   readAttribute: Ember.K,
   readDynamicAttribute: Ember.K,
@@ -10,7 +10,7 @@ var NoTooling = Ember.Object.create({
 });
 
 
-var LogTooling = Ember.Object.create({
+export var LogTooling = Ember.Object.create({
   uses: [],
   log: true,
 
