@@ -1,6 +1,7 @@
 import belongsToMeta from 'gatemedia-data/utils/belongs-to-meta';
+import startApp from '../../helpers/start-app';
 
-module('belongsToMeta');
+module('belongs-to-meta');
 
 test('meta object is valid', function() {
   var meta = belongsToMeta('string');
@@ -19,7 +20,11 @@ test('meta object is valid', function() {
 });
 
 
-module('belongsToMeta codec');
+module('belongs-to-meta codec', {
+  setup: function () {
+    startApp();
+  }
+});
 
 test('key is valid', function() {
   var meta = belongsToMeta('string');

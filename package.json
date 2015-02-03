@@ -17,6 +17,9 @@
   },
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "gatemedia-ext": "gatemedia/gatemedia-ext"
+  },
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.0",
     "broccoli-ember-hbs-template-compiler": "^1.6.1",
@@ -32,9 +35,7 @@
     "ember-cli-uglify": "1.0.1",
     "ember-export-application-global": "^1.0.0",
     "express": "^4.8.5",
-    "glob": "^4.0.5",
-
-    "gatemedia-ext": "*"
+    "glob": "^4.0.5"
   },
   "keywords": [
     "ember-addon"

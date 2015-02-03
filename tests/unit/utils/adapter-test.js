@@ -1,7 +1,12 @@
 import Ember from 'ember';
 import Adapter from 'gatemedia-data/utils/adapter';
+import startApp from '../../helpers/start-app';
 
-module('Adapter');
+module('Adapter', {
+  setup: function () {
+    startApp();
+  }
+});
 
 test('buildUrl', function () {
   var adapter = Adapter.create({
