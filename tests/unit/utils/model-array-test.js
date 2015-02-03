@@ -153,15 +153,16 @@ asyncTest('new records should be saved', 1, function () {
   // Post not changed, useless: fakeXHR('PUT', 'posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
   // Data.API.stub().POST('posts/%@/comments'.fmt(this.post.get('id')), { 'comments': [{ 'id': 300100, 'post_id': this.post.get('id') }] });
 
+  var self = this;
   this.array.save().then(function () {
     deepEqual(
-      this.testAdapter.saved,
+      self.testAdapter.saved,
       [{
         record: {
           'text': "Hello...",
           'author': null,
           'created_at': t1.format(),
-          'post_id': this.post.get('id')
+          'post_id': self.post.get('id')
         },
         extraParams: undefined,
         includeProperties: undefined
@@ -170,15 +171,15 @@ asyncTest('new records should be saved', 1, function () {
           'text': "... world!",
           'author': null,
           'created_at': t2.format(),
-          'post_id': this.post.get('id')
+          'post_id': self.post.get('id')
         },
         extraParams: undefined,
         includeProperties: undefined
       }], 'Records have been saved');
     start();
-  }.bind(this), function (error) {
+  }, function (error) {
     ok(false, 'Failed: %@'.fmt(error));
-  }.bind(this));
+  });
 });
 
 //TODO test: assignRecord

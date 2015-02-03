@@ -294,9 +294,10 @@ export default Ember.Object.extend({
         cached;
 
     if (findMany) {
+      var self = this; // for cli tests run compat... o_O)
       cached = ids.map(function (id) {
-        return this.cachedRecord(key, id);
-      }.bind(this)).compact();
+        return self.cachedRecord(key, id);
+      }).compact();
       foundInCache = !Ember.isEmpty(ids) && (cached.length === ids.length);
     } else {
       cached = this.cachedRecord(key, id);
@@ -306,9 +307,10 @@ export default Ember.Object.extend({
     var async = !options.sync;
 
     if (async) {
+      var target = this; // for cli tests run compat... o_O)
       return new Ember.RSVP.Promise(function (resolve, reject) {
-        run.call(this, resolve, reject);
-      }.bind(this));
+        run.call(target, resolve, reject);
+      });
     } else {
       return run.call(this);
     }

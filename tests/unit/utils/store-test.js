@@ -73,15 +73,16 @@ module('Store', {
 });
 
 test('createRecord expects data with ID', function () {
+  var self = this;
   throws(function () {
-    this.store.createRecord('stuff');
-  }.bind(this),
+    self.store.createRecord('stuff');
+  },
   new Error('Assertion Failed: Missing record id'),
   'Missing data ID fails');
 
   throws(function () {
-    this.store.createRecord('stuff', { stuff: 'Hi' });
-  }.bind(this),
+    self.store.createRecord('stuff', { stuff: 'Hi' });
+  },
   new Error('Assertion Failed: Missing record id'),
   'Missing data ID fails');
 });

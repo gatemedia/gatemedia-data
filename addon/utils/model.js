@@ -296,8 +296,10 @@ var Model = Ember.Object.extend(
   },
 
   save: function (extraParams, includeProperties) {
-    this.set('meta.isSaving', true);
-    this.willSave();
+    var self = this; // for cli tests run compat... o_O)
+
+    self.set('meta.isSaving', true);
+    self.willSave();
     var promise = new Ember.RSVP.Promise(function (resolve, reject) {
 
       function saveChildren (record, resolve/*, reject*/) {
@@ -337,27 +339,27 @@ var Model = Ember.Object.extend(
         savingTracker.saved(); // in case of no relation to save...
       }
 
-      if (this.get('meta.isNew') || this.get('hasChanges') || this.get('meta.isDeleted')) {
-        this.get('_store.adapter').save(this, extraParams, includeProperties).then(function (record) {
+      if (self.get('meta.isNew') || self.get('hasChanges') || self.get('meta.isDeleted')) {
+        self.get('_store.adapter').save(self, extraParams, includeProperties).then(function (record) {
           Ember.run(record, function () {
-            saveChildren(this, resolve, reject);
+            saveChildren(self, resolve, reject);
           });
         }, function (error) {
           reject(error);
         });
       } else {
-        saveChildren(this, resolve, reject);
+        saveChildren(self, resolve, reject);
       }
-    }.bind(this));
+    });
 
     promise.then(function() {
-      this.set('meta.isSaving', false);
-      this.didSave();
-      this.trigger('record:saved', this);
-    }.bind(this), function() {
-      this.set('meta.isSaving', false);
-      this.trigger('record:failed', this);
-    }.bind(this));
+      self.set('meta.isSaving', false);
+      self.didSave();
+      self.trigger('record:saved', self);
+    }, function() {
+      self.set('meta.isSaving', false);
+      self.trigger('record:failed', self);
+    });
     return promise;
   },
 
