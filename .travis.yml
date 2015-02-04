@@ -13,7 +13,7 @@ before_install:
 
 install:
   - npm install -g bower
-  - npm install
+  - npm install --registry https://npm-proxy.fury.io/NxkA5WomdH3_4H9mDsEM/qbereau/
   - bower install
 
 script:
