@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "gatemedia-ext": "^1.0.0"
+    "gatemedia-ext": "^1.0.1"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.0",
