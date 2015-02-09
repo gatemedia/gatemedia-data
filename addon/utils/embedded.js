@@ -7,6 +7,7 @@ export default function (type, options) {
   var meta = {
     type: type,
     isAttribute: true,
+    embedded: true,
     options: options,
     codec: {
       key: function (key) {

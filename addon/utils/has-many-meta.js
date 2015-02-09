@@ -4,6 +4,7 @@ export default function hasManyMeta(type, options) {
   return {
     type: type,
     isRelation: true,
+    many: true,
     options: options,
     codec: {
       key: function (key) {

@@ -7,6 +7,7 @@ test('meta object is valid', function() {
 
   equal(meta.type, 'string', 'Meta type is `string`');
   ok(meta.isRelation, 'Meta is flagged as relation');
+  equal(meta.many, true, 'Meta is flagged as "many" relation');
   deepEqual(meta.options, {}, 'Meta options default to none');
 
   meta = hasManyMeta('string', {
