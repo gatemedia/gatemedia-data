@@ -1,7 +1,6 @@
 import Ember from 'ember';
-import config from '../config/environment';
 
-Ember.libraries.register('GM Data', config.APP.version);
+Ember.libraries.register('GM Data', '2.0.2');
 
 export default {
   name: 'gatemedia-data-version',
