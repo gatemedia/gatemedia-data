@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import Adapter from 'gatemedia-data/utils/adapter';
+import repr from 'gatemedia-ext/utils/ember/repr';
 
 /* global QUnit, ok */
 
@@ -76,7 +77,7 @@ var RequestHandler = Ember.Object.extend({
           }
         }
       }
-    }, this);
+    }.bind(this));
     return match;
   },
 
@@ -218,7 +219,7 @@ var fakeAPI = Ember.Object.extend({
     this.set('handlers', []);
     this.set('fallbackHandler', RequestHandler.extend({
       handleRequest: function (settings) {
-        var message = 'Missing handler for XHR call: %@ %@ %@'.fmt(settings.type, settings.url, Ember.repr(settings.data));
+        var message = 'Missing handler for XHR call: %@ %@ %@'.fmt(settings.type, settings.url, repr(settings.data));
 
         Ember.Logger.error(message);
         ok(false, message);
@@ -250,7 +251,7 @@ QUnit.testDone(function (details) {
     notConsumed.forEach(function (stub) {
       Ember.Logger.error(' %@ -> %@ %@ %@'.fmt(
         stubId(stub),
-        stub.get('verb'), stub.get('path'), Ember.repr(stub.get('params')) || ''));
+        stub.get('verb'), stub.get('path'), repr(stub.get('params')) || ''));
     });
   }
 });
