@@ -5,7 +5,7 @@ import repr from 'gatemedia-ext/utils/ember/repr';
 /* global QUnit, ok */
 
 function extractURL (fullUrl) {
-  return (/http(s?):\/\/(.+?)\/(.+)/).exec(fullUrl).get('lastObject');
+  return (/(?:http(s?):\/\/(.+?))?\/(.+)/).exec(fullUrl).get('lastObject');
 }
 
 
