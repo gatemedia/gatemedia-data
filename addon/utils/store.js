@@ -95,7 +95,7 @@ export default Ember.Object.extend({
   createRecord: function (key, data, extraData, useCache) {
     data = data || {};
     extraData = extraData || {};
-    useCache = useCache || !extraData._embeddedContainer;
+    useCache = !Ember.isNone(useCache) ? useCache : !extraData._embeddedContainer;
     var model = this.modelFor(key),
         record = model.create({
       _data: data,
