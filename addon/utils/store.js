@@ -4,7 +4,7 @@ export default Ember.Object.extend({
   container: null,
 
   instanciate: function (key, data, extraData) {
-    var record = this.createRecord(key, data, extraData);
+    var record = this.createRecord(key, data, extraData, false);
     record.set('meta.isNew', true);
     Ember.run.next(function () {
       record.dirty();
@@ -92,11 +92,11 @@ export default Ember.Object.extend({
     };
   },
 
-  createRecord: function (key, data, extraData) {
+  createRecord: function (key, data, extraData, useCache) {
     data = data || {};
     extraData = extraData || {};
-    var useCache = !extraData._embeddedContainer,
-        model = this.modelFor(key),
+    useCache = useCache || !extraData._embeddedContainer;
+    var model = this.modelFor(key),
         record = model.create({
       _data: data,
       _store: this,
