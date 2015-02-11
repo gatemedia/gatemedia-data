@@ -388,6 +388,9 @@ var Model = Ember.Object.extend(
         processedKeys = [];
 
     this.constructor.eachAttribute(function (attribute, meta) {
+      if (attribute === 'id') {
+        return;
+      }
       if ((meta.options.serialize !== false) && (Ember.isEmpty(includeProperties) || includeProperties.contains(attribute))) {
         json[meta.codec.key(attribute)] = meta.codec.encode(this, attribute);
       }

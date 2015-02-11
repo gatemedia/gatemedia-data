@@ -162,3 +162,18 @@ test('construction', function () {
   deepEqual(record.get('_relationsCache'), {}, 'Relations cache is reset');
   equal(record.get('_cacheTimestamp'), timestamp, 'Relations cache has been expired');
 });
+
+test('serialization', function () {
+  var record = this.TestModel.create({
+    _data: {
+      'id': 36,
+      'text': 'Hello world!',
+      'parent_id': 42
+    }
+  });
+
+  deepEqual(record.toJSON().toString(), {
+    'text': 'Hello world!',
+    'parent_id': 42
+  }.toString(), 'toJSON() doesn\'t include `id`');
+});
