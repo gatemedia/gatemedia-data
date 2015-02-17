@@ -29,7 +29,7 @@ export default function (type, options) {
 
       tooling.readEmbedded(this, key, value);
       if (value === undefined) {
-        value = options.defaultValue;
+        value = options.defaultValue || {};
       }
       value = this._store.load(type, value, {
         _embeddedContainer: this,
