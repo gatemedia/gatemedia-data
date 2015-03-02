@@ -86,7 +86,7 @@ var Model = Ember.Object.extend(
       return relationsCache[ownerRelation.name] || this.get(ownerRelation.name);
     }
     return null;
-  }.property().cacheable(false),
+  }.property().volatile(),
 
   _updateData: function (data) {
     var orig = this.get('_data') || {};
