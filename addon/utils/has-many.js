@@ -84,6 +84,7 @@ export default function (type, options) {
       }
 
       relation = ModelArray.create({
+        _store: this._store, //TODO <- add UTs for this property passing...
         _type: meta.type,
         _owner: this,
         _field: key,

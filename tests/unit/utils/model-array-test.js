@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { module, test } from 'qunit';
 import ModelArray from 'gatemedia-data/utils/model-array';
 import Model from 'gatemedia-data/utils/model';
 import attribute from 'gatemedia-data/utils/attribute';
@@ -7,7 +8,8 @@ import hasMany from 'gatemedia-data/utils/has-many';
 import startApp from '../../helpers/start-app';
 
 module('model-array', {
-  setup: function () {
+
+  beforeEach: function () {
     var Orphan = Model.extend({
     });
 
@@ -106,30 +108,30 @@ module('model-array', {
   }
 });
 
-test('creation', function() {
-  deepEqual(this.array.get('_removed'), [], 'No object removed');
+test('creation', function (assert) {
+  assert.deepEqual(this.array.get('_removed'), [], 'No object removed');
 });
 
-test('record creation should prevent type without any owner relation', function () {
+test('record creation should prevent type without any owner relation', function (assert) {
   var orphans = ModelArray.create({
     _type: 'orphan',
     _owner: this.post,
     _store: this.store
   });
 
-  throws(
+  assert.throws(
     function () {
       orphans.createRecord();
     },
     'createRecord thrown');
 });
 
-test('record creation should prevent owner attribute and container owner mismatch', function () {
+test('record creation should prevent owner attribute and container owner mismatch', function (assert) {
   var otherPost = this.store.instanciate('post', {
     id: 36
   });
 
-  throws(
+  assert.throws(
     function () {
       this.array.createRecord({
         'post_id': otherPost
@@ -138,15 +140,15 @@ test('record creation should prevent owner attribute and container owner mismatc
     'Mismatching parent failed createRecord');
 });
 
-test('record creation should auto-parent new records to owner', function () {
+test('record creation should auto-parent new records to owner', function (assert) {
   var now = moment().utc(),
       comment = this.array.createRecord({
     'text': "Nice, isn't it?",
     'created_at': now
   });
 
-  equal(comment.get('post.id'), this.post.get('id'), 'Comment has been parented');
-  deepEqual(
+  assert.equal(comment.get('post.id'), this.post.get('id'), 'Comment has been parented');
+  assert.deepEqual(
     comment.toJSON(), {
     'text': "Nice, isn't it?",
     'author': null,
@@ -155,7 +157,8 @@ test('record creation should auto-parent new records to owner', function () {
   }, 'Serialized comment is: %@'.fmt(comment.toJSON()));
 });
 
-asyncTest('new records should be saved', 1, function () {
+test('new records should be saved', 1, function (assert) {
+  var done = assert.async();
   var t1 = moment().utc(),
       t2 = t1.clone().add(1, 'minute');
 
@@ -173,7 +176,7 @@ asyncTest('new records should be saved', 1, function () {
 
   var self = this;
   this.array.save().then(function () {
-    deepEqual(
+    assert.deepEqual(
       self.testAdapter.saved,
       [{
         record: {
@@ -194,9 +197,10 @@ asyncTest('new records should be saved', 1, function () {
         extraParams: undefined,
         includeProperties: undefined
       }], 'Records have been saved');
-    start();
+
+    done();
   }, function (error) {
-    ok(false, 'Failed: %@'.fmt(error));
+    assert.ok(false, 'Failed: %@'.fmt(error));
   });
 });
 
@@ -205,11 +209,11 @@ asyncTest('new records should be saved', 1, function () {
 //TODO test: cancelChanges
 //TODO test: clear
 
-test('pushed record should not affect owner', function () {
+test('pushed record should not affect owner', function (assert) {
   var now = moment().utc();
 
-  equal(this.array.get('length'), 0, 'Array has no comment');
-  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+  assert.equal(this.array.get('length'), 0, 'Array has no comment');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
 
   this.array.pushObject(
     this.store.instanciate('comment', {
@@ -220,15 +224,15 @@ test('pushed record should not affect owner', function () {
     })
   );
 
-  equal(this.array.get('length'), 1, 'Array has 1 comment');
-  equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
+  assert.equal(this.array.get('length'), 1, 'Array has 1 comment');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
 });
 
-test('pushed record should affect owner', function () {
+test('pushed record should affect owner', function (assert) {
   var now = moment().utc();
 
-  equal(this.array.get('length'), 0, 'Array has no comment');
-  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+  assert.equal(this.array.get('length'), 0, 'Array has no comment');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
 
   this.array.set('_affectOwner', true);
 
@@ -241,16 +245,16 @@ test('pushed record should affect owner', function () {
     })
   );
 
-  equal(this.array.get('length'), 1, 'Array has 1 comment');
-  equal(this.post.get('addedRelations.length'), 1, 'Post has 1 added relation');
-  equal(this.post.get('addedRelations.firstObject'), 'comments + 1001001', 'Post has 1 added relation');
+  assert.equal(this.array.get('length'), 1, 'Array has 1 comment');
+  assert.equal(this.post.get('addedRelations.length'), 1, 'Post has 1 added relation');
+  assert.equal(this.post.get('addedRelations.firstObject'), 'comments + 1001001', 'Post has 1 added relation');
 });
 
-test('pushed records should not affect owner', function () {
+test('pushed records should not affect owner', function (assert) {
   var now = moment().utc();
 
-  equal(this.array.get('length'), 0, 'Array has no comment');
-  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+  assert.equal(this.array.get('length'), 0, 'Array has no comment');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
 
   this.array.pushObjects([
     this.store.instanciate('comment', {
@@ -267,15 +271,15 @@ test('pushed records should not affect owner', function () {
     })
   ]);
 
-  equal(this.array.get('length'), 2, 'Array has 2 comments');
-  equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
+  assert.equal(this.array.get('length'), 2, 'Array has 2 comments');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post still has no added relation');
 });
 
-test('pushed records should affect owner', function () {
+test('pushed records should affect owner', function (assert) {
   var now = moment().utc();
 
-  equal(this.array.get('length'), 0, 'Array has no comment');
-  equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
+  assert.equal(this.array.get('length'), 0, 'Array has no comment');
+  assert.equal(this.post.get('addedRelations.length'), 0, 'Post has no added relation');
 
   this.array.set('_affectOwner', true);
 
@@ -294,12 +298,13 @@ test('pushed records should affect owner', function () {
     })
   ]);
 
-  equal(this.array.get('length'), 2, 'Array has 2 comments');
-  equal(this.post.get('addedRelations.length'), 2, 'Post has 1 added relation');
-  equal(this.post.get('addedRelations').sort().join(', '), 'comments + 1001001, comments + 1001002', 'Post has 1 added relation');
+  assert.equal(this.array.get('length'), 2, 'Array has 2 comments');
+  assert.equal(this.post.get('addedRelations.length'), 2, 'Post has 1 added relation');
+  assert.equal(this.post.get('addedRelations').sort().join(', '), 'comments + 1001001, comments + 1001002', 'Post has 1 added relation');
 });
 
-asyncTest('deleted record should be removed from array when saving', function () {
+test('deleted record should be removed from array when saving', function (assert) {
+  var done = assert.async();
   var now = moment().utc(),
       comments = [
     this.array.createRecord({
@@ -322,22 +327,23 @@ asyncTest('deleted record should be removed from array when saving', function ()
     })
   ];
 
-  equal(this.array.get('length'), 3, 'Array has 3 comments');
-  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+  assert.equal(this.array.get('length'), 3, 'Array has 3 comments');
+  assert.equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
   this.array.removeObject(comments[2]);
 
   var self = this;
   this.array.save().then(function (saved) {
-    equal(saved.get('length'), 2, 'Saved 2 comments');
-    equal(self.array.get('length'), 2, 'Array has 2 comments');
-    equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+    assert.equal(saved.get('length'), 2, 'Saved 2 comments');
+    assert.equal(self.array.get('length'), 2, 'Array has 2 comments');
+    assert.equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
-    start();
+    done();
   });
 });
 
-asyncTest('deleted record should be removed from array & from owner when saving', function () {
+test('deleted record should be removed from array & from owner when saving', function (assert) {
+  var done = assert.async();
   var now = moment().utc(),
       comments = [
     this.array.createRecord({
@@ -362,23 +368,24 @@ asyncTest('deleted record should be removed from array & from owner when saving'
 
   this.array.set('_affectOwner', true);
 
-  equal(this.array.get('length'), 3, 'Array has 3 comments');
-  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+  assert.equal(this.array.get('length'), 3, 'Array has 3 comments');
+  assert.equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
   this.array.removeObject(comments[2]);
 
   var self = this;
   this.array.save().then(function (saved) {
-    equal(saved.get('length'), 2, 'Saved 2 comments');
-    equal(self.array.get('length'), 2, 'Array has 2 comments');
-    equal(self.post.get('removedRelations.length'), 1, 'Post has one removed relation');
-    equal(self.post.get('removedRelations.firstObject'), 'comments - 1001003', 'Post has expected removed relation');
+    assert.equal(saved.get('length'), 2, 'Saved 2 comments');
+    assert.equal(self.array.get('length'), 2, 'Array has 2 comments');
+    assert.equal(self.post.get('removedRelations.length'), 1, 'Post has one removed relation');
+    assert.equal(self.post.get('removedRelations.firstObject'), 'comments - 1001003', 'Post has expected removed relation');
 
-    start();
+    done();
   });
 });
 
-asyncTest('deleted records should be removed from array when saving', function () {
+test('deleted records should be removed from array when saving', function (assert) {
+  var done = assert.async();
   var now = moment().utc(),
       comments = [
     this.array.createRecord({
@@ -401,8 +408,8 @@ asyncTest('deleted records should be removed from array when saving', function (
     })
   ];
 
-  equal(this.array.get('length'), 3, 'Array has 3 comments');
-  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+  assert.equal(this.array.get('length'), 3, 'Array has 3 comments');
+  assert.equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
   this.array.removeObjects([
     comments[0],
@@ -411,15 +418,16 @@ asyncTest('deleted records should be removed from array when saving', function (
 
   var self = this;
   this.array.save().then(function (saved) {
-    equal(saved.get('length'), 1, 'Saved 1 comments');
-    equal(self.array.get('length'), 1, 'Array has 1 comment');
-    equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+    assert.equal(saved.get('length'), 1, 'Saved 1 comments');
+    assert.equal(self.array.get('length'), 1, 'Array has 1 comment');
+    assert.equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
-    start();
+    done();
   });
 });
 
-asyncTest('deleted records should be removed from array & from owner when saving', function () {
+test('deleted records should be removed from array & from owner when saving', function (assert) {
+  var done = assert.async();
   var now = moment().utc(),
       comments = [
     this.array.createRecord({
@@ -444,8 +452,8 @@ asyncTest('deleted records should be removed from array & from owner when saving
 
   this.array.set('_affectOwner', true);
 
-  equal(this.array.get('length'), 3, 'Array has 3 comments');
-  equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
+  assert.equal(this.array.get('length'), 3, 'Array has 3 comments');
+  assert.equal(this.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
   this.array.removeObjects([
     comments[0],
@@ -454,12 +462,12 @@ asyncTest('deleted records should be removed from array & from owner when saving
 
   var self = this;
   this.array.save().then(function (saved) {
-    equal(saved.get('length'), 1, 'Saved 1 comments');
-    equal(self.array.get('length'), 1, 'Array has 1 comment');
-    equal(self.post.get('removedRelations.length'), 2, 'Post has 2 removed relations');
-    equal(self.post.get('removedRelations').sort().join(', '), 'comments - 1001001, comments - 1001003',
+    assert.equal(saved.get('length'), 1, 'Saved 1 comments');
+    assert.equal(self.array.get('length'), 1, 'Array has 1 comment');
+    assert.equal(self.post.get('removedRelations.length'), 2, 'Post has 2 removed relations');
+    assert.equal(self.post.get('removedRelations').sort().join(', '), 'comments - 1001001, comments - 1001003',
       'Post has expected removed relations');
 
-    start();
+    done();
   });
 });

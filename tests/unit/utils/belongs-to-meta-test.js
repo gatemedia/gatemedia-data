@@ -1,20 +1,21 @@
-import belongsToMeta from 'gatemedia-data/utils/belongs-to-meta';
+import { module, test } from 'qunit';
 import startApp from '../../helpers/start-app';
+import belongsToMeta from 'gatemedia-data/utils/belongs-to-meta';
 
 module('belongs-to-meta');
 
-test('meta object is valid', function() {
+test('meta object is valid', function (assert) {
   var meta = belongsToMeta('string');
 
-  equal(meta.type, 'string', 'Meta type is `string`');
-  ok(meta.isRelation, 'Meta is flagged as relation');
-  deepEqual(meta.options, {}, 'Meta options default to none');
+  assert.equal(meta.type, 'string', 'Meta type is `string`');
+  assert.ok(meta.isRelation, 'Meta is flagged as relation');
+  assert.deepEqual(meta.options, {}, 'Meta options default to none');
 
   meta = belongsToMeta('string', {
     opt: 'yeah'
   });
 
-  deepEqual(meta.options, {
+  assert.deepEqual(meta.options, {
     opt: 'yeah'
   }, 'Meta options are kept');
 });
@@ -26,40 +27,40 @@ module('belongs-to-meta codec', {
   }
 });
 
-test('key is valid', function() {
+test('key is valid', function (assert) {
   var meta = belongsToMeta('string');
 
-  equal(meta.codec.key('stuff'), 'stuff_id');
+  assert.equal(meta.codec.key('stuff'), 'stuff_id');
 });
 
-test('embedded key is valid', function() {
+test('embedded key is valid', function (assert) {
   var meta = belongsToMeta('string', {
     embedded: true
   });
 
-  equal(meta.codec.key('stuff'), 'stuff');
+  assert.equal(meta.codec.key('stuff'), 'stuff');
 });
 
-test('key is camelized', function() {
+test('key is camelized', function (assert) {
   var meta = belongsToMeta('string');
 
-  equal(meta.codec.key('myStuff'), 'my_stuff_id');
-  equal(meta.codec.key('myStuffs'), 'my_stuff_id'); // not functionaly needed
+  assert.equal(meta.codec.key('myStuff'), 'my_stuff_id');
+  assert.equal(meta.codec.key('myStuffs'), 'my_stuff_id'); // not functionaly needed
 });
 
-test('embedded key is decamelized', function() {
+test('embedded key is decamelized', function (assert) {
   var meta = belongsToMeta('string', {
     embedded: true
   });
 
-  equal(meta.codec.key('myStuff'), 'my_stuff');
-  equal(meta.codec.key('myStuffs'), 'my_stuff'); // not functionaly needed
+  assert.equal(meta.codec.key('myStuff'), 'my_stuff');
+  assert.equal(meta.codec.key('myStuffs'), 'my_stuff'); // not functionaly needed
 });
 
-test('key may be aliased', function() {
+test('key may be aliased', function (assert) {
   var meta = belongsToMeta('string', {
     key: 'bar'
   });
 
-  equal(meta.codec.key('foo'), 'bar_id');
+  assert.equal(meta.codec.key('foo'), 'bar_id');
 });

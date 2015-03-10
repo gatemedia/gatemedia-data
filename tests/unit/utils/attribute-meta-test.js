@@ -1,19 +1,20 @@
+import { module, test } from 'qunit';
 import attributeMeta from 'gatemedia-data/utils/attribute-meta';
 
 module('attributeMeta');
 
-test('meta object is valid', function() {
+test('meta object is valid', function (assert) {
   var meta = attributeMeta('string');
 
-  equal(meta.type, 'string', 'Meta type is `string`');
-  ok(meta.isAttribute, 'Meta is flagged as attribute');
-  deepEqual(meta.options, {}, 'Meta options default to none');
+  assert.equal(meta.type, 'string', 'Meta type is `string`');
+  assert.ok(meta.isAttribute, 'Meta is flagged as attribute');
+  assert.deepEqual(meta.options, {}, 'Meta options default to none');
 
   meta = attributeMeta('string', {
     opt: 'yeah'
   });
 
-  deepEqual(meta.options, {
+  assert.deepEqual(meta.options, {
     opt: 'yeah'
   }, 'Meta options are kept');
 });
@@ -21,22 +22,22 @@ test('meta object is valid', function() {
 
 module('attributeMeta codec');
 
-test('key is valid', function() {
+test('key is valid', function (assert) {
   var meta = attributeMeta('string');
 
-  equal(meta.codec.key('stuff'), 'stuff');
+  assert.equal(meta.codec.key('stuff'), 'stuff');
 });
 
-test('key is decamelized', function() {
+test('key is decamelized', function (assert) {
   var meta = attributeMeta('string');
 
-  equal(meta.codec.key('myStuff'), 'my_stuff');
+  assert.equal(meta.codec.key('myStuff'), 'my_stuff');
 });
 
-test('key may be aliased', function() {
+test('key may be aliased', function (assert) {
   var meta = attributeMeta('string', {
     key: 'bar'
   });
 
-  equal(meta.codec.key('foo'), 'bar');
+  assert.equal(meta.codec.key('foo'), 'bar');
 });
