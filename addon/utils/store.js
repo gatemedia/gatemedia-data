@@ -15,8 +15,8 @@ export default Ember.Object.extend({
   load: function (key, data, extraData) {
     var entityData, sideLoadData;
 
-    if (Ember.isNone(data.id) && Ember.typeOf(data[key]) === 'object') {
-      entityData = data[key];
+    if (Ember.isNone(data.id) && Ember.typeOf(data[key.underscore()]) === 'object') {
+      entityData = data[key.underscore()];
       sideLoadData = data;
     } else {
       entityData = data;
