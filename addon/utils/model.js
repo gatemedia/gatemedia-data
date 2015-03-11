@@ -407,7 +407,7 @@ var Model = Ember.Object.extend(
     Ember.assert("Model's internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
       !Ember.isNone(this._data));
     Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
-      if (Ember.isEmpty(includeProperties) || includeProperties.contains(dynamicKey)) {
+      if ((Ember.isEmpty(includeProperties) && (dynamicKey !== 'id')) || includeProperties.contains(dynamicKey)) {
         json[dynamicKey] = this._data[dynamicKey];
       }
     }, this);
