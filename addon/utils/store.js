@@ -135,7 +135,7 @@ export default Ember.Object.extend({
 
     function addAllRelations (keys) {
       keys.forEach(function (key) {
-        var typeName = key.singularize().camelize().classify();
+        var typeName = key.singularize().dasherize();
         orderedRelations.addRelation(key, typeName);
       });
     }
