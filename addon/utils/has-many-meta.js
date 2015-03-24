@@ -24,7 +24,7 @@ export default function hasManyMeta(type, options) {
         if (options.inline) {
           cache = cache || instance.get('_data.' + this.key(attribute));
           return cache.map(function (item) {
-            return item.toJSON();
+            return item.toJSON([], true);
           });
         } else {
           if (cache) {
