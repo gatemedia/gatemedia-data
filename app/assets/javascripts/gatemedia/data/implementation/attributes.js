@@ -277,7 +277,7 @@ Data.hasMany = function (type, options) {
         if (options.inline) {
           cache = cache || instance.get('_data.' + this.key(attribute));
           return cache.map(function (item) {
-            return item.toJSON();
+            return item.toJSON([], true);
           });
         } else {
           if (cache) {
@@ -353,7 +353,7 @@ Data.hasMany = function (type, options) {
         _type: meta.type,
         _owner: this,
         _field: key,
-        _affectOwner: meta.options.serialize || false,
+        _affectOwner: meta.options.serialize || meta.options.inline || false,
         content: content
       });
       content.forEach(function (record) {

@@ -356,12 +356,13 @@ Data.Model = Ember.Object.extend(Ember.Evented, {
     this._updateData(Ember.copy(this.get('_original'), true));
   },
 
-  toJSON: function (includeProperties) {
+  toJSON: function (includeProperties, includeId) {
     var json = {},
         processedKeys = [];
 
     this.constructor.eachAttribute(function (attribute, meta) {
-      if ((meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(attribute))) {
+      var force = (attribute === 'id') && !!includeId;
+      if (force || (meta.options.serialize !== false) && (Ember.isNone(includeProperties) || includeProperties.contains(attribute))) {
         json[meta.codec.key(attribute)] = meta.codec.encode(this, attribute);
       }
       processedKeys.pushObject(meta.codec.key(attribute));
