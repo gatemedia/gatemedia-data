@@ -4,7 +4,7 @@
 
 Ember.$.support.cors = true;
 
-Ember.libraries.register('GM Data', '1.5.1');
+Ember.libraries.register('GM Data', '1.5.2');
 
 /* global Data:true */
 Data = Ember.Namespace.createWithMixins(
