@@ -59,7 +59,13 @@ var RequestHandler = Ember.Object.extend({
             same;
         switch (Ember.typeOf(v1)) {
         case 'array':
-          same = (Ember.compare(v1, v2) === 0);
+          if (Ember.typeOf(v1[0]) === 'object') {
+            same = (v1.length === v2.length) && v1.every(function (item, index) {
+              return this._checkParams(v2[index], Ember.Object.create(item), '%@[%@]'.fmt(key, index));
+            }.bind(this));
+          } else {
+            same = (Ember.compare(v1, v2) === 0);
+          }
           break;
         default:
           same = (v1 === v2);
@@ -72,8 +78,8 @@ var RequestHandler = Ember.Object.extend({
               this.get('verb'),
               this.get('path'),
               path ? '%@.%@'.fmt(path, key) : key,
-              v2,
-              v1));
+              repr(v2),
+              repr(v1)));
           }
         }
       }
