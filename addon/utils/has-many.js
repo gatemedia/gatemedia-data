@@ -24,7 +24,7 @@ export default function (type, options) {
 
   var meta = hasManyMeta(type, options);
 
-  /* jshint maxcomplexity:14, maxstatements:29 */
+  /* jshint maxcomplexity:15, maxstatements:29 */
   return Ember.computed(function(key/*, value, oldValue*/) {
     if (arguments.length > 1) {
       Ember.assert('SHOULD NOT DO THAT, BRO', false);
