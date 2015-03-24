@@ -1,13 +1,16 @@
 ---
 language: node_js
 
-sudo: false
+sudo: true
 
 cache:
   directories:
     - node_modules
 
 before_install:
+  - wget https://s3.amazonaws.com/travis-phantomjs/phantomjs-2.0.0-ubuntu-12.04.tar.bz2
+  - tar -xf phantomjs-2.0.0-ubuntu-12.04.tar.bz2
+  - sudo mv phantomjs /usr/local/phantomjs/bin
   - "npm config set spin false"
   - "npm install -g npm@^2"
 
