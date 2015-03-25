@@ -107,7 +107,7 @@ export default Ember.Object.extend({
 
     record.setProperties(extraData);
     if (useCache) {
-      Ember.assert('Missing record id', !Ember.isNone(data.id));
+      Ember.assert('Missing record id (%@)'.fmt(key), !Ember.isNone(data.id));
 
       var cache = this.cacheFor(key);
       cache[data.id] = record;
