@@ -79,13 +79,13 @@ test('createRecord expects data with ID', function (assert) {
   assert.throws(function () {
     self.store.createRecord('stuff');
   },
-  new Error('Assertion Failed: Missing record id'),
+  new Error('Assertion Failed: Missing record id (stuff)'),
   'Missing data ID fails');
 
   assert.throws(function () {
     self.store.createRecord('stuff', { stuff: 'Hi' });
   },
-  new Error('Assertion Failed: Missing record id'),
+  new Error('Assertion Failed: Missing record id (stuff)'),
   'Missing data ID fails');
 });
 
