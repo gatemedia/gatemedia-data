@@ -55,16 +55,18 @@ export default Ember.Object.extend({
     var loaded = loads.filterBy('action', 'Load'),
         updated = loads.filterBy('action', 'Update');
     if (loaded.length) {
-      Ember.Logger.debug('DATA - Loaded %@ [%@] instances [%@]'.fmt(loaded.length, key, loaded.getEach('record.id').join(',')));
+      Ember.Logger.debug('DATA - Loaded %@ [%@] instances [%@]'.fmt(
+        loaded.length, key.dasherize(), loaded.getEach('record.id').join(',')));
     }
     if (updated.length) {
-      Ember.Logger.debug('DATA - Updated %@ [%@] instances [%@]'.fmt(updated.length, key, updated.getEach('record.id').join(',')));
+      Ember.Logger.debug('DATA - Updated %@ [%@] instances [%@]'.fmt(
+        updated.length, key.dasherize(), updated.getEach('record.id').join(',')));
     }
 
     if (sideLoadData) {
       this.sideLoad(key, sideLoadData);
     } else {
-      Ember.Logger.warn('DATA - Loaded [%@] entities from raw definition. No side load!'.fmt(key));
+      Ember.Logger.warn('DATA - Loaded [%@] entities from raw definition. No side load!'.fmt(key.dasherize()));
     }
 
     return loads.getEach('record');
@@ -377,6 +379,7 @@ export default Ember.Object.extend({
   },
 
   cacheFor: function (key) {
+    key = key.dasherize();
     var context = this.get('context') || '_global_',
         cachePerContext = this.get('cachePerContext'),
         cacheHolder, cache;
