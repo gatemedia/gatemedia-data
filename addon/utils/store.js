@@ -48,7 +48,6 @@ export default Ember.Object.extend({
       var k = key.underscore().pluralize();
       entitiesData = data[k];
       if (Ember.isNone(entitiesData)) {
-console.log('Expected [%@] key but none found in %@'.fmt(k, repr(data)));
         Ember.Logger.warn('Expected [%@] key but none found in %@'.fmt(k, repr(data)));
         entitiesData = [];
       }
