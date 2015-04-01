@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import repr from 'gatemedia-ext/utils/ember/repr';
 
 export default Ember.Object.extend({
   container: null,
@@ -35,7 +36,7 @@ export default Ember.Object.extend({
     return load.record;
   },
 
-  loadMany: function (key, data, extraData) {
+  loadMany: function (key, data, extraData) { // jshint maxstatements:21
     data = data || [];
 
     var entitiesData, sideLoadData;
@@ -44,7 +45,12 @@ export default Ember.Object.extend({
       entitiesData = data;
       sideLoadData = null;
     } else {
-      entitiesData = data[key.underscore().pluralize()];
+      var k = key.underscore().pluralize();
+      entitiesData = data[k];
+      if (Ember.isNone(entitiesData)) {
+        Ember.Logger.warn('Expected [%@] key but none found in %@'.fmt(k, repr(data)));
+        entitiesData = [];
+      }
       sideLoadData = data;
     }
 
