@@ -1,4 +1,6 @@
-# Gatemedia-data
+# GateMedia Data
+
+[![Build Status](https://travis-ci.org/gatemedia/gatemedia-data.svg?branch=ember-cli-addon)](https://travis-ci.org/gatemedia/gatemedia-data)
 
 This README outlines the details of collaborating on this Ember addon.
 
