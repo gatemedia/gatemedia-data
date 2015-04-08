@@ -12,7 +12,7 @@ export default Ember.ArrayProxy.extend({
   init: function () {
     this._super();
 
-    this.set('_removed', []);
+    this.set('_removed', Ember.A());
   },
 
   createRecord: function (data) {
@@ -20,7 +20,7 @@ export default Ember.ArrayProxy.extend({
     var key = this.get('_type'),
         ownerRelation = this._store.modelFor(key).ownerRelation(Constants.LAX_OWNER);
 
-    Ember.assert("ModelArray of %@ does not have any relation to owner".fmt(key), ownerRelation);
+    Ember.assert(Ember.String.fmt("ModelArray of %@ does not have any relation to owner", key), ownerRelation);
 
     var dataOwnerKey = ownerRelation.meta.codec.key(ownerRelation.name),
         dataOwnerId = data[dataOwnerKey],
@@ -29,7 +29,7 @@ export default Ember.ArrayProxy.extend({
         record;
 
     if (dataOwnerId) {
-      Ember.assert("Trying to add a %@ which owner mismatches ModelArray holder".fmt(key), ownerId === dataOwnerId);
+      Ember.assert(Ember.String.fmt("Trying to add a %@ which owner mismatches ModelArray holder", key), ownerId === dataOwnerId);
     } else {
       data[dataOwnerKey] = ownerId;
     }

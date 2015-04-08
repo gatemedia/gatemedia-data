@@ -127,7 +127,7 @@ module("Embedded attributes");
       }
     });
 
-    leaf2.get('extra').defineAttribute('objectTags', { decoder: 'array', defaultValue: [] });
+    leaf2.get('extra').defineAttribute('objectTags', { decoder: 'array', defaultValue: Ember.A() });
 
     equal(leaf2.get('extra.objectTags.length'), 3);
     [
@@ -233,7 +233,7 @@ module("Relations: hasMany");
   test("does not retrieve relation for new record", function () {
     var node = AttributesTest.Node.createRecord({
         'id': 101,
-        'children_ids': []
+        'children_ids': Ember.A()
       }),
       children = node.get('children');
 
@@ -244,7 +244,7 @@ module("Relations: hasMany");
   test("does not retrieve relation for empty set", function () {
     var node = AttributesTest.Node.load({
         'id': 201,
-        'children_ids': []
+        'children_ids': Ember.A()
       }),
       children = node.get('children');
 

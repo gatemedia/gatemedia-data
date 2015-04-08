@@ -1,6 +1,13 @@
 import Ember from 'ember';
 import repr from 'gatemedia-ext/utils/ember/repr';
 
+var dasherize = Ember.String.dasherize,
+    decamelize = Ember.String.decamelize,
+    fmt = Ember.String.fmt,
+    pluralize = Ember.String.pluralize,
+    singularize = Ember.String.singularize,
+    underscore = Ember.String.underscore;
+
 export default Ember.Object.extend({
   container: null,
 
@@ -14,10 +21,11 @@ export default Ember.Object.extend({
   },
 
   load: function (key, data, extraData) {
-    var entityData, sideLoadData;
+    var entityData, sideLoadData,
+        underscoredKey = underscore(key);
 
-    if (Ember.isNone(data.id) && Ember.typeOf(data[key.underscore()]) === 'object') {
-      entityData = data[key.underscore()];
+    if (Ember.isNone(data.id) && Ember.typeOf(data[underscoredKey]) === 'object') {
+      entityData = data[underscoredKey];
       sideLoadData = data;
     } else {
       entityData = data;
@@ -25,19 +33,19 @@ export default Ember.Object.extend({
     }
 
     var load = this._load(key, entityData, extraData);
-    Ember.Logger.debug('DATA - %@ [%@][%@] instance'.fmt(load.action, key, entityData.id));
+    Ember.Logger.debug(fmt('DATA - %@ [%@][%@] instance', load.action, key, entityData.id));
 
     if (sideLoadData) {
       this.sideLoad(key, sideLoadData);
     } else {
-      Ember.Logger.warn('DATA - Loaded [%@] entity from raw definition. No side load!'.fmt(key));
+      Ember.Logger.warn(fmt('DATA - Loaded [%@] entity from raw definition. No side load!', key));
     }
 
     return load.record;
   },
 
   loadMany: function (key, data, extraData) { // jshint maxstatements:21
-    data = data || [];
+    data = data || Ember.A();
 
     var entitiesData, sideLoadData;
 
@@ -45,37 +53,37 @@ export default Ember.Object.extend({
       entitiesData = data;
       sideLoadData = null;
     } else {
-      var k = key.underscore().pluralize();
+      var k = underscore(key).pluralize();
       entitiesData = data[k];
       if (Ember.isNone(entitiesData)) {
-        Ember.Logger.warn('Expected [%@] key but none found in %@'.fmt(k, repr(data)));
-        entitiesData = [];
+        Ember.Logger.warn(fmt('Expected [%@] key but none found in %@', k, repr(data)));
+        entitiesData = Ember.A();
       }
       sideLoadData = data;
     }
 
-    var loads = entitiesData.map(function (entityData) {
+    var loads = Ember.A(Ember.A(entitiesData).map(function (entityData) {
       return this._load(key, entityData, extraData);
-    }, this);
+    }, this));
 
-    var loaded = loads.filterBy('action', 'Load'),
-        updated = loads.filterBy('action', 'Update');
+    var loaded = Ember.A(loads.filterBy('action', 'Load')),
+        updated = Ember.A(loads.filterBy('action', 'Update'));
     if (loaded.length) {
-      Ember.Logger.debug('DATA - Loaded %@ [%@] instances [%@]'.fmt(
-        loaded.length, key.dasherize(), loaded.getEach('record.id').join(',')));
+      Ember.Logger.debug(fmt('DATA - Loaded %@ [%@] instances [%@]',
+        loaded.length, dasherize(key), loaded.getEach('record.id').join(',')));
     }
     if (updated.length) {
-      Ember.Logger.debug('DATA - Updated %@ [%@] instances [%@]'.fmt(
-        updated.length, key.dasherize(), updated.getEach('record.id').join(',')));
+      Ember.Logger.debug(fmt('DATA - Updated %@ [%@] instances [%@]',
+        updated.length, dasherize(key), updated.getEach('record.id').join(',')));
     }
 
     if (sideLoadData) {
       this.sideLoad(key, sideLoadData);
     } else {
-      Ember.Logger.warn('DATA - Loaded [%@] entities from raw definition. No side load!'.fmt(key.dasherize()));
+      Ember.Logger.warn(fmt('DATA - Loaded [%@] entities from raw definition. No side load!', dasherize(key)));
     }
 
-    return loads.getEach('record');
+    return Ember.A(loads.getEach('record'));
   },
 
   _load: function (key, entityData, extraData) {
@@ -113,7 +121,7 @@ export default Ember.Object.extend({
 
     record.setProperties(extraData);
     if (useCache) {
-      Ember.assert('Missing record id (%@)'.fmt(key), !Ember.isNone(data.id));
+      Ember.assert(fmt('Missing record id (%@)', key), !Ember.isNone(data.id));
 
       var cache = this.cacheFor(key);
       cache[data.id] = record;
@@ -122,19 +130,19 @@ export default Ember.Object.extend({
   },
 
   sideLoad: function (key, data, alreadyLoaded) {
-    alreadyLoaded = alreadyLoaded || [];
+    alreadyLoaded = alreadyLoaded || Ember.A();
 
-    Ember.assert('You must call %@.sideLoad() with the initial key'.fmt(this.constructor), !Ember.isNone(alreadyLoaded));
+    Ember.assert(fmt('You must call %@.sideLoad() with the initial key', this.constructor), !Ember.isNone(alreadyLoaded));
     if (!Ember.isArray(alreadyLoaded)) {
       delete data[alreadyLoaded];
       alreadyLoaded = [alreadyLoaded];
     }
 
-    var orderedRelations = [],
+    var orderedRelations = Ember.A(),
         types = {};
 
     orderedRelations.addRelation = function (key, type) {
-      key = key.decamelize();
+      key = decamelize(key);
       if (!this.contains(key) && !alreadyLoaded.contains(key)) {
         types[key] = type;
         this.pushObject(key);
@@ -143,7 +151,7 @@ export default Ember.Object.extend({
 
     function addAllRelations (keys) {
       keys.forEach(function (key) {
-        var typeName = key.singularize().dasherize();
+        var typeName = dasherize(singularize(key));
         orderedRelations.addRelation(key, typeName);
       });
     }
@@ -155,10 +163,10 @@ export default Ember.Object.extend({
       } else if (meta.options.sideLoads) {
         sideLoads = meta.options.sideLoads;
       } else {
-        sideLoads = [];
+        sideLoads = Ember.A();
       }
 
-      addAllRelations(meta.options.dependsOn || []);
+      addAllRelations(meta.options.dependsOn || Ember.A());
       orderedRelations.addRelation(relationName, meta.type);
       addAllRelations(sideLoads);
     });
@@ -166,9 +174,9 @@ export default Ember.Object.extend({
     orderedRelations.forEach(function (key) {
       var dataKey = key;
       if (!data.hasOwnProperty(dataKey)) {
-        dataKey = types[key].underscore();
+        dataKey = underscore(types[key]);
         if (!data.hasOwnProperty(dataKey)) {
-          dataKey = key.pluralize();
+          dataKey = pluralize(key);
           if (!data.hasOwnProperty(dataKey)) {
             dataKey = null;
           }
@@ -176,12 +184,12 @@ export default Ember.Object.extend({
       }
       if (dataKey) {
         if (Ember.typeOf(data[dataKey]) === 'array') {
-          Ember.Logger.debug('DATA - Sideload %@ [%@] instances (`%@`)'.fmt(data[dataKey].length, types[key], dataKey));
+          Ember.Logger.debug(fmt('DATA - Sideload %@ [%@] instances (`%@`)', data[dataKey].length, types[key], dataKey));
           data[dataKey].forEach(function (entityData) {
             this._load(types[key], entityData);
           }, this);
         } else {
-          Ember.Logger.debug('DATA - Sideload a single [%@] instance (`%@`)'.fmt(types[key], dataKey));
+          Ember.Logger.debug(fmt('DATA - Sideload a single [%@] instance (`%@`)', types[key], dataKey));
           this._load(types[key], data[dataKey]);
         }
         delete data[dataKey];
@@ -190,7 +198,7 @@ export default Ember.Object.extend({
 
     if (Ember.keys(data).length) {
       orderedRelations.forEach(function (relation) {
-        var key = relation.singularize(),
+        var key = singularize(relation),
             model = this.modelFor(key, true);
         if (model && Ember.keys(data).length) {
           this.sideLoad(key, data, alreadyLoaded.pushObjects(orderedRelations));
@@ -291,11 +299,11 @@ export default Ember.Object.extend({
       ids = id;
       break;
     case 'object':
-      ids = [];
+      ids = Ember.A();
       options = Ember.merge({ params: id }, options);
       break;
     default:
-      ids = [];
+      ids = Ember.A();
     }
 
     var foundInCache = false,
@@ -303,9 +311,9 @@ export default Ember.Object.extend({
 
     if (findMany) {
       var self = this; // for cli tests run compat... o_O)
-      cached = ids.map(function (id) {
+      cached = Ember.A(ids.map(function (id) {
         return self.cachedRecord(key, id);
-      }).compact();
+      })).compact();
       foundInCache = !Ember.isEmpty(ids) && (cached.length === ids.length);
     } else {
       cached = this.cachedRecord(key, id);
@@ -351,7 +359,7 @@ export default Ember.Object.extend({
       } else {
         Ember.assert('Store is missing its adapter', !Ember.isNone(this.adapter));
         this.adapter.find(
-          { key: key.underscore(), ids: ids, parent: parent },
+          { key: underscore(key), ids: ids, parent: parent },
           { options: options, findMany: findMany, async: async, hooks: hooks },
           { ok: ok, ko: ko, store: this });
       }
@@ -377,15 +385,15 @@ export default Ember.Object.extend({
 
   modelFor: function (key, permissive) {
     Ember.assert('Data store is missing its container', this.container);
-    var factory = this.container.lookupFactory('model:%@'.fmt(key));
+    var factory = this.container.lookupFactory(fmt('model:%@', key));
     if (!permissive) {
-      Ember.assert('Unknown model "%@"'.fmt(key), factory);
+      Ember.assert(fmt('Unknown model "%@"', key), factory);
     }
     return factory;
   },
 
   cacheFor: function (key) {
-    key = key.dasherize();
+    key = dasherize(key);
     var context = this.get('context') || '_global_',
         cachePerContext = this.get('cachePerContext'),
         cacheHolder, cache;
@@ -405,7 +413,7 @@ export default Ember.Object.extend({
     }
     return cache;
   },
-  clearCacheAsContextChanged: function () {
+  clearCacheAsContextChanged: Ember.observer('context', function () {
     var lastContext = this.get('_lastContext'),
         newContext = this.get('context');
 
@@ -416,5 +424,5 @@ export default Ember.Object.extend({
       }
       this.set('_lastContext', newContext);
     }
-  }.observes('context'),
+  }),
 });

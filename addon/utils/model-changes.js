@@ -6,7 +6,7 @@ export default Ember.Object.extend({
 
   init: function () {
     this._super();
-    this.set('_changed', []);
+    this.set('_changed', Ember.A());
     this.set('_changes', {});
   },
 
@@ -16,7 +16,7 @@ export default Ember.Object.extend({
       attributeChanges = this.get(key);
 
     if (!attributeChanges) {
-      attributeChanges = [];
+      attributeChanges = Ember.A();
       this.set(key, attributeChanges);
       this.get('_changed').addObject(attribute);
     }
@@ -30,12 +30,12 @@ export default Ember.Object.extend({
     delete this.get('_changes')[attribute];
   },
 
-  hasChanges: function () {
+  hasChanges: Ember.computed('_changed.@each', function () {
     var changes = 0;
 
     this.get('_changed').forEach(function (key) {
       changes += this.get('_changes.' + key).length;
     }, this);
     return changes > 0;
-  }.property('_changed.@each')
+  })
 });

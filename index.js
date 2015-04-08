@@ -4,8 +4,13 @@
 module.exports = {
   name: 'gatemedia-data',
 
-  included: function (app) {
-    app.import('bower_components/ember-inflector/ember-inflector.js', {
+  included: function (app, parentAddon) {
+    if (!app.import) {
+      return;
+    }
+    this._super.included(app, parentAddon);
+
+    app.import(app.bowerDirectory + '/ember-inflector/ember-inflector.js', {
       exports: {
         'ember-inflector': [
           'default',
@@ -14,5 +19,6 @@ module.exports = {
         ]
       }
     });
+    app.import(app.bowerDirectory + '/momentjs/moment.js');
   }
 };

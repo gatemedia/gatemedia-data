@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import codec from 'gatemedia-data/utils/codec';
 
 export default function (type, options) {
@@ -11,7 +12,7 @@ export default function (type, options) {
         if (options.key) {
           key = options.key;
         }
-        return key.decamelize().underscore();
+        return Ember.String.underscore(Ember.String.decamelize(key));
       },
 
       decode: function (value) {

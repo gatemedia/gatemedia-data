@@ -47,7 +47,7 @@ export default function (type, options) {
           relation.set('_owner', this);
           relationsCache[key] = relation;
         } else {
-          Ember.Logger.warn('An error occured at relation fetching... %@[%@].%@[%@] is not populated'.fmt(
+          Ember.Logger.warn(Ember.String.fmt('An error occured at relation fetching... %@[%@].%@[%@] is not populated',
             this.constructor, this.get('id'), key, id
           ));
         }

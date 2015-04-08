@@ -41,10 +41,10 @@ module("Partial loading", {
     var context = 'dummy';
 
     Data.API.stub(3).GET('stuffs', {
-      'stuffs': []
+      'stuffs': Ember.A()
     });
     Data.API.stub().GET('%@/stuffs'.fmt(context), {
-      'stuffs': []
+      'stuffs': Ember.A()
     });
 
     PartialLoading.Stuff.find().then(function (/*stuffs*/) {

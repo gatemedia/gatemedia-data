@@ -15,7 +15,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
         switch (decoder) {
         case 'array':
           if (Ember.typeOf(result) === 'object') { // fix JQuery serialization or object arrays...
-            var array = [];
+            var array = Ember.A();
             Ember.keys(result).forEach(function (index) {
               array[index] = result[index];
             });

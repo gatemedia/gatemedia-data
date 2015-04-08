@@ -25,14 +25,14 @@ var codec = {
       case 'object':
         return JSON.stringify(value);
       default:
-        Ember.Logger.warn('string codec returning raw %@ value:'.fmt(Ember.typeOf(value)), value);
+        Ember.Logger.warn(Ember.String.fmt('string codec returning raw %@ value:', Ember.typeOf(value)), value);
         return value;
       }
     },
 
     encode: function (value/*, qualifier*/) {
       if (!Ember.isNone(value)) {
-        return '%@'.fmt(value);
+        return Ember.String.fmt('%@', value);
       }
       return null;
     }

@@ -2,13 +2,15 @@ import Ember from 'ember';
 import { module, test } from 'qunit';
 import Store from 'gatemedia-data/utils/store';
 
+var singularize = Ember.String.singularize;
+
 module('Store basics');
 
 test('modelFor retrieves model from key', function (assert) {
   var store = Store.create({
     container: Ember.Object.create({
       lookupFactory: function (key) {
-        return '%@:factory'.fmt(key);
+        return Ember.String.fmt('%@:factory', key);
       }
     })
   });
@@ -48,7 +50,7 @@ module('Store', {
       eachRelation: function (callback, binding) {
         this.relations.forEach(function (name) {
           callback.call(binding || this, name, {
-            type: name.singularize(),
+            type: singularize(name),
             options: {}
           });
         }, this);

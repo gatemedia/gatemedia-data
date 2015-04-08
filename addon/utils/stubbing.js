@@ -2,10 +2,12 @@ import Ember from 'ember';
 import Adapter from 'gatemedia-data/utils/adapter';
 import repr from 'gatemedia-ext/utils/ember/repr';
 
+var fmt = Ember.String.fmt;
+
 /* global QUnit, ok */
 
 function extractURL (fullUrl) {
-  return (/(?:http(s?):\/\/(.+?))?\/(.+)/).exec(fullUrl).get('lastObject');
+  return Ember.A((/(?:http(s?):\/\/(.+?))?\/(.+)/).exec(fullUrl)).get('lastObject');
 }
 
 
@@ -52,7 +54,7 @@ var RequestHandler = Ember.Object.extend({
         if (Ember.typeOf(obj) === 'string') {
           obj = JSON.parse(obj);
         }
-        match = match && this._checkParams(expected[key], Ember.Object.create(obj), path ? '%@.%@'.fmt(path, key) : key);
+        match = match && this._checkParams(expected[key], Ember.Object.create(obj), path ? fmt('%@.%@', path, key) : key);
       } else {
         var v1 = got.get(key),
             v2 = expected[key],
@@ -61,7 +63,7 @@ var RequestHandler = Ember.Object.extend({
         case 'array':
           if (Ember.typeOf(v1[0]) === 'object') {
             same = (v1.length === v2.length) && v1.every(function (item, index) {
-              return this._checkParams(v2[index], Ember.Object.create(item), '%@[%@]'.fmt(key, index));
+              return this._checkParams(v2[index], Ember.Object.create(item), fmt('%@[%@]', key, index));
             }.bind(this));
           } else {
             same = (Ember.compare(v1, v2) === 0);
@@ -73,11 +75,11 @@ var RequestHandler = Ember.Object.extend({
         if (!same) {
           match = false;
           if (v2) {
-            Ember.Logger.error("%@ %@ %@ - Parameter [%@] differ: expected '%@', got '%@'".fmt(
+            Ember.Logger.error(fmt("%@ %@ %@ - Parameter [%@] differ: expected '%@', got '%@'",
               stubId(this),
               this.get('verb'),
               this.get('path'),
-              path ? '%@.%@'.fmt(path, key) : key,
+              path ? fmt('%@.%@', path, key) : key,
               repr(v2),
               repr(v1)));
           }
@@ -222,17 +224,17 @@ var fakeAPI = Ember.Object.extend({
     if (properties) {
       this.setProperties(properties);
     }
-    this.set('handlers', []);
+    this.set('handlers', Ember.A());
     this.set('fallbackHandler', RequestHandler.extend({
       handleRequest: function (settings) {
-        var message = 'Missing handler for XHR call: %@ %@ %@'.fmt(settings.type, settings.url, repr(settings.data));
+        var message = fmt('Missing handler for XHR call: %@ %@ %@', settings.type, settings.url, repr(settings.data));
 
         Ember.Logger.error(message);
         ok(false, message);
         Ember.assert(message, false);
       }
     }).create());
-    this.set('XHR_REQUESTS', []);
+    this.set('XHR_REQUESTS', Ember.A());
   }
 }).create();
 
@@ -246,16 +248,16 @@ Adapter.reopen({
 
 
 function stubId (stub) {
-  return '(stub#%@)'.fmt((/\:(\w+)\>/).exec(stub.toString())[1]);
+  return fmt('(stub#%@)', (/\:(\w+)\>/).exec(stub.toString())[1]);
 }
 
 
 QUnit.testDone(function (details) {
   var notConsumed = fakeAPI.handlers.filterBy('consumed', false);
   if (!Ember.isEmpty(notConsumed)) {
-    Ember.Logger.error('Some stubs were not consumed by [%@::%@]'.fmt(details.module, details.name));
+    Ember.Logger.error(fmt('Some stubs were not consumed by [%@::%@]', details.module, details.name));
     notConsumed.forEach(function (stub) {
-      Ember.Logger.error(' %@ -> %@ %@ %@'.fmt(
+      Ember.Logger.error(fmt(' %@ -> %@ %@ %@',
         stubId(stub),
         stub.get('verb'), stub.get('path'), repr(stub.get('params')) || ''));
     });

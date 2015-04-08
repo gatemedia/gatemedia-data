@@ -1,3 +1,4 @@
+import Ember from 'ember';
 
 export default function belongsToMeta(type, options) {
   options = options || {};
@@ -10,7 +11,7 @@ export default function belongsToMeta(type, options) {
         if (options.key) {
           key = options.key;
         }
-        key = key.decamelize().underscore().singularize();
+        key = Ember.String.singularize(Ember.String.underscore(Ember.String.decamelize(key)));
         if (options.embedded) {
           return key;
         }

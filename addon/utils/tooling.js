@@ -11,7 +11,7 @@ export var NoTooling = Ember.Object.create({
 
 
 export var LogTooling = Ember.Object.create({
-  uses: [],
+  uses: Ember.A(),
   log: true,
 
   readAttribute: function (instance, key, value) {
@@ -94,7 +94,7 @@ export var LogTooling = Ember.Object.create({
     }
 
     var previousUse,
-        compactUses = [];
+        compactUses = Ember.A();
 
     function id (instance) {
       return '%@[%@]'.fmt(instance.constructor.toString(), instance.get('_data.id'));
@@ -111,7 +111,7 @@ export var LogTooling = Ember.Object.create({
       if (Ember.isNone(previousUse) || !sameInstance) {
         compactUse = {
           'instance': use.instance,
-          'accesses': []
+          'accesses': Ember.A()
         };
         compactUses.pushObject(compactUse);
       } else {
@@ -133,7 +133,7 @@ export var LogTooling = Ember.Object.create({
     });
 
     if (level > 0) {
-      var veryCompactUses = [],
+      var veryCompactUses = Ember.A(),
           previousCompactUse;
 
       compactUses.forEach(function (compactUse) {

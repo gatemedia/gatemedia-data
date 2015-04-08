@@ -59,7 +59,7 @@ export default Ember.Object.extend(
   },
 
   _contextifiedUrl: function (url) {
-    var parts = [],
+    var parts = Ember.A(),
         namespace = this.get('namespace'),
         context = this.get('context');
 
@@ -136,10 +136,10 @@ export default Ember.Object.extend(
       var resourceKey = model.key;
       if (query.findMany) {
         resourceKey = resourceKey.pluralize();
-        Ember.Logger.debug('DATA - Got many %@%@:'.fmt(
+        Ember.Logger.debug(Ember.String.fmt('DATA - Got many %@%@:',
           resourceKey.dasherize(), model.parent ? ' (parent ' + model.parent.toString() + ')' : ''), Ember.copy(data));
       } else {
-        Ember.Logger.debug('DATA - Got one %@%@:'.fmt(
+        Ember.Logger.debug(Ember.String.fmt('DATA - Got one %@%@:',
           resourceKey.dasherize(), query.ids ? ' (' + query.ids + ')' : ''), Ember.copy(data));
       }
 
@@ -180,12 +180,12 @@ export default Ember.Object.extend(
         async = true,
         params = {},
         resourceKey = record.get('meta.resourceKey'),
-        url = [
+        url = Ember.A([
       this.get('baseUrl'),
       this.get('namespace'),
       this.get('context'),
       record.get('_url')
-    ].compact().join('/');
+    ]).compact().join('/');
 
     return new Ember.RSVP.Promise(function (resolve, reject) {
       Ember.run(adapter, function () {
@@ -254,9 +254,9 @@ export default Ember.Object.extend(
   buildUrl: function (key, id, parent, useContext) {
     var namespace = this.get('namespace'),
         context = this.get('context'),
-        urlParts = [
+        urlParts = Ember.A([
       this.get('baseUrl')
-    ];
+    ]);
 
     if (namespace) {
       urlParts.pushObject(namespace);
@@ -267,7 +267,7 @@ export default Ember.Object.extend(
     if (parent) {
       urlParts.pushObject(parent.get('_url'));
     }
-    urlParts.pushObject(key.pluralize());
+    urlParts.pushObject(Ember.String.pluralize(key));
     if (!Ember.isNone(id)) {
       urlParts.pushObject(id);
     }

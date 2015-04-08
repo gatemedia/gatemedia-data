@@ -7,6 +7,8 @@ import belongsTo from 'gatemedia-data/utils/belongs-to';
 import hasMany from 'gatemedia-data/utils/has-many';
 import startApp from '../../helpers/start-app';
 
+var fmt = Ember.String.fmt;
+
 module('model-array', {
 
   beforeEach: function () {
@@ -20,15 +22,15 @@ module('model-array', {
       init: function () {
         this._super();
         this.setProperties({
-          addedRelations: [],
-          removedRelations: []
+          addedRelations: Ember.A(),
+          removedRelations: Ember.A()
         });
       },
       _addRelation: function (field, object) {
-        this.get('addedRelations').pushObject('%@ + %@'.fmt(field, object.get('id')));
+        this.get('addedRelations').pushObject(fmt('%@ + %@', field, object.get('id')));
       },
       _removeRelation: function (field, object) {
-        this.get('removedRelations').pushObject('%@ - %@'.fmt(field, object.get('id')));
+        this.get('removedRelations').pushObject(fmt('%@ - %@', field, object.get('id')));
       }
     });
     var Comment = Model.extend({
@@ -48,7 +50,7 @@ module('model-array', {
 
 
     this.testAdapter = Ember.Object.create({
-      saved: [],
+      saved: Ember.A(),
 
       save: function (record, extraParams, includeProperties) {
         this.get('saved').pushObject({
@@ -101,7 +103,7 @@ module('model-array', {
       _type: 'comment',
       _owner: this.post,
       _store: this.store,
-      content: []
+      content: Ember.A()
     });
 
     startApp();
@@ -109,7 +111,7 @@ module('model-array', {
 });
 
 test('creation', function (assert) {
-  assert.deepEqual(this.array.get('_removed'), [], 'No object removed');
+  assert.deepEqual(this.array.get('_removed'), Ember.A(), 'No object removed');
 });
 
 test('record creation should prevent type without any owner relation', function (assert) {
@@ -154,7 +156,7 @@ test('record creation should auto-parent new records to owner', function (assert
     'author': null,
     'created_at': now.format('YYYY-MM-DDTHH:mm:ssZ'),
     'post_id': 42
-  }, 'Serialized comment is: %@'.fmt(comment.toJSON()));
+  }, fmt('Serialized comment is: %@', comment.toJSON()));
 });
 
 test('new records should be saved', 1, function (assert) {
@@ -171,8 +173,8 @@ test('new records should be saved', 1, function (assert) {
     'created_at': t2
   });
 
-  // Post not changed, useless: fakeXHR('PUT', 'posts/%@'.fmt(postId), { "post": { "id": postId, "title": postTitle } });
-  // Data.API.stub().POST('posts/%@/comments'.fmt(this.post.get('id')), { 'comments': [{ 'id': 300100, 'post_id': this.post.get('id') }] });
+  // Post not changed, useless: fakeXHR('PUT', fmt('posts/%@', postId), { "post": { "id": postId, "title": postTitle } });
+  // Data.API.stub().POST(fmt('posts/%@/comments', this.post.get('id')), { 'comments': [{ 'id': 300100, 'post_id': this.post.get('id') }] });
 
   var self = this;
   this.array.save().then(function () {
@@ -200,7 +202,7 @@ test('new records should be saved', 1, function (assert) {
 
     done();
   }, function (error) {
-    assert.ok(false, 'Failed: %@'.fmt(error));
+    assert.ok(false, fmt('Failed: %@', error));
   });
 });
 
@@ -334,7 +336,7 @@ test('deleted record should be removed from array when saving', function (assert
 
   var self = this;
   this.array.save().then(function (saved) {
-    assert.equal(saved.get('length'), 2, 'Saved 2 comments');
+    assert.equal(Ember.A(saved).get('length'), 2, 'Saved 2 comments');
     assert.equal(self.array.get('length'), 2, 'Array has 2 comments');
     assert.equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
@@ -375,7 +377,7 @@ test('deleted record should be removed from array & from owner when saving', fun
 
   var self = this;
   this.array.save().then(function (saved) {
-    assert.equal(saved.get('length'), 2, 'Saved 2 comments');
+    assert.equal(Ember.A(saved).get('length'), 2, 'Saved 2 comments');
     assert.equal(self.array.get('length'), 2, 'Array has 2 comments');
     assert.equal(self.post.get('removedRelations.length'), 1, 'Post has one removed relation');
     assert.equal(self.post.get('removedRelations.firstObject'), 'comments - 1001003', 'Post has expected removed relation');
@@ -418,7 +420,7 @@ test('deleted records should be removed from array when saving', function (asser
 
   var self = this;
   this.array.save().then(function (saved) {
-    assert.equal(saved.get('length'), 1, 'Saved 1 comments');
+    assert.equal(Ember.A(saved).get('length'), 1, 'Saved 1 comments');
     assert.equal(self.array.get('length'), 1, 'Array has 1 comment');
     assert.equal(self.post.get('removedRelations.length'), 0, 'Post has no removed relation');
 
@@ -462,7 +464,7 @@ test('deleted records should be removed from array & from owner when saving', fu
 
   var self = this;
   this.array.save().then(function (saved) {
-    assert.equal(saved.get('length'), 1, 'Saved 1 comments');
+    assert.equal(Ember.A(saved).get('length'), 1, 'Saved 1 comments');
     assert.equal(self.array.get('length'), 1, 'Array has 1 comment');
     assert.equal(self.post.get('removedRelations.length'), 2, 'Post has 2 removed relations');
     assert.equal(self.post.get('removedRelations').sort().join(', '), 'comments - 1001001, comments - 1001003',

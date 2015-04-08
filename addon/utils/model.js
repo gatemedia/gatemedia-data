@@ -3,20 +3,25 @@ import ModelChanges from 'gatemedia-data/utils/model-changes';
 import attribute from 'gatemedia-data/utils/attribute';
 import Constants from 'gatemedia-data/utils/constants';
 
+var fmt = Ember.String.fmt,
+    underscore = Ember.String.underscore,
+    singularize = Ember.String.singularize,
+    pluralize = Ember.String.pluralize;
+
 export var Meta = Ember.Object.extend({
   _model: this,
 
-  modelKey: function () {
+  modelKey: Ember.computed('_model', function () {
     return (/model:(.+):/).exec(this.get('_model').constructor.toString())[1];
-  }.property('_model'),
+  }),
 
-  resourceKey: function () {
-    return this.get('modelKey').underscore();
-  }.property('modelKey'),
+  resourceKey: Ember.computed('modelKey', function () {
+    return underscore(this.get('modelKey'));
+  }),
 
-  resourceUrlToken: function () {
-    return this.get('resourceKey').pluralize();
-  }.property('resourceKey')
+  resourceUrlToken: Ember.computed('resourceKey', function () {
+    return pluralize(this.get('resourceKey'));
+  })
 });
 
 /**
@@ -64,9 +69,9 @@ var Model = Ember.Object.extend(
     );
   },
 
-  _url: function () {
+  _url: Ember.computed('meta.isNew', 'id', function () {
     var parent = this.get('_parent'),
-        parts = [];
+        parts = Ember.A();
 
     if (parent) {
       parts.pushObject(parent.get('_url'));
@@ -76,9 +81,9 @@ var Model = Ember.Object.extend(
       parts.pushObject(this.get('id'));
     }
     return parts.join('/');
-  }.property('meta.isNew', 'id'),
+  }),
 
-  _parent: function () {
+  _parent: Ember.computed(function () {
     var ownerRelation = this.constructor.ownerRelation(Constants.STRICT_OWNER);
 
     if (ownerRelation) {
@@ -86,7 +91,7 @@ var Model = Ember.Object.extend(
       return relationsCache[ownerRelation.name] || this.get(ownerRelation.name);
     }
     return null;
-  }.property().volatile(),
+  }).volatile(),
 
   _updateData: function (data) {
     var orig = this.get('_data') || {};
@@ -163,7 +168,7 @@ var Model = Ember.Object.extend(
   },
 
   resetCache: function (relation) {
-    this.set('_relationsCache.%@'.fmt(relation), null);
+    this.set(fmt('_relationsCache.%@', relation), null);
     this.expireCaches();
   },
 
@@ -206,13 +211,13 @@ var Model = Ember.Object.extend(
 
   _changeRelation: function (relation, action, oldMember, newMember) {
     var data = this.get('_data'),
-        attr = '%@_id'.fmt(relation.underscore().singularize());
+        attr = fmt('%@_id', singularize(underscore(relation)));
 
     if (data.hasOwnProperty(attr)) {
       data[attr] = newMember ? newMember.get('id') : null;
       this.resetCache(relation);
     } else {
-      attr = attr.pluralize();
+      attr = pluralize(attr);
       if (!data.hasOwnProperty(attr)) {
         data[attr] = Ember.A();
       }
@@ -235,12 +240,12 @@ var Model = Ember.Object.extend(
 
   _destroyRelation: function (relation, removedMember) {
     var data = this.get('_data'),
-        attr = '%@_id'.fmt(relation.underscore().singularize());
+        attr = fmt('%@_id', singularize(underscore(relation)));
 
     if (data.hasOwnProperty(attr)) {
       delete data[attr];
     } else {
-      attr = attr.pluralize();
+      attr = pluralize(attr);
       data[attr].removeObject(removedMember.get('id'));
     }
     this.resetCache(relation);
@@ -259,11 +264,11 @@ var Model = Ember.Object.extend(
     }
   },
 
-  hasChanges: function () {
+  hasChanges: Ember.computed('_attributeChanges.hasChanges', '_relationChanges.hasChanges', 'meta.isDirty', function () {
     return this.get('_attributeChanges.hasChanges') ||
            this.get('_relationChanges.hasChanges') ||
            this.get('meta.isDirty');
-  }.property('_attributeChanges.hasChanges', '_relationChanges.hasChanges', 'meta.isDirty'),
+  }),
 
   deleteRecord: function () {
     var container = this.get('_container');
@@ -307,7 +312,7 @@ var Model = Ember.Object.extend(
             savingTracker;
 
         savingTracker = Ember.Object.create({
-          relationsToSave: [],
+          relationsToSave: Ember.A(),
 
           save: function (relation) {
             this.get('relationsToSave').pushObject(relation);
@@ -379,13 +384,13 @@ var Model = Ember.Object.extend(
   },
 
   toJSON: function (includeProperties, includeId) {
-    includeProperties = includeProperties || [];
+    includeProperties = includeProperties || Ember.A();
     if (!Ember.Array.detect(includeProperties)) {
       Ember.Logger.error('Bad includeProperties value:', includeProperties);
-      includeProperties = [];
+      includeProperties = Ember.A();
     }
     var json = {},
-        processedKeys = [];
+        processedKeys = Ember.A();
 
     this.constructor.eachAttribute(function (attribute, meta) {
       var force = (attribute === 'id') && !!includeId;
@@ -402,9 +407,9 @@ var Model = Ember.Object.extend(
       processedKeys.pushObject(meta.codec.key(relation));
     }, this);
 
-    Ember.assert("Model's internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...".fmt(this),
+    Ember.assert(fmt("Model's internal state not initialized. Maybe you used .create() instead of .instanciate() for %@...", this),
       !Ember.isNone(this._data));
-    Ember.keys(this._data).removeObjects(processedKeys).forEach(function (dynamicKey) {
+    Ember.A(Ember.keys(this._data)).removeObjects(processedKeys).forEach(function (dynamicKey) {
       if ((Ember.isEmpty(includeProperties) && (dynamicKey !== 'id')) || includeProperties.contains(dynamicKey)) {
         json[dynamicKey] = this._data[dynamicKey];
       }

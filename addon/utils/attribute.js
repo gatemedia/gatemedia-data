@@ -22,12 +22,12 @@ export default function (type, options) {
         } else {
           var id = this.get('_data.id');
           if (id) {
-            Ember.Logger.warn('Accessing undefined attribute %@[%@].%@ - Fetch full resource'.fmt(
+            Ember.Logger.warn(Ember.String.fmt('Accessing undefined attribute %@[%@].%@ - Fetch full resource',
               this.constructor, id, key));
             this.reload({ /*useContext: false,*/ sync: true });
             value = this.get('_data.' + meta.codec.key(key));
           } else {
-            Ember.Logger.info('New %@ instance, use default %@'.fmt(
+            Ember.Logger.info(Ember.String.fmt('New %@ instance, use default %@',
               this.constructor, key));
             value = options.defaultValue;
           }

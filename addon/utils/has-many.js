@@ -3,6 +3,8 @@ import ModelArray from 'gatemedia-data/utils/model-array';
 import hasManyMeta from 'gatemedia-data/utils/has-many-meta';
 import tooling from 'gatemedia-data/utils/tooling';
 
+var fmt = Ember.String.fmt;
+
 /**
   Declares a "to many" relation.
     - type: the "many" relation side's entity fully qualified class name
@@ -30,7 +32,7 @@ export default function (type, options) {
       Ember.assert('SHOULD NOT DO THAT, BRO', false);
     } else {
       var meta = this.constructor.metaForProperty(key),
-          ids = this.get('_data.' + meta.codec.key(key)),
+          ids = Ember.A(this.get('_data.' + meta.codec.key(key))),
           parent = meta.options.nested ? this : null,
           params,
           relationsCache = this.get('_relationsCache') || {},
@@ -39,17 +41,17 @@ export default function (type, options) {
 
       tooling.readHasMany(parent, this, key, ids, relation);
       if (relation) {
-        // Ember.Logger.debug('hasMany(%@.%@): use cache'.fmt(type, key));
+        // Ember.Logger.debug(fmt('hasMany(%@.%@): use cache', type, key));
         return relation;
       }
 
       if (this.get('meta.isNew')) {
-        content = [];
-        // Ember.Logger.debug('hasMany(%@.%@): empty set (new)'.fmt(type, key));
+        content = Ember.A();
+        // Ember.Logger.debug(fmt('hasMany(%@.%@): empty set (new)', type, key));
       } else {
         if (Ember.isEmpty(ids)) {
-          content = [];
-          // Ember.Logger.debug('hasMany(%@.%@): empty set'.fmt(type, key));
+          content = Ember.A();
+          // Ember.Logger.debug(fmt('hasMany(%@.%@): empty set', type, key));
         } else {
           if (meta.options.nestingParam) {
             var parts = meta.options.nestingParam.split(':'),
@@ -65,20 +67,20 @@ export default function (type, options) {
             if (ownerRelation) {
               var ownRelationKey = ownerRelation.meta.codec.key(ownerRelation.name),
                   ownerId = this.get('id');
-              if (Ember.isNone(ids.get('firstObject.%@'.fmt(ownRelationKey)))) {
-                Ember.Logger.info('Auto-assign %@ using %@ (%@)'.fmt(type, ownRelationKey, ownerId));
+              if (Ember.isNone(ids.get(fmt('firstObject.%@', ownRelationKey)))) {
+                Ember.Logger.info(fmt('Auto-assign %@ using %@ (%@)', type, ownRelationKey, ownerId));
                 ids.forEach(function (data) {
                   data[ownRelationKey] = ownerId;
                 });
               }
               content = this._store.loadMany(type, ids);
             } else {
-              Ember.Logger.error('%@ is missing owner relation for %@ inlining'.fmt(type, key));
-              content = [];
+              Ember.Logger.error(fmt('%@ is missing owner relation for %@ inlining', type, key));
+              content = Ember.A();
             }
           } else {
             content = this._store.find(type, ids, parent, { sync: true, params: params });
-            // Ember.Logger.debug('hasMany(%@.%@): retrieve %@'.fmt(type, key, ids));
+            // Ember.Logger.debug('hasMany(%@.%@): retrieve %@', type, key, ids));
           }
         }
       }
