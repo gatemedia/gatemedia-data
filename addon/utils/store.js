@@ -38,7 +38,7 @@ export default Ember.Object.extend({
     if (sideLoadData) {
       this.sideLoad(key, sideLoadData);
     } else {
-      Ember.Logger.warn(fmt('DATA - Loaded [%@] entity from raw definition. No side load!', key));
+      Ember.Logger.info(fmt('DATA - Loaded [%@] entity from raw definition. No side load!', key));
     }
 
     return load.record;
@@ -80,7 +80,7 @@ export default Ember.Object.extend({
     if (sideLoadData) {
       this.sideLoad(key, sideLoadData);
     } else {
-      Ember.Logger.warn(fmt('DATA - Loaded [%@] entities from raw definition. No side load!', dasherize(key)));
+      Ember.Logger.info(fmt('DATA - Loaded [%@] entities from raw definition. No side load!', dasherize(key)));
     }
 
     return Ember.A(loads.getEach('record'));
