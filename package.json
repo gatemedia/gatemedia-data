@@ -1,6 +1,6 @@
 {
   "name": "gatemedia-data",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "description": "GateMedia data layer",
   "directories": {
     "doc": "doc",
