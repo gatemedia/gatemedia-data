@@ -5,7 +5,7 @@ Ember.$.support.cors = true;
 export default Ember.Object.extend(
   Ember.Evented,
 {
-  baseUrl: Ember.required(),
+  baseUrl: null, //required
   namespace: null,
   context: null,
 
