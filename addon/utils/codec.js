@@ -40,6 +40,9 @@ var codec = {
 
   number: Codec.create({
     decode: function (value/*, qualifier*/) {
+      if (Ember.isNone(value)) {
+        return null;
+      }
       if (Ember.typeOf(value) === 'number') {
         return value;
       }
