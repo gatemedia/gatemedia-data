@@ -12,7 +12,13 @@ export var Meta = Ember.Object.extend({
   _model: this,
 
   modelKey: Ember.computed('_model', function () {
-    return (/model:(.+):/).exec(this.get('_model').constructor.toString())[1];
+    var constructorName = this.get('_model').constructor.toString(),
+        match = (/model:(.+):/).exec(constructorName);
+    if (Ember.isNone(match)) {
+      Ember.Logger.error(Ember.String.fmt('Model constructor unresolvable: %@', constructorName));
+      return '<unknown model>';
+    }
+    return match[1];
   }),
 
   resourceKey: Ember.computed('modelKey', function () {
