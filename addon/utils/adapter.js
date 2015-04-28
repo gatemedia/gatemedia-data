@@ -8,6 +8,8 @@ export default Ember.Object.extend(
   baseUrl: null, //required
   namespace: null,
   context: null,
+  authParams: null,
+  passXHRCredentials: false,
 
   cachePerContext: true,
   clearCacheOnContextChange: false,
@@ -283,6 +285,12 @@ export default Ember.Object.extend(
     if (extraParams) {
       Ember.merge(params, extraParams);
     }
+
+    var authParams = this.get('authParams');
+    if (authParams) {
+      Ember.merge(params, authParams);
+    }
+
     return params;
   },
 
@@ -292,10 +300,15 @@ export default Ember.Object.extend(
   },
 
   ajax: function (settings) {
-    return Ember.$.ajax(Ember.merge(settings, {
-      xhrFields: {
-        withCredentials: true
-      }
-    }));
+    var extraSettings = {};
+
+    if (this.get('passXHRCredentials')) {
+      Ember.merge(extraSettings, {
+        xhrFields: {
+          withCredentials: true
+        }
+      });
+    }
+    return Ember.$.ajax(Ember.merge(settings, extraSettings));
   },
 });

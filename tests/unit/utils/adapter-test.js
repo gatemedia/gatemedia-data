@@ -3,9 +3,13 @@ import { module, test } from 'qunit';
 import Adapter from 'gatemedia-data/utils/adapter';
 import startApp from '../../helpers/start-app';
 
-module('Adapter', {
-  setup: function () {
-    startApp();
+module('adapter', {
+
+  beforeEach: function () {
+    this.app = startApp();
+  },
+  afterEach: function () {
+    Ember.run(this.app, this.app.destroy);
   }
 });
 
@@ -25,4 +29,41 @@ test('buildUrl', function (assert) {
   assert.equal(adapter.buildUrl('client', 42, Ember.Object.create({ _url: 'parent/res' }), true),
     'https://api.com/api/v2/somewhere/parent/res/clients/42',
     'Resource item URL supports parent prefix');
+});
+
+test('authParams are added when set', function (assert) {
+  var adapter = Adapter.create({
+    baseUrl: 'https://api.com',
+    namespace: 'api/v2'
+  });
+
+  assert.deepEqual(adapter.buildParams(), {}, 'No auth parameters are passed when not set');
+
+  var key = 'Afevrt34Tagzrv';
+  adapter.set('authParams', {
+    'user_credentials': key
+  });
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': key
+  }, 'Auth parameters are passed when set');
+
+  adapter.set('authParams', {
+    'user_credentials': key,
+    'extra': 'bam'
+  });
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': key,
+    'extra': 'bam'
+  }, 'Auth parameters are passed when set');
+
+  var key2 = 'AZav34Ttgé"r547';
+  adapter.set('authParams', {
+    'user_credentials': key2
+  });
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': key2
+  }, 'Auth parameters are passed when set');
+
+  adapter.set('authParams', null);
+  assert.deepEqual(adapter.buildParams(), {}, 'Auth parameters are passed when set');
 });
