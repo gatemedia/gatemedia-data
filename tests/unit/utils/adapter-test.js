@@ -67,3 +67,36 @@ test('authParams are added when set', function (assert) {
   adapter.set('authParams', null);
   assert.deepEqual(adapter.buildParams(), {}, 'Auth parameters are passed when set');
 });
+
+test('authParams can be properties on an object', function (assert) {
+  var adapter = Adapter.create({
+    baseUrl: 'https://api.com',
+    namespace: 'api/v2'
+  });
+
+  assert.deepEqual(adapter.buildParams(), {}, 'No auth parameters are passed when not set');
+
+  var params = Ember.Object.extend({
+    token: null,
+    'user_credentials': Ember.computed('token', function () {
+      return this.get('token');
+    })
+  }).create();
+  adapter.set('authParams', params);
+
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': null
+  }, 'Auth parameters are set from properties value');
+
+  var key = 'Afevrt34Tagzrv';
+  params.set('token', key);
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': key
+  }, 'Auth parameters are altered when properties evolves');
+
+  var key2 = 'Erhsqqst2346Yrg';
+  params.set('token', key2);
+  assert.deepEqual(adapter.buildParams(), {
+    'user_credentials': key2
+  }, 'Auth parameters are altered when properties evolves');
+});

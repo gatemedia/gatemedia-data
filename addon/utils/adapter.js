@@ -288,7 +288,17 @@ export default Ember.Object.extend(
 
     var authParams = this.get('authParams');
     if (authParams) {
-      Ember.merge(params, authParams);
+      var auth = {};
+
+      if (Ember.Object.detectInstance(authParams)) {
+        authParams.constructor.eachComputedProperty(function (prop) {
+          auth[prop] = authParams.get(prop);
+        });
+      } else {
+        auth = authParams;
+      }
+
+      Ember.merge(params, auth);
     }
 
     return params;
