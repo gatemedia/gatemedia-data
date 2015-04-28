@@ -78,8 +78,10 @@ test('authParams can be properties on an object', function (assert) {
 
   var params = Ember.Object.extend({
     token: null,
-    'user_credentials': Ember.computed('token', function () {
-      return this.get('token');
+    authParams: Ember.computed('token', function () {
+      return {
+        'user_credentials': this.get('token')
+      };
     })
   }).create();
   adapter.set('authParams', params);

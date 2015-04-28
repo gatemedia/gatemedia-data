@@ -288,17 +288,13 @@ export default Ember.Object.extend(
 
     var authParams = this.get('authParams');
     if (authParams) {
-      var auth = {};
-
       if (Ember.Object.detectInstance(authParams)) {
-        authParams.constructor.eachComputedProperty(function (prop) {
-          auth[prop] = authParams.get(prop);
-        });
-      } else {
-        auth = authParams;
+        authParams = authParams.get('authParams');
+        if (Ember.isNone(authParams)) {
+          Ember.Logger.warn('authParams is an object but is missing "authParams" property');
+        }
       }
-
-      Ember.merge(params, auth);
+      Ember.merge(params, authParams);
     }
 
     return params;
