@@ -1,6 +1,6 @@
 {
   "name": "gatemedia-data",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "GateMedia data layer",
   "directories": {
     "doc": "doc",
@@ -19,7 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "gatemedia-ext": "1.4.1"
+    "gatemedia-ext": "1.4.2"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
