@@ -76,9 +76,22 @@ Data.attr = function (type, options) {
 Data.embedded = function (type, options) {
   options = options || {};
 
+  var parts = type.split(':'),
+      qualifier = parts[0],
+      basicType = parts[1] || qualifier,
+      isArray = false;
+
+  switch (qualifier) {
+  case 'array':
+    isArray = true;
+    break;
+  }
+
   var meta = {
-    type: type,
+    type: basicType,
     isAttribute: true,
+    embedded: true,
+    isArray: isArray,
     options: options,
     codec: {
       key: function (key) {
@@ -86,6 +99,11 @@ Data.embedded = function (type, options) {
       },
 
       encode: function (instance, attribute) {
+        if (isArray) {
+          return Ember.A(instance.get(attribute).map(function (item) {
+            return item.toJSON();
+          }));
+        }
         return instance.get(attribute).toJSON();
       }
     }
@@ -102,7 +120,8 @@ Data.embedded = function (type, options) {
       if (value === undefined) {
         value = options.defaultValue;
       }
-      value = Data.getType(type).load(value, {
+      var load = (meta.isArray ? Data.getType(type).loadMany : Data.getType(type).load);
+      value = load(value, {
         _embeddedContainer: this,
         _embeddedAttribute: key
       });
