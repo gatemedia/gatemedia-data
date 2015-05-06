@@ -5,6 +5,6 @@ module('embedded');
 
 // Replace this with your real tests.
 test('it works', function (assert) {
-  var result = embedded();
+  var result = embedded('stuff');
   assert.ok(result);
 });

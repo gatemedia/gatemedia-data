@@ -1,24 +1,10 @@
 import Ember from 'ember';
+import embeddedMeta from 'gatemedia-data/utils/embedded-meta';
 import tooling from 'gatemedia-data/utils/tooling';
 
 export default function (type, options) {
   options = options || {};
-
-  var meta = {
-    type: type,
-    isAttribute: true,
-    embedded: true,
-    options: options,
-    codec: {
-      key: function (key) {
-        return key.decamelize();
-      },
-
-      encode: function (instance, attribute) {
-        return instance.get(attribute).toJSON();
-      }
-    }
-  };
+  var meta = embeddedMeta(type, options);
 
   return Ember.computed(function(key, value, oldValue) {
     if (arguments.length > 1) {
@@ -31,7 +17,8 @@ export default function (type, options) {
       if (value === undefined) {
         value = options.defaultValue || {};
       }
-      value = this._store.load(type, value, {
+      var load = (meta.isArray ? this._store.loadMany : this._store.load);
+      value = load(type, value, {
         _embeddedContainer: this,
         _embeddedAttribute: key
       });
