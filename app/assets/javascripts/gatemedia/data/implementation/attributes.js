@@ -121,7 +121,7 @@ Data.embedded = function (type, options) {
         value = options.defaultValue;
       }
       var load = (meta.isArray ? Data.getType(basicType).loadMany : Data.getType(type).load);
-      value = load(value, {
+      value = Ember.run(Data.getType(basicType), load, value, {
         _embeddedContainer: this,
         _embeddedAttribute: key
       });
