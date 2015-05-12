@@ -18,7 +18,7 @@ export default function (type, options) {
         value = options.defaultValue || {};
       }
       var load = (meta.isArray ? this._store.loadMany : this._store.load);
-      value = load(type, value, {
+      value = Ember.run(this._store, load, meta.type, value, {
         _embeddedContainer: this,
         _embeddedAttribute: key
       });
