@@ -9,6 +9,7 @@ export default Ember.Object.extend(
   namespace: null,
   context: null,
   authParams: null,
+  authHeaders: null,
   passXHRCredentials: false,
 
   cachePerContext: true,
@@ -307,6 +308,19 @@ export default Ember.Object.extend(
 
   ajax: function (settings) {
     var extraSettings = {};
+
+    var authHeaders = this.get('authHeaders');
+    if (authHeaders) {
+      if (Ember.Object.detectInstance(authHeaders)) {
+        authHeaders = authHeaders.get('authParams');
+        if (Ember.isNone(authHeaders)) {
+          Ember.Logger.warn('authHeaders is an object but is missing "authHeaders" property');
+        }
+      }
+      Ember.merge(extraSettings, {
+        headers: authHeaders
+      });
+    }
 
     if (this.get('passXHRCredentials')) {
       Ember.merge(extraSettings, {
