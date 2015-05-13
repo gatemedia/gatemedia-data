@@ -312,7 +312,7 @@ export default Ember.Object.extend(
     var authHeaders = this.get('authHeaders');
     if (authHeaders) {
       if (Ember.Object.detectInstance(authHeaders)) {
-        authHeaders = authHeaders.get('authParams');
+        authHeaders = authHeaders.get('authHeaders');
         if (Ember.isNone(authHeaders)) {
           Ember.Logger.warn('authHeaders is an object but is missing "authHeaders" property');
         }
