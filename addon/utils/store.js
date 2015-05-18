@@ -302,6 +302,14 @@ export default Ember.Object.extend({
       ids = Ember.A();
       options = Ember.merge({ params: id }, options);
       break;
+    case 'instance':
+      if (Ember.isNone(parent)) {
+        ids = Ember.A();
+        parent = id;
+      } else {
+        Ember.Logger.warn('Weird find arguments: both "id" (instance) & "parent" where specified...');
+      }
+      break;
     default:
       ids = Ember.A();
     }
