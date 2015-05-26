@@ -1,6 +1,6 @@
 {
   "name": "gatemedia-data",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "GateMedia data layer",
   "directories": {
     "doc": "doc",
@@ -19,11 +19,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "gatemedia-ext": "1.4.2"
+    "gatemedia-ext": "1.4.4"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
-    "ember-cli": "0.2.3",
+    "ember-cli": "0.2.5",
     "ember-cli-app-version": "0.3.3",
     "ember-cli-babel": "^5.0.0",
     "ember-cli-content-security-policy": "0.4.0",

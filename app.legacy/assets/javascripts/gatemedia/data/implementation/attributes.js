@@ -5,13 +5,10 @@
 Data.dynamicAttributable = Ember.Mixin.create({
 
   defineAttribute: function (key, definition) {
-    Ember.defineProperty(this, key, Ember.computed(function (key, newValue/*, oldValue*/) {
-      var result = newValue;
-      if (arguments.length > 1) {
-        Ember.set(this._data, key, result);
-      } else {
+    Ember.defineProperty(this, key, Ember.computed({
+      get: function (key) {
         var decoder = definition.decoder || 'raw';
-        result = Ember.get(this._data, key);
+        var result = Ember.get(this._data, key);
         switch (decoder) {
         case 'array':
           if (Ember.typeOf(result) === 'object') { // fix JQuery serialization or object arrays...
@@ -25,9 +22,13 @@ Data.dynamicAttributable = Ember.Mixin.create({
         default:
           // nope
         }
-      }
-      Data.tooling.readDynamicAttribute(this, key, result);
-      return result;
+        Data.tooling.readDynamicAttribute(this, key, result);
+        return result;
+      },
+      set: function (key, newValue/*, oldValue*/) {
+        Ember.set(this._data, key, newValue);
+        return newValue;
+      },
     }).property('_data', '_data.%@'.fmt(key)).cacheable(false));
 
     if (Ember.isNone(Ember.get(this._data, key))) {

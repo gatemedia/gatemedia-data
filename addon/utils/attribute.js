@@ -6,13 +6,9 @@ export default function (type, options) {
   options = options || {};
   var meta = attributeMeta(type, options);
 
-  return Ember.computed(function(key, value, oldValue) {
-    if (arguments.length > 1) {
-      var encodedValue = meta.codec.encode(value);
-      this._changeAttribute(key, oldValue, encodedValue);
-      this.set('_data.' + meta.codec.key(key), encodedValue);
-    } else {
-      value = this.get('_data.' + meta.codec.key(key));
+  return Ember.computed({
+    get: function(key) {
+      var value = this.get('_data.' + meta.codec.key(key));
 
       tooling.readAttribute(this, key, value);
       if (Ember.isNone(value)) {
@@ -34,7 +30,13 @@ export default function (type, options) {
         }
       }
       value = meta.codec.decode(value);
+      return value;
+    },
+    set: function(key, value, oldValue) {
+      var encodedValue = meta.codec.encode(value);
+      this._changeAttribute(key, oldValue, encodedValue);
+      this.set('_data.' + meta.codec.key(key), encodedValue);
+      return value;
     }
-    return value;
   }).property('_data', '_cacheTimestamp').meta(meta);
 }

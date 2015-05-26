@@ -2,7 +2,7 @@ import Ember from 'ember';
 import Store from 'gatemedia-data/utils/store';
 import Adapter from 'gatemedia-data/utils/adapter';
 
-export function initialize (container, application) {
+export function initialize (registry, application) {
 
   var adapter = Adapter.create({
     baseUrl: 'dummy.com',
@@ -11,7 +11,7 @@ export function initialize (container, application) {
     clearCacheOnContextChange: true
   }),
       store = Store.create({
-    container: container,
+    container: null,
     adapter: adapter
   });
 

@@ -27,10 +27,8 @@ export default function (type, options) {
   var meta = hasManyMeta(type, options);
 
   /* jshint maxcomplexity:15, maxstatements:29 */
-  return Ember.computed(function(key/*, value, oldValue*/) {
-    if (arguments.length > 1) {
-      Ember.assert('SHOULD NOT DO THAT, BRO', false);
-    } else {
+  return Ember.computed({
+    get: function(key) {
       var meta = this.constructor.metaForProperty(key),
           ids = Ember.A(this.get('_data.' + meta.codec.key(key))),
           parent = meta.options.nested ? this : null,
@@ -98,6 +96,9 @@ export default function (type, options) {
       });
       relationsCache[key] = relation;
       return relation;
+    },
+    set: function(/*key, value, oldValue*/) {
+      Ember.assert('SHOULD NOT DO THAT, BRO', false);
     }
   }).property('_data', '_relationsCache', '_cacheTimestamp').meta(meta);
 }

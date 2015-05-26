@@ -20,14 +20,8 @@ export default function (type, options) {
 
   var meta = belongsToMeta(type, options);
 
-  return Ember.computed(function(key, value, oldValue) {
-    if (arguments.length > 1) {
-      this.set('_data.' + meta.codec.key(key), value ? value.get('id') : value);
-      this.get('_relationsCache')[key] = value;
-      Ember.run.next(this, function () {
-        this._replaceRelation(key, oldValue, value);
-      });
-    } else {
+  return Ember.computed({
+    get: function(key) {
       var id = this.get('_data.' + meta.codec.key(key)),
           parent = meta.options.nested ? this : null,
           relationsCache = this.get('_relationsCache') || {},
@@ -55,6 +49,14 @@ export default function (type, options) {
         relation = null;
       }
       return relation;
+    },
+    set: function(key, value, oldValue) {
+      this.set('_data.' + meta.codec.key(key), value ? value.get('id') : value);
+      this.get('_relationsCache')[key] = value;
+      Ember.run.next(this, function () {
+        this._replaceRelation(key, oldValue, value);
+      });
+      return value;
     }
   }).property('_data', '_relationsCache', '_cacheTimestamp').meta(meta);
 }

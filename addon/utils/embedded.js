@@ -6,12 +6,9 @@ export default function (type, options) {
   options = options || {};
   var meta = embeddedMeta(type, options);
 
-  return Ember.computed(function(key, value, oldValue) {
-    if (arguments.length > 1) {
-      this._changeAttribute(key, oldValue, value);
-      this.set('_data.' + meta.codec.key(key), value);
-    } else {
-      value = this.get('_data.' + meta.codec.key(key));
+  return Ember.computed({
+    get: function(key) {
+      var value = this.get('_data.' + meta.codec.key(key));
 
       tooling.readEmbedded(this, key, value);
       if (value === undefined) {
@@ -22,7 +19,12 @@ export default function (type, options) {
         _embeddedContainer: this,
         _embeddedAttribute: key
       });
+      return value;
+    },
+    set: function(key, value, oldValue) {
+      this._changeAttribute(key, oldValue, value);
+      this.set('_data.' + meta.codec.key(key), value);
+      return value;
     }
-    return value;
   }).property('_data').meta(meta);
 }

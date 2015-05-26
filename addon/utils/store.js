@@ -392,8 +392,9 @@ export default Ember.Object.extend({
 
 
   modelFor: function (key, permissive) {
-    Ember.assert('Data store is missing its container', this.container);
-    var factory = this.container.lookupFactory(fmt('model:%@', key));
+    var container = this.get('container');
+    Ember.assert('Data store is missing its container', container);
+    var factory = container.lookupFactory(fmt('model:%@', key));
     if (!permissive) {
       Ember.assert(fmt('Unknown model "%@"', key), factory);
     }

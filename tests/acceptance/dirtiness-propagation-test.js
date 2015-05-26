@@ -15,6 +15,7 @@ module('Dirtiness propagation', {
     this.container = this.app.__container__;
     // jshint camelcase:true
     this.store = this.container.lookup('store:main');
+    this.store.set('container', this.container);
   },
   afterEach: function () {
     Ember.run(this.app, this.app.destroy);
