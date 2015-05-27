@@ -33,9 +33,11 @@ export default function (type, options) {
       return value;
     },
     set: function(key, value, oldValue) {
-      var encodedValue = meta.codec.encode(value);
-      this._changeAttribute(key, oldValue, encodedValue);
-      this.set('_data.' + meta.codec.key(key), encodedValue);
+      if (value !== oldValue) {
+        var encodedValue = meta.codec.encode(value);
+        this._changeAttribute(key, oldValue, encodedValue);
+        this.set('_data.' + meta.codec.key(key), encodedValue);
+      }
       return value;
     }
   }).property('_data', '_cacheTimestamp').meta(meta);
