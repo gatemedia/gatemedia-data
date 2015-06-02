@@ -5,7 +5,7 @@ module.exports = {
     {
       name: "ember-stable",
       dependencies: {
-        "ember": "1.12.0"
+        "ember": "1.12.1"
       }
     }, {
       name: "ember-beta",
