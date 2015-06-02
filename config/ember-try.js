@@ -12,6 +12,14 @@ module.exports = {
       dependencies: {
         "ember": "1.13.0-beta.2"
       }
+    }, {
+      name: "ember-canary",
+      dependencies: {
+        "ember": "components/ember#canary"
+      },
+      resolutions: {
+        "ember": "canary"
+      }
     }
   ]
 };
