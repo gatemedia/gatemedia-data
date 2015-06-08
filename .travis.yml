@@ -3,22 +3,23 @@ language: node_js
 node_js:
   - "0.12"
 
-env:
-  - EMBER_VERSION='ember-stable'
-  - EMBER_VERSION='ember-beta'
-  - EMBER_VERSION='ember-canary'
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - env: EMBER_VERSION='ember-beta'
-    - env: EMBER_VERSION='ember-canary'
-
 sudo: false
 
 cache:
   directories:
     - node_modules
+
+env:
+  - EMBER_VERSION=default
+  - EMBER_VERSION=ember-release
+  - EMBER_VERSION=ember-beta
+  - EMBER_VERSION=ember-canary
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: EMBER_VERSION=ember-beta
+    - env: EMBER_VERSION=ember-canary
 
 before_install:
   - "npm config set spin false"
@@ -30,7 +31,7 @@ install:
   - bower install
 
 script:
-  - ember try ${EMBER_VERSION}
+  - ember try $EMBER_VERSION test
 
 notifications:
   slack: gatemedia:H7N9AYdoNtCuSPkcNAkMhnbA

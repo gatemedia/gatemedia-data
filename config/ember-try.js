@@ -1,24 +1,34 @@
-'use strict';
-
 module.exports = {
   scenarios: [
     {
-      name: "ember-stable",
+      name: 'default',
+      dependencies: { }
+    },
+    {
+      name: 'ember-release',
       dependencies: {
-        "ember": "1.12.1"
-      }
-    }, {
-      name: "ember-beta",
-      dependencies: {
-        "ember": "1.13.0-beta.2"
-      }
-    }, {
-      name: "ember-canary",
-      dependencies: {
-        "ember": "components/ember#canary"
+        'ember': 'components/ember#release'
       },
       resolutions: {
-        "ember": "canary"
+        'ember': 'release'
+      }
+    },
+    {
+      name: 'ember-beta',
+      dependencies: {
+        'ember': 'components/ember#beta'
+      },
+      resolutions: {
+        'ember': 'beta'
+      }
+    },
+    {
+      name: 'ember-canary',
+      dependencies: {
+        'ember': 'components/ember#canary'
+      },
+      resolutions: {
+        'ember': 'canary'
       }
     }
   ]
