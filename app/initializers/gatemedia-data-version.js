@@ -1,6 +1,6 @@
 import Ember from 'ember';
 
-var VERSION = '2.5.4';
+var VERSION = '2.5.5-beta1';
 Ember.libraries.register('GM Data', VERSION);
 
 export default {
