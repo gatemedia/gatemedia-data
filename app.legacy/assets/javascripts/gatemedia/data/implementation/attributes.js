@@ -13,7 +13,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
         case 'array':
           if (Ember.typeOf(result) === 'object') { // fix JQuery serialization or object arrays...
             var array = Ember.A();
-            Ember.keys(result).forEach(function (index) {
+            Object.keys(result).forEach(function (index) {
               array[index] = result[index];
             });
             result = array;
@@ -37,7 +37,7 @@ Data.dynamicAttributable = Ember.Mixin.create({
   },
 
   defineAttributes: function (object) {
-    Ember.keys(object).forEach(function (key) {
+    Object.keys(object).forEach(function (key) {
       this.defineAttribute(key, object[key]);
     }, this);
   },

@@ -196,11 +196,11 @@ export default Ember.Object.extend({
       }
     }, this);
 
-    if (Ember.keys(data).length) {
+    if (Object.keys(data).length) {
       orderedRelations.forEach(function (relation) {
         var key = singularize(relation),
             model = this.modelFor(key, true);
-        if (model && Ember.keys(data).length) {
+        if (model && Object.keys(data).length) {
           this.sideLoad(key, data, alreadyLoaded.pushObjects(orderedRelations));
         }
       }, this);
@@ -382,7 +382,7 @@ export default Ember.Object.extend({
    */
   all: function (model) {
     var cache = this.cacheFor(model);
-    return Ember.keys(cache).map(function (id) { return cache[id]; });
+    return Object.keys(cache).map(function (id) { return cache[id]; });
   },
 
   cachedRecord: function (model, id) {

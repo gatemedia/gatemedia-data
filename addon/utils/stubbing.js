@@ -48,7 +48,7 @@ var RequestHandler = Ember.Object.extend({
 
   _checkParams: function (expected, got, path) {
     var match = true;
-    Ember.keys(expected).forEach(function (key) {
+    Object.keys(expected).forEach(function (key) {
       if (Ember.typeOf(expected[key]) === 'object') {
         var obj = got.get(key);
         if (Ember.typeOf(obj) === 'string') {

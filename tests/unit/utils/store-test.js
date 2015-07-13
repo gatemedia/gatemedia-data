@@ -104,7 +104,7 @@ test('createRecord works & cache created instance if not embedded', function (as
     id: 42,
     stuff: 'Hi'
   }, 'Record attributes are stored raw');
-  assert.deepEqual(Ember.keys(this.store._cache.stuff), ['42'], 'Record is cached');
+  assert.deepEqual(Object.keys(this.store._cache.stuff), ['42'], 'Record is cached');
 
   this.store.createRecord('stuff', {
     id: 36,
@@ -112,13 +112,13 @@ test('createRecord works & cache created instance if not embedded', function (as
   }, {
     _embeddedContainer: 'something'
   });
-  assert.deepEqual(Ember.keys(this.store._cache.stuff), ['42'], 'Last record was not cached');
+  assert.deepEqual(Object.keys(this.store._cache.stuff), ['42'], 'Last record was not cached');
 
   this.store.createRecord('stuff', {
     id: 75,
     stuff: 'Hello'
   });
-  assert.deepEqual(Ember.keys(this.store._cache.stuff), ['42','75'], 'Last record was cached');
+  assert.deepEqual(Object.keys(this.store._cache.stuff), ['42','75'], 'Last record was cached');
 });
 
 test('createRecord accepts extra data', function (assert) {
@@ -167,7 +167,7 @@ test('load instanciate new record but meta.isNew is false', function (assert) {
     stuff: 'Hop'
   }, 'Record attributes are stored raw');
   assert.equal(record.get('cacheReset'), 1, 'Record caches are reset');
-  assert.deepEqual(Ember.keys(this.store._cache.stuff), ['42'], 'Record is cached');
+  assert.deepEqual(Object.keys(this.store._cache.stuff), ['42'], 'Record is cached');
 });
 
 test('loadMany instanciate new records', function (assert) {
@@ -183,7 +183,7 @@ test('loadMany instanciate new records', function (assert) {
     assert.equal(record.get('__modelFor__'), 'model:stuff', 'Record belongs to expected model');
     assert.equal(record.get('meta.isNew'), false, 'Record has meta.isNew false');
   });
-  assert.deepEqual(Ember.keys(this.store._cache.stuff), ['12','34'], 'Record is cached');
+  assert.deepEqual(Object.keys(this.store._cache.stuff), ['12','34'], 'Record is cached');
 });
 
 test('sideLoad loads extra data', function (assert) {
@@ -221,11 +221,11 @@ test('sideLoad loads extra data', function (assert) {
   this.store.load('user', data);
 
   assert.ok(!Ember.isNone(this.store._cache.user), 'User records cache is defined');
-  assert.deepEqual(Ember.keys(this.store._cache.user), [ '42' ], '1 user record cached');
+  assert.deepEqual(Object.keys(this.store._cache.user), [ '42' ], '1 user record cached');
   assert.ok(!Ember.isNone(this.store._cache.post), 'Post records cache is defined');
-  assert.deepEqual(Ember.keys(this.store._cache.post), [ '1', '2', '3' ], '3 post records cached');
+  assert.deepEqual(Object.keys(this.store._cache.post), [ '1', '2', '3' ], '3 post records cached');
   assert.ok(!Ember.isNone(this.store._cache.comment), 'Comment records cache is defined');
-  assert.deepEqual(Ember.keys(this.store._cache.comment), [ '11', '12', '13' ], '3 comment records cached');
+  assert.deepEqual(Object.keys(this.store._cache.comment), [ '11', '12', '13' ], '3 comment records cached');
 });
 
 
