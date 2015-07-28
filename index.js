@@ -20,5 +20,9 @@ module.exports = {
       }
     });
     app.import(app.bowerDirectory + '/momentjs/moment.js');
+  },
+
+  isDevelopingAddon: function () {
+    return true;
   }
 };
