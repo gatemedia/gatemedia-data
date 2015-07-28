@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import safeInvoke from 'gatemedia-ext/utils/ember/safe-invoke';
 
 Ember.$.support.cors = true;
 
@@ -29,27 +30,27 @@ export default Ember.Object.extend(
     this.setContext(null);
   },
 
-  GET: function (url, data, sync) {
+  GET: function (url, data, sync, call) {
     var settings = {
       type: 'GET',
       url: this._contextifiedUrl(url),
       data: this.buildParams(data),
       sync: Ember.isNone(sync) ? false : sync
     };
-    return this._promisifiedAjax(settings);
+    return this._promisifiedAjax(settings, call);
   },
 
-  POST: function (url, data, sync) {
-    return this._jsonBasedAjax('POST', url, data, sync);
+  POST: function (url, data, sync, call) {
+    return this._jsonBasedAjax('POST', url, data, sync, call);
   },
-  PUT: function (url, data, sync) {
-    return this._jsonBasedAjax('PUT', url, data, sync);
+  PUT: function (url, data, sync, call) {
+    return this._jsonBasedAjax('PUT', url, data, sync, call);
   },
-  DELETE: function (url, data, sync) {
-    return this._jsonBasedAjax('DELETE', url, data, sync);
+  DELETE: function (url, data, sync, call) {
+    return this._jsonBasedAjax('DELETE', url, data, sync, call);
   },
 
-  _jsonBasedAjax: function (action, url, data, sync) {
+  _jsonBasedAjax: function (action, url, data, sync, call) {
     var settings = {
       type: action,
       url: this._contextifiedUrl(url),
@@ -58,7 +59,7 @@ export default Ember.Object.extend(
       data: JSON.stringify(this.buildParams(data)),
       sync: Ember.isNone(sync) ? false : sync
     };
-    return this._promisifiedAjax(settings);
+    return this._promisifiedAjax(settings, call);
   },
 
   _contextifiedUrl: function (url) {
@@ -77,10 +78,10 @@ export default Ember.Object.extend(
     return parts.join('/');
   },
 
-  _promisifiedAjax: function (settings) {
+  _promisifiedAjax: function (settings, call) {
     var self = this;
     return new Ember.RSVP.Promise(function (resolve, reject) {
-      self._xhr(
+      var xhr = self._xhr(
         settings,
         function (data) {
           resolve(data);
@@ -95,6 +96,10 @@ export default Ember.Object.extend(
             });
           });
         });
+
+      if (call) {
+        safeInvoke(call, 'setXHR', [xhr]);
+      }
     });
   },
 
@@ -113,6 +118,7 @@ export default Ember.Object.extend(
         .done(success)
         .fail(error);
     }
+    return call;
   },
 
   find: function (model, query, result) {
