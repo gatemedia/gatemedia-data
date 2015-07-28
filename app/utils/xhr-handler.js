@@ -1,0 +1,1 @@
+export { default } from 'gatemedia-data/utils/xhr-handler';

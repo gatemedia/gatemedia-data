@@ -30,27 +30,27 @@ export default Ember.Object.extend(
     this.setContext(null);
   },
 
-  GET: function (url, data, sync, call) {
+  GET: function (url, data, sync, xhrHandler) {
     var settings = {
       type: 'GET',
       url: this._contextifiedUrl(url),
       data: this.buildParams(data),
       sync: Ember.isNone(sync) ? false : sync
     };
-    return this._promisifiedAjax(settings, call);
+    return this._promisifiedAjax(settings, xhrHandler);
   },
 
-  POST: function (url, data, sync, call) {
-    return this._jsonBasedAjax('POST', url, data, sync, call);
+  POST: function (url, data, sync, xhrHandler) {
+    return this._jsonBasedAjax('POST', url, data, sync, xhrHandler);
   },
-  PUT: function (url, data, sync, call) {
-    return this._jsonBasedAjax('PUT', url, data, sync, call);
+  PUT: function (url, data, sync, xhrHandler) {
+    return this._jsonBasedAjax('PUT', url, data, sync, xhrHandler);
   },
-  DELETE: function (url, data, sync, call) {
-    return this._jsonBasedAjax('DELETE', url, data, sync, call);
+  DELETE: function (url, data, sync, xhrHandler) {
+    return this._jsonBasedAjax('DELETE', url, data, sync, xhrHandler);
   },
 
-  _jsonBasedAjax: function (action, url, data, sync, call) {
+  _jsonBasedAjax: function (action, url, data, sync, xhrHandler) {
     var settings = {
       type: action,
       url: this._contextifiedUrl(url),
@@ -59,7 +59,7 @@ export default Ember.Object.extend(
       data: JSON.stringify(this.buildParams(data)),
       sync: Ember.isNone(sync) ? false : sync
     };
-    return this._promisifiedAjax(settings, call);
+    return this._promisifiedAjax(settings, xhrHandler);
   },
 
   _contextifiedUrl: function (url) {
@@ -78,7 +78,7 @@ export default Ember.Object.extend(
     return parts.join('/');
   },
 
-  _promisifiedAjax: function (settings, call) {
+  _promisifiedAjax: function (settings, xhrHandler) {
     var self = this;
     return new Ember.RSVP.Promise(function (resolve, reject) {
       var xhr = self._xhr(
@@ -97,8 +97,8 @@ export default Ember.Object.extend(
           });
         });
 
-      if (call) {
-        safeInvoke(call, 'setXHR', [xhr]);
+      if (xhrHandler) {
+        safeInvoke(xhrHandler, 'setXHR', [xhr]);
       }
     });
   },
